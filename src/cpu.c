@@ -5,3 +5,4 @@ CPU cpu;
 void init_cpu() {
     ;
 }
+

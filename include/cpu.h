@@ -12,7 +12,7 @@ enum {
     P_STATUS_RESERVED   = 0b00100000,
     P_STATUS_OVERFLOW   = 0b01000000,
     P_STATUS_NEGATIVE   = 0b10000000,
-}
+};
 
 struct CPU {
     unsigned char a;
