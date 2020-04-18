@@ -2,11 +2,12 @@
 #include <stdlib.h>
 
 #include "cassette/cassette.h"
+#include "log/log.h"
 
 static unsigned char *read_nes_file(const char *fname) {
     FILE *nes = fopen(fname, "r");
     if(!nes) {
-        fprintf(stderr, "cannot open file: %s\n", fname);
+        nemu_error("cannot open file: %s", fname);
         return NULL;
     }
 
@@ -15,7 +16,7 @@ static unsigned char *read_nes_file(const char *fname) {
     fseek(nes, 0, SEEK_SET);
     unsigned char *rom = malloc(sizeof(char) * (fsize + 1));
     if(fread(rom, 1, fsize, nes) < fsize) {
-        fprintf(stderr, "Error reading file\n");
+        nemu_error("Error reading file");
         free(rom);
         rom = NULL;
     }
@@ -26,7 +27,7 @@ static unsigned char *read_nes_file(const char *fname) {
 
 int main(int argc, char **argv) {
     if(argc != 2) {
-        fprintf(stderr, "invalid arguments\n");
+        nemu_error("invalid arguments");
         return 1;
     }
 

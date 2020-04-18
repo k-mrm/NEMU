@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "cassette/cassette.h"
+#include "log/log.h"
 
 Cassette cassette;
 
@@ -12,7 +13,7 @@ static void cassette_dump() {
 
 int parse_ines_format(unsigned char *ines) {
     if(memcmp(ines, "NES\x1A", 4)) {
-        fprintf(stderr, "This file is not NES format\n");
+        nemu_error("This file is not NES format");
         return 1;
     }
     size_t nprgrom_byte = ines[4] * 16384;
