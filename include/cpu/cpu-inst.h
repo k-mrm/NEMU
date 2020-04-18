@@ -76,4 +76,11 @@ enum OpCode {
     OP_NOP,
 };
 
+typedef struct CPUInst CPUInst;
+
+struct CPUInst {
+    enum AddressingMode a;
+    enum OpCode op;
+};
+
 #endif
