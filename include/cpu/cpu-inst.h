@@ -81,6 +81,14 @@ typedef struct CPUInst CPUInst;
 struct CPUInst {
     enum AddressingMode a;
     enum OpCode op;
+    int len;
+    int cycle;
 };
+
+extern CPUInst hex_inst_table[256];
+
+#define DEF_OP(hex, a, op, len, cycle)  \
+    hex_inst_table[(hex)] = (CPUInst){(a), (op), (len), (cycle)}
+
 
 #endif

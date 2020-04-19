@@ -33,10 +33,7 @@ int main(int argc, char **argv) {
 
     unsigned char *rom = read_nes_file(argv[1]);
     if(!rom) return 1; 
-
-    if(parse_ines_format(rom)) {
-        return 1;
-    }
+    if(parse_ines_format(rom)) return 1;
 
     return 0;
 }
