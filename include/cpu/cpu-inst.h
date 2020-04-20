@@ -7,14 +7,14 @@ enum AddressingMode {
     ADDR_IMPLIED,
     ADDR_RELATIVE,
     ADDR_ZEROPAGE,
-    ADDR_ZEROPAGE_X,
-    ADDR_ZEROPAGE_Y,
+    ADDR_ZEROPAGEX,
+    ADDR_ZEROPAGEY,
     ADDR_ABSOLUTE,
-    ADDR_ABSOLUTE_X,
-    ADDR_ABSOLITE_Y,
+    ADDR_ABSOLUTEX,
+    ADDR_ABSOLUTEY,
     ADDR_INDIRECT,
-    ADDR_INDIRECT_X,
-    ADDR_INDIRECT_Y,
+    ADDR_INDIRECTX,
+    ADDR_INDIRECTY,
 };
 
 enum OpCode {
@@ -85,10 +85,10 @@ struct CPUInst {
     int cycle;
 };
 
-extern CPUInst hex_inst_table[256];
+extern CPUInst inst_table[256];
 
-#define DEF_OP(hex, a, op, len, cycle)  \
-    hex_inst_table[(hex)] = (CPUInst){(a), (op), (len), (cycle)}
+#define DEF_INST(hex, a, op, len, cycle)  \
+    inst_table[(hex)] = (CPUInst){(a), (op), (len), (cycle)}
 
 
 #endif
