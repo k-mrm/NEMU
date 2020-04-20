@@ -25,6 +25,10 @@ static unsigned char *read_nes_file(const char *fname) {
     return rom;
 }
 
+void nes_init() {
+    ;
+}
+
 int main(int argc, char **argv) {
     if(argc != 2) {
         nemu_error("invalid arguments");
@@ -33,6 +37,8 @@ int main(int argc, char **argv) {
 
     unsigned char *rom = read_nes_file(argv[1]);
     if(!rom) return 1; 
+
+    nes_init();
     if(parse_ines_format(rom)) return 1;
 
     return 0;
