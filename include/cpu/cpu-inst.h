@@ -79,16 +79,18 @@ enum OpCode {
 typedef struct CPUInst CPUInst;
 
 struct CPUInst {
-    enum AddressingMode a;
     enum OpCode op;
+    enum AddressingMode a;
     int len;
     int cycle;
 };
 
 extern CPUInst inst_table[256];
 
-#define DEF_INST(hex, a, op, len, cycle)  \
-    inst_table[(hex)] = (CPUInst){(a), (op), (len), (cycle)}
+#define DEF_INST(hex, op, a, len, cycle)  \
+    inst_table[(hex)] = (CPUInst){(op), (a), (len), (cycle)}
 
+void cpu_define_inst(void);
+int cpu_step(CPUInst *);
 
 #endif

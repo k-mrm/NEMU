@@ -2,7 +2,6 @@
 
 CPU cpu;
 
-void init_cpu() {
+void cpu_init() {
     ;
 }
-

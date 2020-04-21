@@ -3,7 +3,7 @@
 
 CPUInst inst_table[256];
 
-void cpu_inst_define() {
+void cpu_define_inst() {
     DEF_INST(0x69, OP_ADC, ADDR_IMMEDIATE, 2, 2);
     DEF_INST(0x65, OP_ADC, ADDR_ZEROPAGE, 2, 3);
     DEF_INST(0x75, OP_ADC, ADDR_ZEROPAGEX, 2, 4);
@@ -182,6 +182,12 @@ void cpu_inst_define() {
     DEF_INST(0xEA, OP_NOP, ADDR_IMPLIED, 1, 2);
 }
 
-int cpu_inst_exec() {
-    ;
+int cpu_step(CPUInst *inst) {
+    int cycle = inst->cycle;
+    switch(inst->op) {
+    case OP_NOP: break;
+    default:     break;
+    }
+
+    return cycle;
 }

@@ -4,14 +4,14 @@
 #include <stdint.h>
 
 enum REGP_STATUS {
-    P_STATUS_CARRY      = 0b00000001,
-    P_STATUS_ZERO       = 0b00000010,
-    P_STATUS_IRQ        = 0b00000100,
-    P_STATUS_DECIMAL    = 0b00001000,
-    P_STATUS_BRK        = 0b00010000,
-    P_STATUS_RESERVED   = 0b00100000,   /* always 1 */
-    P_STATUS_OVERFLOW   = 0b01000000,
-    P_STATUS_NEGATIVE   = 0b10000000,
+    P_STATUS_CARRY      = 1 << 0,
+    P_STATUS_ZERO       = 1 << 1,
+    P_STATUS_IRQ        = 1 << 2,
+    P_STATUS_DECIMAL    = 1 << 3,
+    P_STATUS_BRK        = 1 << 4,
+    P_STATUS_RESERVED   = 1 << 5,   /* always 1 */
+    P_STATUS_OVERFLOW   = 1 << 6,
+    P_STATUS_NEGATIVE   = 1 << 7,
 };
 
 typedef struct CPU CPU;
