@@ -11,7 +11,7 @@ static void cassette_dump() {
     printf("chrrom: %zu\n", cassette.nchrrom_byte);
 }
 
-int parse_ines_format(unsigned char *ines) {
+static int parse_ines_format(unsigned char *ines) {
     if(memcmp(ines, "NES\x1A", 4)) {
         nemu_error("This file is not NES format");
         return 1;
@@ -37,4 +37,33 @@ int parse_ines_format(unsigned char *ines) {
     cassette_dump();
 
     return 0;
+}
+
+int read_cassette(const char *fname) {
+    int exitcode = 1;
+    FILE *cas = fopen(fname, "r");
+    if(!cas) {
+        nemu_error("cannot open file: %s", fname);
+        return 1;
+    }
+
+    fseek(cas, 0, SEEK_END);
+    size_t fsize = ftell(cas);
+    fseek(cas, 0, SEEK_SET);
+    unsigned char *ines = malloc(sizeof(char) * (fsize + 1));
+    if(fread(ines, 1, fsize, cas) < fsize) {
+        nemu_error("Error reading file");
+        free(ines);
+        goto end;
+    }
+
+    if(parse_ines_format(ines)) {
+        free(ines);
+        goto end;
+    }
+
+    exitcode = 0;
+end:
+    fclose(cas);
+    return exitcode;
 }

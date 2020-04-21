@@ -13,6 +13,7 @@ struct Cassette {
 
 extern Cassette cassette;
 
-int parse_ines_format(unsigned char *);
+int read_cassette(const char *);
+
 
 #endif
