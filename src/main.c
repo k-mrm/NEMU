@@ -6,25 +6,33 @@
 #include "cpu/instruction.h"
 #include "log/log.h"
 
-static unsigned char *read_nes_file(const char *fname) {
-    FILE *nes = fopen(fname, "r");
-    if(!nes) {
+static int read_cassette(const char *fname) {
+    int exitcode = 1;
+    FILE *cas = fopen(fname, "r");
+    if(!cas) {
         nemu_error("cannot open file: %s", fname);
-        return NULL;
+        return 1;
     }
 
-    fseek(nes, 0, SEEK_END);
-    size_t fsize = ftell(nes);
-    fseek(nes, 0, SEEK_SET);
-    unsigned char *rom = malloc(sizeof(char) * (fsize + 1));
-    if(fread(rom, 1, fsize, nes) < fsize) {
+    fseek(cas, 0, SEEK_END);
+    size_t fsize = ftell(cas);
+    fseek(cas, 0, SEEK_SET);
+    unsigned char *ines = malloc(sizeof(char) * (fsize + 1));
+    if(fread(ines, 1, fsize, cas) < fsize) {
         nemu_error("Error reading file");
-        free(rom);
-        rom = NULL;
+        free(ines);
+        goto end;
     }
-    fclose(nes);
 
-    return rom;
+    if(parse_ines_format(ines)) {
+        free(ines);
+        goto end;
+    }
+
+    exitcode = 0;
+end:
+    fclose(cas);
+    return exitcode;
 }
 
 void nes_init() {
@@ -38,11 +46,9 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    unsigned char *rom = read_nes_file(argv[1]);
-    if(!rom) return 1; 
+    if(read_cassette(argv[1])) return 1;
 
     nes_init();
-    if(parse_ines_format(rom)) return 1;
 
     return 0;
 }

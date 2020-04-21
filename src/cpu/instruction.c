@@ -183,7 +183,9 @@ void cpu_define_inst() {
     DEF_INST(0xEA, OP_NOP, ADDR_IMPLIED, 1, 2);
 }
 
-int cpu_step(CPUInst *inst) {
+int cpu_step() {
+    inst_table();
+
     int cycle = inst->cycle;
     switch(inst->op) {
     case OP_NOP:
