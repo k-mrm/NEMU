@@ -1,5 +1,6 @@
 #include "cpu/cpu.h"
 #include "cpu/cpu-inst.h"
+#include "log/log.h"
 
 CPUInst inst_table[256];
 
@@ -185,9 +186,13 @@ void cpu_define_inst() {
 int cpu_step(CPUInst *inst) {
     int cycle = inst->cycle;
     switch(inst->op) {
-    case OP_NOP: break;
-    default:     break;
+    case OP_NOP:
+        break;
+    default:
+        nemu_error("Unhandled opcode");
+        break;
     }
 
     return cycle;
 }
+

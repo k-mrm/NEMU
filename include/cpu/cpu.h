@@ -26,4 +26,6 @@ struct CPU {
 
 extern CPU cpu;
 
+void cpu_init(void);
+
 #endif

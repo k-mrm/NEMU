@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "cassette/cassette.h"
+#include "cpu/cpu.h"
+#include "cpu/cpu-inst.h"
 #include "log/log.h"
 
 static unsigned char *read_nes_file(const char *fname) {
@@ -26,7 +28,8 @@ static unsigned char *read_nes_file(const char *fname) {
 }
 
 void nes_init() {
-    ;
+    cpu_define_inst();
+    cpu_init();
 }
 
 int main(int argc, char **argv) {
