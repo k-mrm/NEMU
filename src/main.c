@@ -3,7 +3,7 @@
 
 #include "cassette/cassette.h"
 #include "cpu/cpu.h"
-#include "cpu/cpu-inst.h"
+#include "cpu/instruction.h"
 #include "log/log.h"
 
 static unsigned char *read_nes_file(const char *fname) {

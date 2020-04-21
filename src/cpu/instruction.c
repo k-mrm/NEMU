@@ -1,5 +1,5 @@
 #include "cpu/cpu.h"
-#include "cpu/cpu-inst.h"
+#include "cpu/instruction.h"
 #include "log/log.h"
 
 CPUInst inst_table[256];
