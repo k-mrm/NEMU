@@ -16,16 +16,17 @@ enum REGP_STATUS {
 
 typedef struct CPU CPU;
 struct CPU {
-    uint8_t a;
-    uint8_t x;
-    uint8_t y;
-    uint16_t pc;
-    uint8_t sp;
-    uint8_t p;
+    struct {
+        uint8_t a;
+        uint8_t x;
+        uint8_t y;
+        uint16_t pc;
+        uint8_t sp;
+        uint8_t p;
+    } reg;
+    uint8_t *bus;
 };
 
-extern CPU cpu;
-
-void cpu_init(void);
+void cpu_init(CPU *);
 
 #endif

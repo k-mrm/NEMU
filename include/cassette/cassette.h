@@ -11,9 +11,6 @@ struct Cassette {
     unsigned char *chrrom;
 };
 
-extern Cassette cassette;
-
-int read_cassette(const char *);
-
+int read_cassette(Cassette *, const char *);
 
 #endif

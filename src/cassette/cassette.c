@@ -4,14 +4,12 @@
 #include "cassette/cassette.h"
 #include "log/log.h"
 
-Cassette cassette;
-
-static void cassette_dump() {
-    printf("prgrom: %zu\n", cassette.nprgrom_byte);
-    printf("chrrom: %zu\n", cassette.nchrrom_byte);
+static void cassette_dump(Cassette *cassette) {
+    printf("prgrom: %zu\n", cassette->nprgrom_byte);
+    printf("chrrom: %zu\n", cassette->nchrrom_byte);
 }
 
-static int parse_ines_format(unsigned char *ines) {
+static int parse_ines_format(Cassette *cassette, unsigned char *ines) {
     if(memcmp(ines, "NES\x1A", 4)) {
         nemu_error("This file is not NES format");
         return 1;
@@ -29,17 +27,17 @@ static int parse_ines_format(unsigned char *ines) {
     size_t prgrom_base = HEADER_BYTE + trainer_byte;
     size_t chrrom_base = prgrom_base + nprgrom_byte;
 
-    cassette.nprgrom_byte = nprgrom_byte;
-    cassette.nchrrom_byte = nchrrom_byte;
-    cassette.prgrom = ines + prgrom_base;
-    cassette.chrrom = ines + chrrom_base;
+    cassette->nprgrom_byte = nprgrom_byte;
+    cassette->nchrrom_byte = nchrrom_byte;
+    cassette->prgrom = ines + prgrom_base;
+    cassette->chrrom = ines + chrrom_base;
 
-    cassette_dump();
+    cassette_dump(cassette);
 
     return 0;
 }
 
-int read_cassette(const char *fname) {
+int read_cassette(Cassette *cassette, const char *fname) {
     int exitcode = 1;
     FILE *cas = fopen(fname, "r");
     if(!cas) {
@@ -57,7 +55,7 @@ int read_cassette(const char *fname) {
         goto end;
     }
 
-    if(parse_ines_format(ines)) {
+    if(parse_ines_format(cassette, ines)) {
         free(ines);
         goto end;
     }

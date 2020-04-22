@@ -1,12 +1,13 @@
 #include "cpu/cpu.h"
 
-CPU cpu;
+uint8_t cpubus[0x10000];
 
-void cpu_init() {
-    cpu.a = 0;
-    cpu.x = 0;
-    cpu.y = 0;
-    cpu.pc = 0;
-    cpu.sp = 0xfd;
-    cpu.p = 0x34;
+void cpu_init(CPU *cpu) {
+    cpu->reg.a = 0;
+    cpu->reg.x = 0;
+    cpu->reg.y = 0;
+    cpu->reg.pc = 0;
+    cpu->reg.sp = 0xfd;
+    cpu->reg.p = 0x34;
+    cpu->bus = cpubus;
 }

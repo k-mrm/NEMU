@@ -6,9 +6,9 @@
 #include "cpu/instruction.h"
 #include "log/log.h"
 
-void nes_init() {
+void nes_init(CPU *cpu) {
     cpu_define_inst();
-    cpu_init();
+    cpu_init(cpu);
 }
 
 int main(int argc, char **argv) {
@@ -17,9 +17,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if(read_cassette(argv[1])) return 1;
+    CPU cpu;
+    Cassette cassette;
 
-    nes_init();
+    if(read_cassette(&cassette, argv[1])) return 1;
+
+    nes_init(&cpu);
 
     return 0;
 }

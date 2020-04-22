@@ -2,6 +2,7 @@
 #define NEMU_CPU_REG_H
 
 #include <stdint.h>
+#include "cpu/cpu.h"
 
 #define cpu_set_pflag(p, flag)   ((p) |= (flag))
 #define cpu_unset_pflag(p, flag) ((p) &= ~(flag))
