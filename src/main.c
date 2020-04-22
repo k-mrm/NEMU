@@ -21,7 +21,6 @@ int main(int argc, char **argv) {
     Cassette cassette;
 
     if(read_cassette(&cassette, argv[1])) return 1;
-
     nes_init(&cpu);
 
     return 0;
