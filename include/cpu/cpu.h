@@ -28,6 +28,6 @@ struct CPU {
     CPUBus *bus;
 };
 
-void cpu_init(CPU *);
+void cpu_init(CPU *, CPUBus *);
 
 #endif

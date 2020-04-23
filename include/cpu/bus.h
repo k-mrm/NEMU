@@ -15,6 +15,7 @@ struct CPUBus {
     Cassette *cas;
 };
 
+void cpubus_init(CPUBus *, RAM *, PPU *, APU *, Cassette *);
 uint8_t cpubus_read(CPUBus *, int);
 void cpubus_write(CPUBus *, int, uint8_t);
 

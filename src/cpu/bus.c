@@ -1,6 +1,13 @@
 #include "cpu/cpu.h"
 #include "cpu/bus.h"
 
+void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c) {
+    bus->wram = r;
+    bus->ppu = p;
+    bus->apu = a;
+    bus->cas = c;
+}
+
 uint8_t cpubus_read(CPUBus *bus, int addr) {
     if(addr < 0x2000) {
         return ram_read(bus->wram, addr & 0x7ff);
@@ -34,10 +41,10 @@ uint8_t cpubus_read(CPUBus *bus, int addr) {
 
 void cpubus_write(CPUBus *bus, int addr, uint8_t data) {
     if(addr < 0x2000) {
-        return ram_write(bus->wram, addr & 0x7ff, data);
+        ram_write(bus->wram, addr & 0x7ff, data);
     }
     else if(addr < 0x4000) {
-        return ppu_write(bus->ppu, (addr - 0x2000) & 0x7, data);
+        ppu_write(bus->ppu, (addr - 0x2000) & 0x7, data);
     }
     else if(addr < 0x4018) {
         ;   /* TODO */

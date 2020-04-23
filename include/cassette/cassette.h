@@ -1,10 +1,10 @@
 #ifndef NEMU_CASSETTE_H
 #define NEMU_CASSETTE_H
 
-#define HEADER_BYTE 16
-
 #include <stdio.h>
 #include <stdint.h>
+
+#define HEADER_BYTE 16
 
 typedef struct Cassette Cassette;
 struct Cassette {

@@ -18,4 +18,8 @@ struct PPU {
     } reg;
 };
 
+ 
+uint8_t ppu_read(PPU *, int);
+void ppu_write(PPU *, int, uint8_t);
+
 #endif
