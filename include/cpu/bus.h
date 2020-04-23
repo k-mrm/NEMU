@@ -5,6 +5,7 @@
 #include "ram/ram.h"
 #include "ppu/ppu.h"
 #include "apu/apu.h"
+#include "cassette/cassette.h"
 
 typedef struct CPUBus CPUBus;
 struct CPUBus {
@@ -14,6 +15,7 @@ struct CPUBus {
     Cassette *cas;
 };
 
-uint8_t cpubus_read(CPU *cpu, int addr);
+uint8_t cpubus_read(CPUBus *, int);
+void cpubus_write(CPUBus *, int, uint8_t);
 
 #endif

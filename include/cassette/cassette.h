@@ -3,12 +3,15 @@
 
 #define HEADER_BYTE 16
 
+#include <stdio.h>
+#include <stdint.h>
+
 typedef struct Cassette Cassette;
 struct Cassette {
     size_t nprgrom_byte;
     size_t nchrrom_byte;
-    unsigned char *prgrom;
-    unsigned char *chrrom;
+    uint8_t *prgrom;
+    uint8_t *chrrom;
 };
 
 int read_cassette(Cassette *, const char *);
