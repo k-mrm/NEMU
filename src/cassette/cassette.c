@@ -65,3 +65,7 @@ end:
     fclose(cas);
     return exitcode;
 }
+
+uint8_t cassette_read_rom(Cassette *cas, int addr) {
+    return cas->prgrom[addr];
+}

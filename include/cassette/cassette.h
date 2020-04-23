@@ -12,5 +12,6 @@ struct Cassette {
 };
 
 int read_cassette(Cassette *, const char *);
+uint8_t cassette_read_rom(Cassette *, int);
 
 #endif

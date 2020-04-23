@@ -11,6 +11,7 @@ struct CPUBus {
     RAM *wram;
     PPU *ppu;
     APU *apu;
+    Cassette *cas;
 };
 
 #endif

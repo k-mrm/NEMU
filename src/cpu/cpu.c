@@ -8,3 +8,4 @@ void cpu_init(CPU *cpu) {
     cpu->reg.sp = 0xfd;
     cpu->reg.p = 0x34;
 }
+
