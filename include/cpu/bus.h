@@ -14,4 +14,6 @@ struct CPUBus {
     Cassette *cas;
 };
 
+uint8_t cpubus_read(CPU *cpu, int addr);
+
 #endif
