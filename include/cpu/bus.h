@@ -3,11 +3,13 @@
 
 #include <stdint.h>
 #include "ppu/ppu.h"
+#include "apu/apu.h"
 
 typedef struct CPUBus CPUBus;
 struct CPUBus {
     uint8_t wram[0x800];    /* 0x0000 ~ 0x07ff */
     PPU *ppu;
+    APU *apu;
 };
 
 #endif
