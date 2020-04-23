@@ -7,5 +7,4 @@ void cpu_init(CPU *cpu) {
     cpu->reg.pc = 0;
     cpu->reg.sp = 0xfd;
     cpu->reg.p = 0x34;
-    cpu->bus = cpubus;
 }

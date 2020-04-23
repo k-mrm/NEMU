@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "cassette/cassette.h"
@@ -49,8 +50,8 @@ int read_cassette(Cassette *cassette, const char *fname) {
     fseek(cas, 0, SEEK_SET);
     unsigned char *ines = malloc(sizeof(char) * (fsize + 1));
     if(fread(ines, 1, fsize, cas) < fsize) {
-        panic("Error reading file");
         free(ines);
+        panic("Error reading file");
         goto end;
     }
 

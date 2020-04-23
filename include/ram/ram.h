@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+typedef struct RAM RAM;
 struct RAM {
     uint8_t ram[0x800];
 };

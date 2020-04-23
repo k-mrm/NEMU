@@ -183,15 +183,15 @@ void cpu_define_inst() {
     DEF_INST(0xEA, OP_NOP, ADDR_IMPLIED, 1, 2);
 }
 
-int cpu_step() {
-    inst_table();
+int cpu_step(uint8_t code) {
+    CPUInst inst = inst_table[code];
 
-    int cycle = inst->cycle;
-    switch(inst->op) {
+    int cycle = inst.cycle;
+    switch(inst.op) {
     case OP_NOP:
         break;
     default:
-        nemu_error("Unhandled opcode");
+        panic("Unhandled opcode");
         break;
     }
 
