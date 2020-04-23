@@ -1,6 +1,5 @@
 #include "cpu/cpu.h"
 
-
 void cpu_init(CPU *cpu) {
     cpu->reg.a = 0;
     cpu->reg.x = 0;

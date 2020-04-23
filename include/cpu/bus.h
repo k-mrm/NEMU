@@ -2,12 +2,13 @@
 #define NEMU_CPU_BUS_H
 
 #include <stdint.h>
+#include "ram/ram.h"
 #include "ppu/ppu.h"
 #include "apu/apu.h"
 
 typedef struct CPUBus CPUBus;
 struct CPUBus {
-    uint8_t wram[0x800];    /* 0x0000 ~ 0x07ff */
+    RAM *wram;
     PPU *ppu;
     APU *apu;
 };
