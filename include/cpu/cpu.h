@@ -2,6 +2,7 @@
 #define NEMU_CPU_H
 
 #include <stdint.h>
+#include "cpu/bus.h"
 
 enum REGP_STATUS {
     P_STATUS_CARRY      = 1 << 0,
@@ -24,7 +25,7 @@ struct CPU {
         uint8_t sp;
         uint8_t p;
     } reg;
-    uint8_t *bus;
+    CPUBus *bus;
 };
 
 void cpu_init(CPU *);

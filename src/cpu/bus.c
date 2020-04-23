@@ -1,4 +1,5 @@
 #include "cpu/cpu.h"
+#include "cpu/bus.h"
 
 uint8_t cpubus_read(CPU *cpu, int addr) {
     if(addr < 0x0800) {

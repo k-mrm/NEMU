@@ -1,6 +1,5 @@
 #include "cpu/cpu.h"
 
-uint8_t cpubus[0x10000];
 
 void cpu_init(CPU *cpu) {
     cpu->reg.a = 0;
