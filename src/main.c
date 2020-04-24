@@ -3,6 +3,7 @@
 #include "cassette/cassette.h"
 #include "cpu/cpu.h"
 #include "cpu/bus.h"
+#include "cpu/interrupt.h"
 #include "cpu/instruction.h"
 #include "ram/ram.h"
 #include "ppu/ppu.h"
@@ -34,6 +35,9 @@ int main(int argc, char **argv) {
 
     if(read_cassette(&cassette, argv[1])) return 1;
     nemu_init(&cpu, &bus, &ram, &ppu, &apu, &cassette);
+    cpu_interrupt(&cpu, RESET);
+
+    printf("%#x\n", cpu.reg.pc);
 
     return 0;
 }

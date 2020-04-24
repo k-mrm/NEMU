@@ -29,8 +29,8 @@ static int parse_ines_format(Cassette *cassette, unsigned char *ines) {
 
     cassette->nprgrom_byte = nprgrom_byte;
     cassette->nchrrom_byte = nchrrom_byte;
-    cassette->prgrom = ines + prgrom_base;
-    cassette->chrrom = ines + chrrom_base;
+    memcpy(cassette->prgrom, ines + prgrom_base, nprgrom_byte);
+    memcpy(cassette->chrrom, ines + chrrom_base, nchrrom_byte);
 
     cassette_dump(cassette);
 

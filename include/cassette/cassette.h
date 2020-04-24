@@ -10,8 +10,8 @@ typedef struct Cassette Cassette;
 struct Cassette {
     size_t nprgrom_byte;
     size_t nchrrom_byte;
-    uint8_t *prgrom;
-    uint8_t *chrrom;
+    uint8_t prgrom[0x8000];
+    uint8_t chrrom[0x2000];
 };
 
 int read_cassette(Cassette *, const char *);
