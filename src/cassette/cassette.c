@@ -1,13 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "cassette/cassette.h"
 #include "log/log.h"
 
 static void cassette_dump(Cassette *cassette) {
     printf("prgrom: %zu\n", cassette->nprgrom_byte);
     printf("chrrom: %zu\n", cassette->nchrrom_byte);
+
+    puts("prgrom:");
+    for(int i = 0; i < cassette->nprgrom_byte; ++i) {
+        printf("%x ", cassette->prgrom[i]);
+    }
+    puts("chrrom:");
+    for(int i = 0; i < cassette->nchrrom_byte; ++i) {
+        printf("%x ", cassette->chrrom[i]);
+    }
+    puts("");
 }
 
 static int parse_ines_format(Cassette *cassette, unsigned char *ines) {
@@ -23,8 +32,8 @@ static int parse_ines_format(Cassette *cassette, unsigned char *ines) {
     unsigned char flag10 = ines[10];
 
     int has_trainer = flag6 & 0x04;
-    size_t trainer_byte = has_trainer ? 512 : 0;
-    size_t prgrom_base = HEADER_BYTE + trainer_byte;
+    size_t ntrainer_byte = has_trainer ? 512 : 0;
+    size_t prgrom_base = HEADER_BYTE + ntrainer_byte;
     size_t chrrom_base = prgrom_base + nprgrom_byte;
 
     cassette->nprgrom_byte = nprgrom_byte;
