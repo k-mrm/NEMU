@@ -91,6 +91,6 @@ extern CPUInst inst_table[256];
     inst_table[(hex)] = (CPUInst){(op), (a), (len), (cycle)}
 
 void cpu_define_inst(void);
-int cpu_step(uint8_t);
+int cpu_step(CPU *);
 
 #endif

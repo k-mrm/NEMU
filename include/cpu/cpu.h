@@ -29,5 +29,6 @@ struct CPU {
 };
 
 void cpu_init(CPU *, CPUBus *);
+void cpu_reset(CPU *);
 
 #endif
