@@ -8,7 +8,7 @@ void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c) {
     bus->cas = c;
 }
 
-uint8_t cpubus_read(CPUBus *bus, int addr) {
+uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
     if(addr < 0x2000) {
         return ram_read(bus->wram, addr & 0x7ff);
     }
@@ -39,7 +39,7 @@ uint8_t cpubus_read(CPUBus *bus, int addr) {
     }
 }
 
-void cpubus_write(CPUBus *bus, int addr, uint8_t data) {
+void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
     if(addr < 0x2000) {
         ram_write(bus->wram, addr & 0x7ff, data);
     }

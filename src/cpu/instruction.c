@@ -183,12 +183,12 @@ void cpu_define_inst() {
     DEF_INST(0xEA, OP_NOP, ADDR_IMPLIED, 1, 2);
 }
 
-uint8_t fetch(uint16_t pc) {
-    ;
+uint8_t cpu_fetch(CPU *cpu) {
+    return cpubus_read(cpu->bus, cpu->reg.pc++);
 }
 
 int cpu_step(CPU *cpu) {
-    uint8_t code = fetch(cpu->reg.pc);
+    uint8_t code = cpu_fetch(cpu);
     CPUInst inst = inst_table[code];
 
     int cycle = inst.cycle;
