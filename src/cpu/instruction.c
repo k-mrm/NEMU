@@ -187,9 +187,44 @@ uint8_t cpu_fetch(CPU *cpu) {
     return cpubus_read(cpu->bus, cpu->reg.pc++);
 }
 
+uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
+    switch(addrmode) {
+    case ADDR_ACCUMULATOR:
+    case ADDR_IMPLIED:
+        return 0;
+    case ADDR_IMMEDIATE:
+    case ADDR_ZEROPAGE:
+        return cpu_fetch(cpu);
+    case ADDR_RELATIVE:
+        return;
+    case ADDR_ZEROPAGEX:
+        return (cpu_fetch(cpu) + cpu->reg.x) & 0xff;
+    case ADDR_ZEROPAGEY:
+        return (cpu_fetch(cpu) + cpu->reg.y) & 0xff;
+    case ADDR_ABSOLUTE: {
+        uint8_t low = cpu_fetch(cpu);
+        uint8_t high = cpu_fetch(cpu);
+        return ((uint16_t)(high) << 8) | low;
+    }
+    case ADDR_ABSOLUTEX: {
+        uint8_t low = cpu_fetch(cpu);
+        uint8_t high = cpu_fetch(cpu);
+        return (((uint16_t)(high) << 8) | low) + cpu->reg.x;
+    }
+    case ADDR_ABSOLUTEY: {
+        uint8_t low = cpu_fetch(cpu);
+        uint8_t high = cpu_fetch(cpu);
+        return (((uint16_t)(high) << 8) | low) + cpu->reg.y;
+    }
+    default:
+        return 0;   /* unreachable */
+    }
+}
+
 int cpu_step(CPU *cpu) {
     uint8_t code = cpu_fetch(cpu);
     CPUInst inst = inst_table[code];
+    uint16_t operand = cpu_fetch_operand(cpu, inst.a);
 
     int cycle = inst.cycle;
     switch(inst.op) {
