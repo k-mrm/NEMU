@@ -222,7 +222,26 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     case ADDR_INDIRECT: {
         uint8_t low = cpu_fetch(cpu);
         uint8_t high = cpu_fetch(cpu);
-        uint16_t res = ((uint16_t)(high) << 8) | low;
+        uint16_t addr = ((uint16_t)(high) << 8) | low;
+
+        uint8_t res_low = cpubus_read(cpu->bus, addr);
+        uint8_t res_high = cpubus_read(cpu->bus, addr + 1);
+
+        return ((uint16_t)(res_high) << 8) | res_low;
+    }
+    case ADDR_INDIRECTX: {
+        uint8_t low = cpu_fetch(cpu) + cpu->reg.x;
+        uint8_t res_low = cpubus_read(cpu->bus, low);
+        uint8_t res_high = cpubus_read(cpu->bus, low + 1);
+
+        return ((uint16_t)(res_high) << 8) | res_low;
+    }
+    case ADDR_INDIRECTY: {
+        uint8_t low = cpu_fetch(cpu);
+        uint8_t res_high = cpubus_read(cpu->bus, low);
+        uint8_t res_low = cpubus_read(cpu->bus, low + 1);
+
+        return (((uint16_t)(res_high) << 8) | res_low) + cpu->reg.y;
     }
     default:
         return 0;   /* unreachable */

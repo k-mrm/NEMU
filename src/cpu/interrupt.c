@@ -9,7 +9,7 @@ void cpu_interrupt(CPU *cpu, int inter) {
         cpu_set_pflag(cpu, P_STATUS_IRQ);
         uint8_t low = cpubus_read(cpu->bus, 0xfffc);
         uint8_t high = cpubus_read(cpu->bus, 0xfffd);
-        cpu_set_pc(cpu, ((uint16_t)high << 8) | low);
+        cpu_set_pc(cpu, ((uint16_t)(high) << 8) | low);
     }
     case IRQ:   break;
     case BRK:   break;
