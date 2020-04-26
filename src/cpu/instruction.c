@@ -248,16 +248,47 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     }
 }
 
+uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
+    switch(addrmode) {
+    case ADDR_ACCUMULATOR:
+        return cpu->reg.a;
+    case ADDR_IMPLIED:
+        return 0;
+    case ADDR_IMMEDIATE:
+        return cpu_fetch_operand(cpu, addrmode);
+    case ADDR_ZEROPAGE:
+    case ADDR_RELATIVE:
+    case ADDR_ZEROPAGEX:
+    case ADDR_ZEROPAGEY:
+    case ADDR_ABSOLUTE:
+    case ADDR_ABSOLUTEX:
+    case ADDR_ABSOLUTEY:
+    case ADDR_INDIRECT:
+    case ADDR_INDIRECTX:
+    case ADDR_INDIRECTY: {
+        uint16_t addr = cpu_fetch_operand(cpu, addrmode);
+        return cpubus_read(cpu->bus, addr);
+    }
+    default:
+        return 0;   /* unreachable */
+    }
+}
+
 int cpu_step(CPU *cpu) {
     uint8_t code = cpu_fetch(cpu);
     CPUInst inst = inst_table[code];
-    uint16_t operand = cpu_fetch_operand(cpu, inst.a);
 
     int cycle = inst.cycle;
 
     switch(inst.op) {
     case OP_NOP:
         break;
+    case OP_LDA: {
+        cpu->reg.a = operand;
+        if(operand == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(operand & 1 << 7) cpu_set_pflag(cpu, P_STATUS_NEG);
+        break;
+    }
     default:
         panic("Unhandled opcode");
         break;
