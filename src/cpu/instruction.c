@@ -238,8 +238,8 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     }
     case ADDR_INDIRECTY: {
         uint8_t low = cpu_fetch(cpu);
-        uint8_t res_high = cpubus_read(cpu->bus, low);
-        uint8_t res_low = cpubus_read(cpu->bus, low + 1);
+        uint8_t res_low = cpubus_read(cpu->bus, low);
+        uint8_t res_high = cpubus_read(cpu->bus, low + 1);
 
         return (((uint16_t)(res_high) << 8) | res_low) + cpu->reg.y;
     }
@@ -254,6 +254,7 @@ int cpu_step(CPU *cpu) {
     uint16_t operand = cpu_fetch_operand(cpu, inst.a);
 
     int cycle = inst.cycle;
+
     switch(inst.op) {
     case OP_NOP:
         break;
