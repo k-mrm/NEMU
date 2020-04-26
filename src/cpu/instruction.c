@@ -195,8 +195,11 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     case ADDR_IMMEDIATE:
     case ADDR_ZEROPAGE:
         return cpu_fetch(cpu);
-    case ADDR_RELATIVE:
-        return;
+    case ADDR_RELATIVE: {
+        uint8_t offset = cpu_fetch(cpu);
+        int data = (int)offset + (int)cpu->reg.pc;
+        return (uint16_t)data;
+    }
     case ADDR_ZEROPAGEX:
         return (cpu_fetch(cpu) + cpu->reg.x) & 0xff;
     case ADDR_ZEROPAGEY:
@@ -215,6 +218,11 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
         uint8_t low = cpu_fetch(cpu);
         uint8_t high = cpu_fetch(cpu);
         return (((uint16_t)(high) << 8) | low) + cpu->reg.y;
+    }
+    case ADDR_INDIRECT: {
+        uint8_t low = cpu_fetch(cpu);
+        uint8_t high = cpu_fetch(cpu);
+        uint16_t res = ((uint16_t)(high) << 8) | low;
     }
     default:
         return 0;   /* unreachable */
