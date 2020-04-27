@@ -305,6 +305,25 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_DEY: {
+        cpu->reg.y--;
+
+        if(cpu->reg.y == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(cpu->reg.y & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+
+        break;
+    }
+    case OP_BNE: {
+        if(!cpu_get_pflag(cpu, P_STATUS_ZERO)) {
+            uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+            cpu->reg.pc = addr;
+        }
+
+        break;
+    } 
+    case OP_JMP:
+        cpu->reg.pc = cpu_fetch_operand(cpu, inst.a);
+        break;
     case OP_LDA: {
         cpu->reg.a = cpu_fetch_data(cpu, inst.a);
         if(cpu->reg.a == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
@@ -345,7 +364,7 @@ int cpu_step(CPU *cpu) {
         cpu->reg.sp = cpu->reg.x;
         break;
     default:
-        panic("Unhandled opcode");
+        panic("Unhandled opcode: %#x", inst.op);
         break;
     }
 
