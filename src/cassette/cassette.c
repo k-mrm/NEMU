@@ -10,12 +10,13 @@ static void cassette_dump(Cassette *cassette) {
 
     puts("prgrom:");
     for(int i = 0; i < cassette->nprgrom_byte; ++i) {
-        printf("%x ", cassette->prgrom[i]);
+        printf("%02x ", cassette->prgrom[i]);
     }
+    /*
     puts("chrrom:");
     for(int i = 0; i < cassette->nchrrom_byte; ++i) {
         printf("%x ", cassette->chrrom[i]);
-    }
+    } */
     puts("");
 }
 

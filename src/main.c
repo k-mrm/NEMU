@@ -39,5 +39,10 @@ int main(int argc, char **argv) {
 
     printf("%#x\n", cpu.reg.pc);
 
+    for(;;) {
+        cpu_step(&cpu);
+        printf("%#x\n", cpu.reg.pc);
+    }
+
     return 0;
 }

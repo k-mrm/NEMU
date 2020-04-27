@@ -1,5 +1,6 @@
 #include "cpu/cpu.h"
 #include "cpu/instruction.h"
+#include "cpu/register.h"
 #include "log/log.h"
 
 CPUInst inst_table[256];
@@ -244,6 +245,7 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
         return (((uint16_t)(res_high) << 8) | res_low) + cpu->reg.y;
     }
     default:
+        panic("Unknown addressing mode");
         return 0;   /* unreachable */
     }
 }
@@ -270,6 +272,7 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
         return cpubus_read(cpu->bus, addr);
     }
     default:
+        panic("Unknown addressing mode");
         return 0;   /* unreachable */
     }
 }
@@ -314,8 +317,8 @@ int cpu_step(CPU *cpu) {
         break;
     }
     case OP_BNE: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         if(!cpu_get_pflag(cpu, P_STATUS_ZERO)) {
-            uint16_t addr = cpu_fetch_operand(cpu, inst.a);
             cpu->reg.pc = addr;
         }
 
