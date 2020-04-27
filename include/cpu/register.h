@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include "cpu/cpu.h"
 
-#define cpu_set_pflag(cpu, flag)   ((cpu)->reg.p |= (flag))
-#define cpu_unset_pflag(cpu, flag) ((cpu)->reg.p &= ~(flag))
-#define cpu_get_pflag(cpu, flag)   ((cpu)->reg.p & (flag))
+#define cpu_set_pflag(cpu, flag)   (cpu)->reg.p |= (flag)
+#define cpu_unset_pflag(cpu, flag) (cpu)->reg.p &= ~(flag)
+#define cpu_get_pflag(cpu, flag)   (((cpu)->reg.p & (flag)) != 0)
 
 #define sp_actual(sp)       ((uint16_t)(sp) | (0x01 << 8))
 #define sp_actual2raw(sp)   ((uint8_t)((sp) & 0xff))

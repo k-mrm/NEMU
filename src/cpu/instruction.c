@@ -283,12 +283,67 @@ int cpu_step(CPU *cpu) {
     switch(inst.op) {
     case OP_NOP:
         break;
-    case OP_LDA: {
-        cpu->reg.a = operand;
-        if(operand == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(operand & 1 << 7) cpu_set_pflag(cpu, P_STATUS_NEG);
+    case OP_ADC: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        uint16_t res = cpu->reg.a + m + cpu_get_pflag(cpu, P_STATUS_NEGATIVE);
+
+        if(res == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(res & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        if(res > 0xff)  cpu_set_pflag(cpu, P_STATUS_CARRY);
+        if((cpu->reg.a ^ res) & (m ^ res) & (1 << 7))
+            cpu_set_pflag(cpu, P_STATUS_OVERFLOW);
+
+        cpu->reg.a = res;
+
         break;
     }
+    case OP_INX: {
+        cpu->reg.x++;
+
+        if(cpu->reg.x == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(cpu->reg.x & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+
+        break;
+    }
+    case OP_LDA: {
+        cpu->reg.a = cpu_fetch_data(cpu, inst.a);
+        if(cpu->reg.a == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(cpu->reg.a & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        break;
+    }
+    case OP_LDX: {
+        cpu->reg.x = cpu_fetch_data(cpu, inst.a);
+        if(cpu->reg.x == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(cpu->reg.x & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        break;
+    }
+    case OP_LDY: {
+        cpu->reg.y = cpu_fetch_data(cpu, inst.a);
+        if(cpu->reg.y == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
+        if(cpu->reg.y & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        break;
+    }
+    case OP_SEI:
+        cpu_set_pflag(cpu, P_STATUS_IRQ);
+        break;
+    case OP_STA: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        cpubus_write(cpu->bus, addr, cpu->reg.a);
+        break;
+    }
+    case OP_STX: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        cpubus_write(cpu->bus, addr, cpu->reg.x);
+        break;
+    }
+    case OP_STY: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        cpubus_write(cpu->bus, addr, cpu->reg.y);
+        break;
+    }
+    case OP_TXS:
+        cpu->reg.sp = cpu->reg.x;
+        break;
     default:
         panic("Unhandled opcode");
         break;
