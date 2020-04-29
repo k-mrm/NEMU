@@ -85,10 +85,10 @@ struct CPUInst {
     int cycle;
 };
 
-extern CPUInst inst_table[256];
+extern CPUInst code_decoder[256];
 
 #define DEF_INST(hex, op, a, len, cycle)  \
-    inst_table[(hex)] = (CPUInst){(op), (a), (len), (cycle)}
+    code_decoder[(hex)] = (CPUInst){(op), (a), (len), (cycle)}
 
 void cpu_define_inst(void);
 int cpu_step(CPU *);

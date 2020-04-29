@@ -3,7 +3,7 @@
 #include "cpu/register.h"
 #include "log/log.h"
 
-CPUInst inst_table[256];
+CPUInst code_decoder[256];
 
 void cpu_define_inst() {
     DEF_INST(0x69, OP_ADC, ADDR_IMMEDIATE, 2, 2);
@@ -279,7 +279,7 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
 
 int cpu_step(CPU *cpu) {
     uint8_t code = cpu_fetch(cpu);
-    CPUInst inst = inst_table[code];
+    CPUInst inst = code_decoder[code];
 
     int cycle = inst.cycle;
 
