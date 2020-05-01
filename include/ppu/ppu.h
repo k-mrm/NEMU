@@ -20,7 +20,6 @@ struct PPU {
     PPUBus *bus;
 };
 
-uint8_t ppu_read(PPU *, uint16_t);
-void ppu_write(PPU *, uint16_t, uint8_t);
+void ppu_init(PPU *, Cassette *);
 
 #endif
