@@ -2,6 +2,7 @@
 #define NEMU_PPU_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "ppu/bus.h"
 
 typedef struct PPU PPU;
@@ -17,9 +18,16 @@ struct PPU {
         uint8_t data;       /* $2007 */
         uint8_t oamdma;     /* $4014 */
     } reg;
+    struct {
+        bool scroll_write_once;
+        bool addr_write_once;
+    } state;
+    uint16_t addr;
     PPUBus *bus;
 };
 
 void ppu_init(PPU *, Cassette *);
+uint8_t ppu_read(PPU *, uint16_t);
+void ppu_write(PPU *, uint16_t, uint8_t);
 
 #endif
