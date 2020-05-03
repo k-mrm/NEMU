@@ -2,8 +2,10 @@
 
 static void nemu_init(NEMU *nes) {
     cpu_define_inst();
-    cpubus_init(&nes->bus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette);
-    cpu_init(&nes->cpu, &nes->bus);
+    cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette);
+    cpu_init(&nes->cpu, &nes->cpubus);
+    ppubus_init(&nes->ppubus, nes->cassette);
+    ppu_init(&nes->ppu, &nes->ppubus);
 }
 
 int nemu_start(NEMU *nes) {

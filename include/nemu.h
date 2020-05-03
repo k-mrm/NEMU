@@ -14,9 +14,10 @@
 typedef struct NEMU NEMU;
 struct NEMU {
     CPU cpu;
-    CPUBus bus;
+    CPUBus cpubus;
     RAM ram;
     PPU ppu;
+    PPUBus ppubus;
     APU apu;
     Cassette *cassette;
 };
