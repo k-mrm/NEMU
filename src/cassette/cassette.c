@@ -79,3 +79,7 @@ end:
 uint8_t cassette_read_rom(Cassette *cas, int addr) {
     return cas->prgrom[addr];
 }
+
+uint8_t cassette_read_chrrom(Cassette *cas, int addr) {
+    return cas->chrrom[addr];
+}
