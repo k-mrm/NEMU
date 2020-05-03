@@ -8,8 +8,11 @@ int main(int argc, char **argv) {
         panic("invalid arguments");
     }
 
+    Cassette cassette;
+    if(read_cassette(&cassette, argv[1])) return 1;
     NEMU nes;
-    int status = nemu_start(&nes, argv[1]);
+    nes.cassette = &cassette;
+    int status = nemu_start(&nes);
 
     return status;
 }

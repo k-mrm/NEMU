@@ -18,9 +18,9 @@ struct NEMU {
     RAM ram;
     PPU ppu;
     APU apu;
-    Cassette cassette;
+    Cassette *cassette;
 };
 
-int nemu_start(NEMU *, char *);
+int nemu_start(NEMU *);
 
 #endif
