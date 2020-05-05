@@ -10,4 +10,6 @@ struct RGB {
     uint8_t b;
 };
 
+extern RGB colors[];
+
 #endif

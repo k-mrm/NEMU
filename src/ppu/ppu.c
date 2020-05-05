@@ -23,6 +23,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         break;
     case 7:
         ppubus_write(ppu->bus, ppu->addr, data);
+        printf("ppuaddr %#x\n", ppu->addr);
         ppu->addr++;
         break;
     default:
@@ -31,5 +32,18 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
 }
 
 void ppu_init(PPU *ppu, PPUBus *bus) {
+    ppu->reg.ctrl = 0;
+    ppu->reg.mask = 0;
+    ppu->reg.status = 0;
+    ppu->reg.oamaddr = 0;
+    ppu->reg.scroll = 0;
+    ppu->reg.addr = 0;
+    ppu->reg.data = 0;
+    ppu->reg.oamdma = 0;
+
+    ppu->state.scroll_write_once = false;
+    ppu->state.addr_write_once = false;
+
+    ppu->addr = 0;
     ppu->bus = bus;
 }
