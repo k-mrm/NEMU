@@ -5,6 +5,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     switch(idx) {
     case 7: {
         uint8_t data = ppubus_read(ppu->bus, ppu->addr);
+        printf("ppuaddr read %#x\n", ppu->addr);
         ppu->addr++;
         return data;
     }
@@ -23,7 +24,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         break;
     case 7:
         ppubus_write(ppu->bus, ppu->addr, data);
-        printf("ppuaddr %#x\n", ppu->addr);
+        printf("ppuaddr write %#x\n", ppu->addr);
         ppu->addr++;
         break;
     default:
@@ -46,4 +47,12 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
 
     ppu->addr = 0;
     ppu->bus = bus;
+    ppu->cpu_cycle = 0;
+}
+
+void ppu_step(PPU *ppu, int cycle) {
+    ppu->cpu_cycle += cycle;
+    if(ppu->cpu_cycle >= 341) {
+        ppu->cpu_cycle -= 341;
+    }
 }

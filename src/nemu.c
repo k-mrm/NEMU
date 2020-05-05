@@ -15,8 +15,9 @@ int nemu_start(NEMU *nes) {
     printf("%#x\n", nes->cpu.reg.pc);
 
     for(;;) {
-        cpu_step(&nes->cpu);
+        int cycle = cpu_step(&nes->cpu);
         printf("%#x\n", nes->cpu.reg.pc);
+        ppu_step(&nes->ppu, cycle * 3);
     }
 
     return 0;

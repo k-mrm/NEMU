@@ -24,8 +24,10 @@ struct PPU {
     } state;
     uint16_t addr;
     PPUBus *bus;
+    int cpu_cycle;
 };
 
+void ppu_run(PPU *, int);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);
 void ppu_write(PPU *, uint16_t, uint8_t);
