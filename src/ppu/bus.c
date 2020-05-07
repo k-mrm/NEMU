@@ -47,4 +47,5 @@ void ppubus_init(PPUBus *bus, Cassette *cas) {
     bus->cassette = cas;
     bus->vram = malloc(sizeof(uint8_t) * 0x800); /* 2 KiB */
     bus->palette = malloc(sizeof(uint8_t) * 0x20);
+    bus->oam = malloc(sizeof(uint8_t) * 256);
 }

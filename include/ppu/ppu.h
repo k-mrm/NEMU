@@ -19,7 +19,6 @@ struct PPU {
         uint8_t oamdma;     /* $4014 */
     } reg;
     struct {
-        bool scroll_write_once;
         bool addr_write_once;
     } state;
     uint16_t addr;

@@ -16,6 +16,13 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
 
 void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
     switch(idx) {
+    case 3:
+        ppu->reg.oamaddr = data;
+        break;
+    case 4:
+        ppu->bus->oam[ppu->reg.oamaddr] = data;
+        ppu->reg.oamaddr++;
+        break;
     case 6:
         ppu->addr = ppu->state.addr_write_once ?
             ppu->addr | data :
@@ -42,7 +49,6 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
     ppu->reg.data = 0;
     ppu->reg.oamdma = 0;
 
-    ppu->state.scroll_write_once = false;
     ppu->state.addr_write_once = false;
 
     ppu->addr = 0;

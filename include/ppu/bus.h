@@ -2,6 +2,7 @@
 #define NEMU_PPU_BUS_H
 
 #include <stdint.h>
+#include "ppu/sprite.h"
 #include "cassette/cassette.h"
 
 typedef struct PPUBus PPUBus;
@@ -9,6 +10,7 @@ struct PPUBus {
     Cassette *cassette;
     uint8_t *vram;
     uint8_t *palette;
+    uint8_t *oam;
 };
 
 uint8_t ppubus_read(PPUBus *, uint16_t);
