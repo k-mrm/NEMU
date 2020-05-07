@@ -198,7 +198,7 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
         return cpu_fetch(cpu);
     case ADDR_RELATIVE: {
         uint8_t offset = cpu_fetch(cpu);
-        int data = (int)offset + (int)cpu->reg.pc;
+        int data = (int)(int8_t)offset + (int)cpu->reg.pc;
         return (uint16_t)data;
     }
     case ADDR_ZEROPAGEX:
@@ -290,11 +290,11 @@ int cpu_step(CPU *cpu) {
         uint8_t m = cpu_fetch_data(cpu, inst.a);
         uint16_t res = cpu->reg.a + m + cpu_get_pflag(cpu, P_STATUS_NEGATIVE);
 
-        if(res == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(res & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
-        if(res > 0xff)  cpu_set_pflag(cpu, P_STATUS_CARRY);
-        if((cpu->reg.a ^ res) & (m ^ res) & (1 << 7))
-            cpu_set_pflag(cpu, P_STATUS_OVERFLOW);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, res & (1 << 7));
+        cpu_write_pflag(cpu, P_STATUS_CARRY, res > 0xff);
+        cpu_write_pflag(cpu, P_STATUS_OVERFLOW,
+                (cpu->reg.a ^ res) & (m ^ res) & (1 << 7));
 
         cpu->reg.a = res;
 
@@ -303,16 +303,16 @@ int cpu_step(CPU *cpu) {
     case OP_INX: {
         cpu->reg.x++;
 
-        if(cpu->reg.x == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(cpu->reg.x & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.x & (1 << 7));
 
         break;
     }
     case OP_DEY: {
         cpu->reg.y--;
 
-        if(cpu->reg.y == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(cpu->reg.y & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.y == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.y & (1 << 7));
 
         break;
     }
@@ -329,20 +329,21 @@ int cpu_step(CPU *cpu) {
         break;
     case OP_LDA: {
         cpu->reg.a = cpu_fetch_data(cpu, inst.a);
-        if(cpu->reg.a == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(cpu->reg.a & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
         break;
     }
     case OP_LDX: {
         cpu->reg.x = cpu_fetch_data(cpu, inst.a);
-        if(cpu->reg.x == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(cpu->reg.x & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.x & (1 << 7));
         break;
     }
     case OP_LDY: {
         cpu->reg.y = cpu_fetch_data(cpu, inst.a);
-        if(cpu->reg.y == 0) cpu_set_pflag(cpu, P_STATUS_ZERO);
-        if(cpu->reg.y & (1 << 7)) cpu_set_pflag(cpu, P_STATUS_NEGATIVE);
+        printf("regy %d\n", cpu->reg.y);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.y == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.y & (1 << 7));
         break;
     }
     case OP_SEI:
@@ -367,7 +368,7 @@ int cpu_step(CPU *cpu) {
         cpu->reg.sp = cpu->reg.x;
         break;
     default:
-        panic("Unhandled opcode: %#x", inst.op);
+        panic("Unhandled opcode: %d", inst.op);
         break;
     }
 
