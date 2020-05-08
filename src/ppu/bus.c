@@ -27,15 +27,15 @@ void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
         ;
     }
     else if(addr < 0x3000) {
-        /* TODO: Mirror */
+        /* TODO: BG Mirror */
         bus->vram[addr - 0x2000] = data;
     }
     else if(addr < 0x3f00) {
-        /* TODO: Mirror */
+        /* TODO: BG Mirror */
         bus->vram[addr - 0x3000] = data;
     }
     else if(addr < 0x4000) {
-        bus->palette[(addr - 0x3f00) & 0x20] = data;
+        bus->palette[(addr - 0x3f00) & 0x1f] = data;
     }
     else {
         /* unreachable */
