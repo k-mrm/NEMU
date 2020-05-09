@@ -27,6 +27,7 @@ struct PPU {
 };
 
 void ppu_run(PPU *, int);
+void ppu_render(PPU *);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);
 void ppu_write(PPU *, uint16_t, uint8_t);

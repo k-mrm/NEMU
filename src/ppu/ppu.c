@@ -56,6 +56,10 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
     ppu->cpu_cycle = 0;
 }
 
+void ppu_render(PPU *ppu) {
+    ;
+}
+
 void ppu_step(PPU *ppu, int cycle) {
     ppu->cpu_cycle += cycle;
     if(ppu->cpu_cycle >= 341) {

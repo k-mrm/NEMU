@@ -12,4 +12,6 @@ struct RGB {
 
 extern RGB colors[];
 
+#define rgb(r, g, b)    (RGB){r, g, b}
+
 #endif
