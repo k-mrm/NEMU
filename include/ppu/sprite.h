@@ -6,7 +6,7 @@
 typedef struct Sprite Sprite;
 struct Sprite {
     uint8_t y;
-    uint8_t tile;
+    uint8_t tileid;
     uint8_t attr;
     uint8_t x;
 };

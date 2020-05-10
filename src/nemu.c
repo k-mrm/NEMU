@@ -14,10 +14,6 @@ int nemu_start(NEMU *nes) {
 
     printf("%#x\n", nes->cpu.reg.pc);
 
-    for(int i = 0; i < 256; i++) {
-        ppu_sprite_dump(&nes->ppu, i);
-    }
-
     for(;;) {
         int cycle = cpu_step(&nes->cpu);
         ppu_step(&nes->ppu, cycle * 3);
