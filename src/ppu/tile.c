@@ -40,7 +40,9 @@ static Tile *make_tile(PPU *ppu, uint16_t sid, uint8_t pid) {
 
 Tile *ppu_make_tile(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
     uint16_t sid = get_spriteid(ppu, x, y, offset);
-    uint8_t pid = get_paletteid(ppu, x, y, offset);
+    uint8_t aid = get_paletteid(ppu, x, y, offset);
+    uint8_t blockpos = x % 4 / 2 + y % 4 / 2 * 2;
+    uint8_t pid = (aid >> blockpos) & 0x03;
 
     return make_tile(ppu, sid, pid);
 }
