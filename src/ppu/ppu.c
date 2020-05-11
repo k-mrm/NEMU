@@ -56,12 +56,35 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
     ppu->cpu_cycle = 0;
 }
 
+enum {
+    LINE_VISIBLE,
+    LINE_POSTRENDER,
+    LINE_VERTICAL_BLANKING,
+    LINE_PRERENDER,
+};
+
+int linestate_from(uint16_t line) {
+    if(line < 240) {
+        return LINE_VISIBLE;
+    }
+    else if(line == 240) {
+        return LINE_POSTRENDER;
+    }
+    else if(line < 261) {
+        return LINE_VERTICAL_BLANKING;
+    }
+    else if(line == 261) {
+        return LINE_PRERENDER;
+    }
+
+}
+
 void ppu_render(PPU *ppu) {
     ;
 }
 
-void ppu_step(PPU *ppu, int cycle) {
-    ppu->cpu_cycle += cycle;
+void ppu_step(PPU *ppu, int cyclex3) {
+    ppu->cpu_cycle += cyclex3;
     if(ppu->cpu_cycle >= 341) {
         ppu->cpu_cycle -= 341;
     }
