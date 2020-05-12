@@ -84,18 +84,18 @@ int linestate_from(uint16_t line) {
     }
 }
 
-void ppu_render(PPU *ppu, Screen screen) {
+void ppu_render(PPU *ppu, Disp screen) {
     RGB rgb;
     for(int i = 0; i < 256; i++) {
         for(int j = 0; j < 240; j++) {
             rgb = screen[i][j];
-            printf("%x%x%x", rgb.r, rgb.g, rgb.b);
+            printf("%02x", (rgb.r+rgb.g+rgb.b)/3);
         }
         puts("");
     }
 }
 
-void ppu_draw_line(PPU *ppu, Screen screen) {
+void ppu_draw_line(PPU *ppu, Disp screen) {
     if(ppu->line % 8 == 0) {
         Tile *tile;
         uint8_t palette[4];
@@ -105,14 +105,11 @@ void ppu_draw_line(PPU *ppu, Screen screen) {
             for(int i = 0; i < 4; ++i) {
                 palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile->paletteid * 4 + i);
             }
-            printf("id %x\n", 0x3f00 + tile->paletteid * 4);
-            printf("palette %2x%2x%2x%2x\n", palette[0], palette[1], palette[2], palette[3]);
 
             for(int i = 0; i < 8; ++i) {
                 for(int j = 0; j < 8; ++j) {
                     uint8_t c = palette[tile->pp[i][j]];
                     RGB rgb = colors[c];
-                    // printf("[%u][%u] %2x%2x%2x \n", x * 8 + 1, ppu->line + j, rgb.r, rgb.g, rgb.b);
                     screen[x * 8 + i][ppu->line + j] = rgb;
                 }
             }
@@ -124,7 +121,7 @@ void ppu_draw_line(PPU *ppu, Screen screen) {
     /* TODO: draw sprite */
 }
 
-int ppu_step(PPU *ppu, int cyclex3, Screen screen) {
+int ppu_step(PPU *ppu, int cyclex3, Disp screen) {
     ppu->cpu_cycle += cyclex3;
     if(ppu->cpu_cycle >= 341) {
         ppu->cpu_cycle -= 341;

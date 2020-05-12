@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     if(read_cassette(&cassette, argv[1])) return 1;
     NEMU nes;
     nes.cassette = &cassette;
-    int status = nemu_start(&nes);
+    int status = nemu_start(&nes, &argc, argv);
 
     return status;
 }

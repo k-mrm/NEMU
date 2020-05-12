@@ -30,11 +30,11 @@ struct PPU {
     int cpu_cycle;
 };
 
-typedef RGB Screen[256][240];
+typedef RGB Disp[256][240];
 
 void ppu_run(PPU *, int);
-void ppu_render(PPU *, Screen);
-int ppu_step(PPU *, int, Screen);
+void ppu_render(PPU *, Disp);
+int ppu_step(PPU *, int, Disp);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);
 void ppu_write(PPU *, uint16_t, uint8_t);

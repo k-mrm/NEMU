@@ -1,5 +1,6 @@
 CC := gcc
 CFLAGS = -Wall -Wextra -I ./include/ -g
+LDFLAGS = -lGL -lglut
 SRCROOT = ./src
 SRCDIRS := $(shell find $(SRCROOT) -type d)
 SRCS=$(foreach dir, $(SRCDIRS), $(wildcard $(dir)/*.c))
@@ -9,7 +10,7 @@ PROGRAM = emu
 .PHONY: clean
 
 emu: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:
 	$(RM) $(OBJS) $(PROGRAM)

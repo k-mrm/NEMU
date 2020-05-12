@@ -24,6 +24,6 @@ struct NEMU {
     RGB screen[256][240];
 };
 
-int nemu_start(NEMU *);
+int nemu_start(NEMU *, int *, char **);
 
 #endif

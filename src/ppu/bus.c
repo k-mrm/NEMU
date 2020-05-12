@@ -15,7 +15,6 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
     }
     else if(addr < 0x4000) {
         uint8_t res = bus->palette[(addr - 0x3f00) & 0x1f];
-        printf("read!! %u@%x\n", bus->palette[(addr-0x3f00)&0x1f], (addr-0x3f00)&0x1f);
         return res;
     }
     else {
