@@ -33,7 +33,7 @@ static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
 }
 
 static Tile *make_tile(PPU *ppu, uint16_t sid, uint8_t pid) {
-    Tile *tile = ppu_make_pixelpat(ppu, pid);
+    Tile *tile = ppu_make_pixelpat(ppu, sid);
     tile->paletteid = pid;
     return tile;
 }

@@ -103,14 +103,16 @@ void ppu_draw_line(PPU *ppu, Screen screen) {
         for(uint8_t x = 0; x < 32; x++) {
             tile = ppu_make_tile(ppu, x, y, 0x2000);
             for(int i = 0; i < 4; ++i) {
-                palette[i] = ppubus_read(ppu, 0x3f00 + tile->paletteid * 4 + i);
+                palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile->paletteid * 4 + i);
             }
+            printf("id %x\n", 0x3f00 + tile->paletteid * 4);
+            printf("palette %2x%2x%2x%2x\n", palette[0], palette[1], palette[2], palette[3]);
 
             for(int i = 0; i < 8; ++i) {
                 for(int j = 0; j < 8; ++j) {
                     uint8_t c = palette[tile->pp[i][j]];
                     RGB rgb = colors[c];
-                    printf("[%u][%u] %2x%2x%2x \n", x * 8 + 1, ppu->line + j, rgb.r, rgb.g, rgb.b);
+                    // printf("[%u][%u] %2x%2x%2x \n", x * 8 + 1, ppu->line + j, rgb.r, rgb.g, rgb.b);
                     screen[x * 8 + i][ppu->line + j] = rgb;
                 }
             }
