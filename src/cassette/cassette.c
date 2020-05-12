@@ -8,11 +8,11 @@ static void cassette_dump(Cassette *cassette) {
     printf("prgrom: %zu\n", cassette->nprgrom_byte);
     printf("chrrom: %zu\n", cassette->nchrrom_byte);
 
+    /*
     puts("prgrom:");
     for(int i = 0; i < cassette->nprgrom_byte; ++i) {
         printf("%02x ", cassette->prgrom[i]);
     }
-    /*
     puts("chrrom:");
     for(int i = 0; i < cassette->nchrrom_byte; ++i) {
         printf("%x ", cassette->chrrom[i]);
@@ -42,7 +42,7 @@ static int parse_ines_format(Cassette *cassette, unsigned char *ines) {
     memcpy(cassette->prgrom, ines + prgrom_base, nprgrom_byte);
     memcpy(cassette->chrrom, ines + chrrom_base, nchrrom_byte);
 
-    cassette_dump(cassette);
+    // cassette_dump(cassette);
 
     return 0;
 }

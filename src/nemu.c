@@ -16,7 +16,10 @@ int nemu_start(NEMU *nes) {
 
     for(;;) {
         int cycle = cpu_step(&nes->cpu);
-        ppu_step(&nes->ppu, cycle * 3);
+        int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen);
+        if(draw) {
+            // ppu_render(&nes->ppu, nes->screen);
+        }
     }
 
     return 0;

@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include "ppu/ppu.h"
+#include "ppu/tile.h"
+#include "ppu/palette.h"
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     switch(idx) {
@@ -52,6 +54,7 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
     ppu->state.addr_write_once = false;
 
     ppu->addr = 0;
+    ppu->line = 0;
     ppu->bus = bus;
     ppu->cpu_cycle = 0;
 }
@@ -76,16 +79,69 @@ int linestate_from(uint16_t line) {
     else if(line == 261) {
         return LINE_PRERENDER;
     }
-
+    else {
+        panic("invalid line");
+    }
 }
 
-void ppu_render(PPU *ppu) {
-    ;
+void ppu_render(PPU *ppu, Screen screen) {
+    RGB rgb;
+    for(int i = 0; i < 256; i++) {
+        for(int j = 0; j < 240; j++) {
+            rgb = screen[i][j];
+            printf("%x%x%x", rgb.r, rgb.g, rgb.b);
+        }
+        puts("");
+    }
 }
 
-void ppu_step(PPU *ppu, int cyclex3) {
+void ppu_draw_line(PPU *ppu, Screen screen) {
+    if(ppu->line % 8 == 0) {
+        Tile *tile;
+        uint8_t palette[4];
+        uint8_t y = ppu->line / 8;
+        for(uint8_t x = 0; x < 32; x++) {
+            tile = ppu_make_tile(ppu, x, y, 0x2000);
+            for(int i = 0; i < 4; ++i) {
+                palette[i] = ppubus_read(ppu, 0x3f00 + tile->paletteid * 4 + i);
+            }
+
+            for(int i = 0; i < 8; ++i) {
+                for(int j = 0; j < 8; ++j) {
+                    uint8_t c = palette[tile->pp[i][j]];
+                    RGB rgb = colors[c];
+                    printf("[%u][%u] %2x%2x%2x \n", x * 8 + 1, ppu->line + j, rgb.r, rgb.g, rgb.b);
+                    screen[x * 8 + i][ppu->line + j] = rgb;
+                }
+            }
+
+            free(tile);
+        }
+    }
+
+    /* TODO: draw sprite */
+}
+
+int ppu_step(PPU *ppu, int cyclex3, Screen screen) {
     ppu->cpu_cycle += cyclex3;
     if(ppu->cpu_cycle >= 341) {
         ppu->cpu_cycle -= 341;
+        
+        switch(linestate_from(ppu->line)) {
+        case LINE_VISIBLE:
+            ppu_draw_line(ppu, screen);
+            ppu->line++;
+            break;
+        case LINE_POSTRENDER:
+            ppu->line++;
+            break;
+        case LINE_VERTICAL_BLANKING:
+            ppu->line++;
+            break;
+        case LINE_PRERENDER:
+            ppu->line = 0;
+            return 1;
+        }
     }
+    return 0;
 }

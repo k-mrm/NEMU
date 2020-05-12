@@ -10,6 +10,7 @@
 #include "ppu/ppu.h"
 #include "apu/apu.h"
 #include "log/log.h"
+#include "ppu/palette.h"
 
 typedef struct NEMU NEMU;
 struct NEMU {
@@ -20,6 +21,7 @@ struct NEMU {
     PPUBus ppubus;
     APU apu;
     Cassette *cassette;
+    RGB screen[256][240];
 };
 
 int nemu_start(NEMU *);
