@@ -19,7 +19,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
         int cycle = cpu_step(&nes->cpu);
         int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen);
         if(draw) {
-            gui_render_console(&nes->gui, nes->screen);
+            gui_render(&nes->gui, nes->screen);
         }
     }
 

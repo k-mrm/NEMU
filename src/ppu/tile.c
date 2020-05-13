@@ -3,7 +3,7 @@
 #include "ppu/tile.h"
 
 Tile *new_tile() {
-    Tile *t = malloc(sizeof(Tile));
+    Tile *t = calloc(1, sizeof(Tile));
     return t;
 }
 
@@ -20,7 +20,6 @@ static Tile *ppu_make_pixelpat(PPU *ppu, uint16_t sid) {
             tile->pp[i % 8][j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
         }
     }
-
     return tile;
 }
 

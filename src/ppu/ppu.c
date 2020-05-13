@@ -12,7 +12,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
         return data;
     }
     default:
-        break;
+        return 0;
     }
 }
 
@@ -81,6 +81,7 @@ int linestate_from(uint16_t line) {
     }
     else {
         panic("invalid line");
+        return -1;
     }
 }
 
@@ -98,12 +99,14 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
             for(int i = 0; i < 8; ++i) {
                 for(int j = 0; j < 8; ++j) {
                     uint8_t c = palette[tile->pp[i][j]];
+                    // printf("%02x", c);
                     screen[x * 8 + i][ppu->line + j] = c;
                 }
             }
 
             free(tile);
         }
+        //puts("");
     }
 
     /* TODO: draw sprite */
