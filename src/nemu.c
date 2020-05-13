@@ -6,7 +6,7 @@ static void nemu_init(NEMU *nes, int *argc, char **argv) {
     cpu_init(&nes->cpu, &nes->cpubus);
     ppubus_init(&nes->ppubus, nes->cassette);
     ppu_init(&nes->ppu, &nes->ppubus);
-    gui_init(argc, argv);
+    gui_init(&nes->gui);
 }
 
 int nemu_start(NEMU *nes, int *argc, char **argv) {
@@ -19,7 +19,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
         int cycle = cpu_step(&nes->cpu);
         int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen);
         if(draw) {
-            ppu_render(&nes->ppu, nes->screen);
+            gui_render_console(&nes->gui, nes->screen);
         }
     }
 

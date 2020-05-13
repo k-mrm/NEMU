@@ -30,7 +30,7 @@ struct PPU {
     int cpu_cycle;
 };
 
-typedef RGB Disp[256][240];
+typedef uint8_t Disp[256][240];
 
 void ppu_run(PPU *, int);
 void ppu_render(PPU *, Disp);

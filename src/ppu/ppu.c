@@ -84,17 +84,6 @@ int linestate_from(uint16_t line) {
     }
 }
 
-void ppu_render(PPU *ppu, Disp screen) {
-    RGB rgb;
-    for(int i = 0; i < 256; i++) {
-        for(int j = 0; j < 240; j++) {
-            rgb = screen[i][j];
-            printf("%02x", (rgb.r+rgb.g+rgb.b)/3);
-        }
-        puts("");
-    }
-}
-
 void ppu_draw_line(PPU *ppu, Disp screen) {
     if(ppu->line % 8 == 0) {
         Tile *tile;
@@ -109,8 +98,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
             for(int i = 0; i < 8; ++i) {
                 for(int j = 0; j < 8; ++j) {
                     uint8_t c = palette[tile->pp[i][j]];
-                    RGB rgb = colors[c];
-                    screen[x * 8 + i][ppu->line + j] = rgb;
+                    screen[x * 8 + i][ppu->line + j] = c;
                 }
             }
 
