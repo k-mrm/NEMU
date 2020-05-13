@@ -23,7 +23,7 @@ struct NEMU {
     PPUBus ppubus;
     APU apu;
     Cassette *cassette;
-    uint8_t screen[256][240];
+    Disp screen;
     GUI gui;
 };
 

@@ -20,11 +20,12 @@ static Tile *ppu_make_pixelpat(PPU *ppu, uint16_t sid) {
             tile->pp[i % 8][j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
         }
     }
+
     return tile;
 }
 
 static uint16_t get_spriteid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
-    return ppubus_read(ppu->bus, x + y * 0x20 + offset);
+    return ppubus_read(ppu->bus, offset + x + y * 0x20);
 }
 
 static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {

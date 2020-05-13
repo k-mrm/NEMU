@@ -98,9 +98,12 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
 
             for(int i = 0; i < 8; ++i) {
                 for(int j = 0; j < 8; ++j) {
-                    uint8_t c = palette[tile->pp[i][j]];
-                    // printf("%02x", c);
-                    screen[x * 8 + i][ppu->line + j] = c;
+                    uint8_t c = palette[tile->pp[j][i]];
+                    /* printf("%02x", c);
+                    if(tile->pp[j][i])
+                        printf("at %#x %#x\n", x * 8 + i, ppu->line + j);
+                        */
+                    screen[ppu->line + j][x * 8 + i] = c;
                 }
             }
 
