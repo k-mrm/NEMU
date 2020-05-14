@@ -329,6 +329,12 @@ int cpu_step(CPU *cpu) {
     case OP_JMP:
         cpu->reg.pc = cpu_fetch_operand(cpu, inst.a);
         break;
+    case OP_CLD:
+        cpu_write_pflag(cpu, P_STATUS_DECIMAL, 0);
+        break;
+    case OP_SED:
+        cpu_write_pflag(cpu, P_STATUS_DECIMAL, 1);
+        break;
     case OP_LDA: {
         cpu->reg.a = cpu_fetch_data(cpu, inst.a);
         cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
@@ -435,6 +441,7 @@ static char *inst_dump(uint8_t op) {
     case OP_PHP: return "php";
     case OP_PLP: return "plp";
     case OP_NOP: return "nop";
+    default:     return "???";
     }
 }
 
