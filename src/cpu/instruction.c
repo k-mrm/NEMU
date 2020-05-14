@@ -346,6 +346,17 @@ int cpu_step(CPU *cpu) {
 
         break;
     } 
+    case OP_BIT: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        uint8_t bit6 = (m >> 6) & 1; 
+        uint8_t bit7 = (m >> 7) & 1; 
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, (cpu->reg.a & m) == 0);
+        cpu_write_pflag(cpu, P_STATUS_OVERFLOW, bit6);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, bit7);
+
+        break;
+    }
     case OP_BCS: {
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         if(cpu_get_pflag(cpu, P_STATUS_CARRY)) {
