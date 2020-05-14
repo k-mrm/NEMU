@@ -382,6 +382,15 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_BMI: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        if(cpu_get_pflag(cpu, P_STATUS_NEGATIVE)) {
+            cycle++;
+            cpu->reg.pc = addr;
+        }
+
+        break;
+    }
     case OP_BVS: {
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         if(cpu_get_pflag(cpu, P_STATUS_OVERFLOW)) {
