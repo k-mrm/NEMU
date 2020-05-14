@@ -373,6 +373,9 @@ int cpu_step(CPU *cpu) {
     case OP_SEI:
         cpu_set_pflag(cpu, P_STATUS_IRQ);
         break;
+    case OP_SEC:
+        cpu_set_pflag(cpu, P_STATUS_CARRY);
+        break;
     case OP_LDA: {
         cpu->reg.a = cpu_fetch_data(cpu, inst.a);
         cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
