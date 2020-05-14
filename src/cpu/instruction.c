@@ -296,8 +296,6 @@ int cpu_step(CPU *cpu) {
     int cycle = inst.cycle;
 
     switch(inst.op) {
-    case OP_NOP:
-        break;
     case OP_ADC: {
         uint8_t m = cpu_fetch_data(cpu, inst.a);
         uint16_t res = cpu->reg.a + m + cpu_get_pflag(cpu, P_STATUS_NEGATIVE);
@@ -309,6 +307,15 @@ int cpu_step(CPU *cpu) {
                 (cpu->reg.a ^ res) & (m ^ res) & (1 << 7));
 
         cpu->reg.a = res;
+
+        break;
+    }
+    case OP_AND: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        cpu->reg.a = cpu->reg.a & m;
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
 
         break;
     }
@@ -490,6 +497,8 @@ int cpu_step(CPU *cpu) {
         break;
     case OP_PLP:
         cpu->reg.p = cpu_stack_pop(cpu);
+        break;
+    case OP_NOP:
         break;
     default:
         panic("Unhandled opcode: %s", inst_dump(inst.op));
