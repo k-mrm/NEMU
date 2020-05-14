@@ -466,6 +466,26 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_CPX: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        uint8_t res = cpu->reg.x - m;
+
+        cpu_write_pflag(cpu, P_STATUS_CARRY, cpu->reg.x >= m);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == m);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
+
+        break;
+    }
+    case OP_CPY: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        uint8_t res = cpu->reg.y - m;
+
+        cpu_write_pflag(cpu, P_STATUS_CARRY, cpu->reg.y >= m);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.y == m);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
+
+        break;
+    }
     case OP_BRK:
         cpu_interrupt(cpu, BRK);
         break;
