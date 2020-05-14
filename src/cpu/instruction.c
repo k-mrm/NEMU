@@ -197,7 +197,7 @@ void cpu_stack_push(CPU *cpu, uint8_t data) {
 
 uint8_t cpu_stack_pop(CPU *cpu) {
     cpu->reg.sp++;
-    cpubus_read(cpu->bus, cpu_stackptr(cpu));
+    return cpubus_read(cpu->bus, cpu_stackptr(cpu));
 }
 
 uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
@@ -348,8 +348,8 @@ int cpu_step(CPU *cpu) {
     } 
     case OP_BIT: {
         uint8_t m = cpu_fetch_data(cpu, inst.a);
-        uint8_t bit6 = (m >> 6) & 1; 
-        uint8_t bit7 = (m >> 7) & 1; 
+        uint8_t bit6 = (m >> 6) & 1;
+        uint8_t bit7 = (m >> 7) & 1;
 
         cpu_write_pflag(cpu, P_STATUS_ZERO, (cpu->reg.a & m) == 0);
         cpu_write_pflag(cpu, P_STATUS_OVERFLOW, bit6);
@@ -375,6 +375,24 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_BVS: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        if(cpu_get_pflag(cpu, P_STATUS_OVERFLOW)) {
+            cycle++;
+            cpu->reg.pc = addr;
+        }
+
+        break;
+    } 
+    case OP_BVC: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        if(!cpu_get_pflag(cpu, P_STATUS_OVERFLOW)) {
+            cycle++;
+            cpu->reg.pc = addr;
+        }
+
+        break;
+    } 
     case OP_BPL: {
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         if(!cpu_get_pflag(cpu, P_STATUS_NEGATIVE)) {
