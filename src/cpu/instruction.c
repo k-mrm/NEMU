@@ -475,6 +475,12 @@ int cpu_step(CPU *cpu) {
     case OP_TXS:
         cpu->reg.sp = cpu->reg.x;
         break;
+    case OP_PHP:
+        cpu_stack_push(cpu, cpu->reg.p);
+        break;
+    case OP_PLP:
+        cpu->reg.p = cpu_stack_pop(cpu);
+        break;
     default:
         panic("Unhandled opcode: %s", inst_dump(inst.op));
         break;
