@@ -5,6 +5,8 @@
 
 CPUInst code_decoder[256];
 
+static char *inst_dump(uint8_t);
+
 void cpu_define_inst() {
     DEF_INST(0x69, OP_ADC, ADDR_IMMEDIATE, 2, 2);
     DEF_INST(0x65, OP_ADC, ADDR_ZEROPAGE, 2, 3);
@@ -368,10 +370,72 @@ int cpu_step(CPU *cpu) {
         cpu->reg.sp = cpu->reg.x;
         break;
     default:
-        panic("Unhandled opcode: %d", inst.op);
+        panic("Unhandled opcode: %s", inst_dump(inst.op));
         break;
     }
 
     return cycle;
 }
+
+static char *inst_dump(uint8_t op) {
+    switch(op) {
+    case OP_ADC: return "adc";
+    case OP_SBC: return "sbc";
+    case OP_AND: return "and";
+    case OP_ORA: return "ora";
+    case OP_EOR: return "eor";
+    case OP_ASL: return "asl";
+    case OP_LSR: return "lsr";
+    case OP_ROL: return "rol";
+    case OP_ROR: return "ror";
+    case OP_BCC: return "bcc";
+    case OP_BCS: return "bcs";
+    case OP_BEQ: return "beq";
+    case OP_BNE: return "bne";
+    case OP_BVC: return "bvc";
+    case OP_BVS: return "bvs";
+    case OP_BPL: return "bpl";
+    case OP_BMI: return "bmi";
+    case OP_BIT: return "bit";
+    case OP_JMP: return "jmp";
+    case OP_JSR: return "jsr";
+    case OP_RTS: return "rts";
+    case OP_BRK: return "brk";
+    case OP_RTI: return "rti";
+    case OP_CMP: return "cmp";
+    case OP_CPX: return "cpx";
+    case OP_CPY: return "cpy";
+    case OP_INC: return "inc";
+    case OP_DEC: return "dec";
+    case OP_INX: return "inx";
+    case OP_DEX: return "dex";
+    case OP_INY: return "iny";
+    case OP_DEY: return "dey";
+    case OP_CLC: return "clc";
+    case OP_SEC: return "sec";
+    case OP_CLI: return "cli";
+    case OP_SEI: return "sei";
+    case OP_CLD: return "cld";
+    case OP_SED: return "sed";
+    case OP_CLV: return "clv";
+    case OP_LDA: return "lda";
+    case OP_LDX: return "ldx";
+    case OP_LDY: return "ldy";
+    case OP_STA: return "sta";
+    case OP_STX: return "stx";
+    case OP_STY: return "sty";
+    case OP_TAX: return "tax";
+    case OP_TXA: return "txa";
+    case OP_TAY: return "tay";
+    case OP_TYA: return "tya";
+    case OP_TSX: return "tsx";
+    case OP_TXS: return "txs";
+    case OP_PHA: return "pha";
+    case OP_PLA: return "pla";
+    case OP_PHP: return "php";
+    case OP_PLP: return "plp";
+    case OP_NOP: return "nop";
+    }
+}
+
 

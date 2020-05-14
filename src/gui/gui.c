@@ -20,8 +20,8 @@ void gui_render_console(GUI *gui, Disp screen) {
 }
 
 void gui_render(GUI *gui, Disp screen) {
-    for(int x = 0; x < 256; ++x) {
-        for(int y = 0; y < 240; ++y) {
+    for(int y = 0; y < 240; ++y) {
+        for(int x = 0; x < 256; ++x) {
             RGB rgb = colors[screen[y][x]];
             al_put_pixel(x, y, al_map_rgb(rgb.r, rgb.g, rgb.b));
         }
