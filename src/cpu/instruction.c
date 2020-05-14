@@ -1,5 +1,6 @@
 #include "cpu/cpu.h"
 #include "cpu/instruction.h"
+#include "cpu/interrupt.h"
 #include "cpu/register.h"
 #include "log/log.h"
 
@@ -313,6 +314,15 @@ int cpu_step(CPU *cpu) {
     case OP_AND: {
         uint8_t m = cpu_fetch_data(cpu, inst.a);
         cpu->reg.a = cpu->reg.a & m;
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
+
+        break;
+    }
+    case OP_ORA: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        cpu->reg.a = cpu->reg.a | m;
 
         cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
         cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
