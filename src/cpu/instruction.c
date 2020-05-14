@@ -321,11 +321,27 @@ int cpu_step(CPU *cpu) {
     case OP_BNE: {
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         if(!cpu_get_pflag(cpu, P_STATUS_ZERO)) {
+            cycle++;
             cpu->reg.pc = addr;
         }
 
         break;
     } 
+    case OP_BPL: {
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        if(!cpu_get_pflag(cpu, P_STATUS_NEGATIVE)) {
+            cycle++;
+            cpu->reg.pc = addr;
+        }
+
+        break;
+    }
+    case OP_JSR: {
+        uint8_t pc = cpu->reg.pc;
+        uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        cpu->reg.pc = addr;
+        break;
+    }
     case OP_JMP:
         cpu->reg.pc = cpu_fetch_operand(cpu, inst.a);
         break;
@@ -334,6 +350,9 @@ int cpu_step(CPU *cpu) {
         break;
     case OP_SED:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 1);
+        break;
+    case OP_SEI:
+        cpu_set_pflag(cpu, P_STATUS_IRQ);
         break;
     case OP_LDA: {
         cpu->reg.a = cpu_fetch_data(cpu, inst.a);
@@ -354,9 +373,6 @@ int cpu_step(CPU *cpu) {
         cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.y & (1 << 7));
         break;
     }
-    case OP_SEI:
-        cpu_set_pflag(cpu, P_STATUS_IRQ);
-        break;
     case OP_STA: {
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         cpubus_write(cpu->bus, addr, cpu->reg.a);

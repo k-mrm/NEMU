@@ -13,7 +13,9 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
     nemu_init(nes, argc, argv);
     cpu_interrupt(&nes->cpu, RESET);
 
-    printf("%#x\n", nes->cpu.reg.pc);
+#ifdef CPU_DEBUG
+    nes->cpu.reg.pc = 0xc000;
+#endif
 
     for(;;) {
         int cycle = cpu_step(&nes->cpu);
@@ -21,6 +23,10 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
         if(draw) {
             gui_render(&nes->gui, nes->screen);
         }
+#ifdef CPU_DEBUG
+        printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
+        printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));
+#endif
     }
 
     return 0;
