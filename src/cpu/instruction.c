@@ -376,8 +376,14 @@ int cpu_step(CPU *cpu) {
     case OP_CLD:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 0);
         break;
+    case OP_CLC:
+        cpu_write_pflag(cpu, P_STATUS_CARRY, 0);
+        break;
     case OP_SED:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 1);
+        break;
+    case OP_CLI:
+        cpu_write_pflag(cpu, P_STATUS_IRQ, 0);
         break;
     case OP_SEI:
         cpu_set_pflag(cpu, P_STATUS_IRQ);
