@@ -475,6 +475,16 @@ int cpu_step(CPU *cpu) {
     case OP_TXS:
         cpu->reg.sp = cpu->reg.x;
         break;
+    case OP_PHA:
+        cpu_stack_push(cpu, cpu->reg.a);
+        break;
+    case OP_PLA:
+        cpu->reg.a = cpu_stack_pop(cpu);
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
+
+        break;
     case OP_PHP:
         cpu_stack_push(cpu, cpu->reg.p);
         break;
