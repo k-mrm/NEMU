@@ -447,21 +447,7 @@ int cpu_step(CPU *cpu) {
         break;
     }
     case OP_BRK:
-        if(cpu_get_pflag(cpu, P_STATUS_IRQ)) break;
-
-        cpu_write_pflag(cpu, P_STATUS_BRK, 1);
-        cpu->reg.pc++;
-        cpu_stack_push(cpu, cpu->reg.pc >> 8);
-        cpu_stack_push(cpu, cpu->reg.pc & 0x7f);
-        cpu_stack_push(cpu, cpu->reg.p);
-
-        cpu_write_pflag(cpu, P_STATUS_IRQ, 1);
-
-        uint8_t low = cpubus_read(cpu->bus, 0xfffe);
-        uint8_t high = cpubus_read(cpu->bus, 0xffff);
-
-        cpu->reg.pc = ((uint16_t)high << 8) | low;
-
+        cpu_interrupt(cpu, BRK);
         break;
     case OP_CLD:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 0);
