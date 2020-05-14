@@ -427,6 +427,16 @@ int cpu_step(CPU *cpu) {
     case OP_JMP:
         cpu->reg.pc = cpu_fetch_operand(cpu, inst.a);
         break;
+    case OP_CMP: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        uint8_t res = cpu->reg.a - m;
+
+        cpu_write_pflag(cpu, P_STATUS_CARRY, cpu->reg.a >= m);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == m);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
+
+        break;
+    }
     case OP_CLD:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 0);
         break;
