@@ -329,6 +329,16 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_INC: {
+        uint8_t addr = cpu_fetch_operand(cpu, inst.a);
+        uint8_t res = cpubus_read(cpu->bus, addr) + 1;
+        cpubus_write(cpu->bus, addr, res);
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, res & (1 << 7));
+
+        break;
+    }
     case OP_INX: {
         cpu->reg.x++;
 
