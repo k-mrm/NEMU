@@ -354,6 +354,13 @@ int cpu_step(CPU *cpu) {
         cpu->reg.pc = addr;
         break;
     }
+    case OP_RTS: {
+        uint8_t low = cpu_stack_pop(cpu);
+        uint8_t high = cpu_stack_pop(cpu);
+        uint16_t addr = ((uint16_t)high << 8) | low;
+        cpu->reg.pc = addr + 1;
+        break;
+    }
     case OP_JMP:
         cpu->reg.pc = cpu_fetch_operand(cpu, inst.a);
         break;
