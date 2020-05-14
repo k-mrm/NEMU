@@ -17,10 +17,8 @@
     }
 
 #define sp_actual(sp)       ((uint16_t)(sp) | (0x01 << 8))
-#define sp_actual2raw(sp)   ((uint8_t)((sp) & 0xff))
 
-#define cpu_get_sp(cpu)     sp_actual((cpu)->reg.sp)
-#define cpu_set_sp(cpu, v)      ((cpu)->reg.sp = sp_actual2raw(v))
+#define cpu_stackptr(cpu)     sp_actual((cpu)->reg.sp)
 
 
 #endif

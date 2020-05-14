@@ -190,6 +190,16 @@ uint8_t cpu_fetch(CPU *cpu) {
     return cpubus_read(cpu->bus, cpu->reg.pc++);
 }
 
+void cpu_stack_push(CPU *cpu, uint8_t data) {
+    cpubus_write(cpu->bus, cpu_stackptr(cpu), data);
+    cpu->reg.sp--;
+}
+
+uint8_t cpu_stack_pop(CPU *cpu) {
+    cpu->reg.sp++;
+    cpubus_read(cpu->bus, cpu_stackptr(cpu));
+}
+
 uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     switch(addrmode) {
     case ADDR_ACCUMULATOR:
@@ -337,8 +347,10 @@ int cpu_step(CPU *cpu) {
         break;
     }
     case OP_JSR: {
-        uint8_t pc = cpu->reg.pc;
+        uint16_t pc = cpu->reg.pc;
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        cpu_stack_push(cpu, pc >> 8);
+        cpu_stack_push(cpu, pc | 0x7f);
         cpu->reg.pc = addr;
         break;
     }
