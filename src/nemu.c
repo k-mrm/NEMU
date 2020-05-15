@@ -24,8 +24,8 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
             gui_render(&nes->gui, nes->screen);
         }
 #ifdef CPU_DEBUG
-        printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
-        printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));
+        // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
+        // printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));
 #endif
     }
 
