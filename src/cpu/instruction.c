@@ -334,7 +334,7 @@ int cpu_step(CPU *cpu) {
         uint8_t m = inst.a == ADDR_ACCUMULATOR ?
             cpu->reg.a :
             cpubus_read(cpu->bus, addr);
-        uint8_t res = m << 2;
+        uint8_t res = m << 1;
 
         cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 7) & 1);
         cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
@@ -352,7 +352,7 @@ int cpu_step(CPU *cpu) {
         uint8_t m = inst.a == ADDR_ACCUMULATOR ?
             cpu->reg.a :
             cpubus_read(cpu->bus, addr);
-        uint8_t res = m >> 2;
+        uint8_t res = m >> 1;
 
         cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 0) & 1);
         cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
@@ -372,7 +372,7 @@ int cpu_step(CPU *cpu) {
         uint8_t m = inst.a == ADDR_ACCUMULATOR ?
             cpu->reg.a :
             cpubus_read(cpu->bus, addr);
-        uint8_t res = (m << 2) | carry;
+        uint8_t res = (m << 1) | carry;
 
         cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 7) & 1);
         cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
@@ -392,7 +392,7 @@ int cpu_step(CPU *cpu) {
         uint8_t m = inst.a == ADDR_ACCUMULATOR ?
             cpu->reg.a :
             cpubus_read(cpu->bus, addr);
-        uint8_t res = (m >> 2) | (carry << 7);
+        uint8_t res = (m >> 1) | (carry << 7);
 
         cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 0) & 1);
         cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
