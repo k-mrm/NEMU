@@ -329,6 +329,24 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_ASL: {
+        uint8_t addr = cpu_fetch_operand(cpu, inst.a);
+        uint8_t m = inst.a == ADDR_ACCUMULATOR ?
+            cpu->reg.a :
+            cpubus_read(cpu->bus, addr);
+        uint8_t res = m << 2;
+
+        cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 7) & 1);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
+
+        if(inst.a == ADDR_ACCUMULATOR)
+            cpu->reg.a = res;
+        else
+            cpubus_write(cpu->bus, addr, res);
+
+        break;
+    }
     case OP_INC: {
         uint8_t addr = cpu_fetch_operand(cpu, inst.a);
         uint8_t res = cpubus_read(cpu->bus, addr) + 1;
