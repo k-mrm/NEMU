@@ -614,6 +614,9 @@ int cpu_step(CPU *cpu) {
     case OP_SEI:
         cpu_set_pflag(cpu, P_STATUS_IRQ);
         break;
+    case OP_CLV:
+        cpu_write_pflag(cpu, P_STATUS_OVERFLOW, 0);
+        break;
     case OP_SEC:
         cpu_set_pflag(cpu, P_STATUS_CARRY);
         break;
