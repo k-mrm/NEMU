@@ -191,16 +191,6 @@ uint8_t cpu_fetch(CPU *cpu) {
     return cpubus_read(cpu->bus, cpu->reg.pc++);
 }
 
-void cpu_stack_push(CPU *cpu, uint8_t data) {
-    cpubus_write(cpu->bus, cpu_stackptr(cpu), data);
-    cpu->reg.sp--;
-}
-
-uint8_t cpu_stack_pop(CPU *cpu) {
-    cpu->reg.sp++;
-    return cpubus_read(cpu->bus, cpu_stackptr(cpu));
-}
-
 uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     switch(addrmode) {
     case ADDR_ACCUMULATOR:
@@ -293,6 +283,7 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
 int cpu_step(CPU *cpu) {
     uint8_t code = cpu_fetch(cpu);
     CPUInst inst = code_decoder[code];
+    printf("now: %s\n", inst_dump(inst.op));
 
     int cycle = inst.cycle;
 
@@ -629,9 +620,6 @@ int cpu_step(CPU *cpu) {
     case OP_CLD:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 0);
         break;
-    case OP_CLC:
-        cpu_write_pflag(cpu, P_STATUS_CARRY, 0);
-        break;
     case OP_SED:
         cpu_write_pflag(cpu, P_STATUS_DECIMAL, 1);
         break;
@@ -643,6 +631,9 @@ int cpu_step(CPU *cpu) {
         break;
     case OP_CLV:
         cpu_write_pflag(cpu, P_STATUS_OVERFLOW, 0);
+        break;
+    case OP_CLC:
+        cpu_write_pflag(cpu, P_STATUS_CARRY, 0);
         break;
     case OP_SEC:
         cpu_write_pflag(cpu, P_STATUS_CARRY, 1);

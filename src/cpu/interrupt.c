@@ -13,14 +13,14 @@ void cpu_interrupt(CPU *cpu, int inter) {
     }
     case IRQ:   break;
     case BRK: {
-        if(cpu_get_pflag(cpu, P_STATUS_IRQ)) break;
+        if(cpu_get_pflag(cpu, P_STATUS_IRQ) || cpu_get_pflag(cpu, P_STATUS_BRK))
+            break;
 
         cpu_write_pflag(cpu, P_STATUS_BRK, 1);
         cpu->reg.pc++;
         cpu_stack_push(cpu, cpu->reg.pc >> 8);
         cpu_stack_push(cpu, cpu->reg.pc & 0xff);
         cpu_stack_push(cpu, cpu->reg.p);
-
         cpu_write_pflag(cpu, P_STATUS_IRQ, 1);
 
         uint8_t low = cpubus_read(cpu->bus, 0xfffe);
