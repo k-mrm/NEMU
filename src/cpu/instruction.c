@@ -299,15 +299,33 @@ int cpu_step(CPU *cpu) {
     switch(inst.op) {
     case OP_ADC: {
         uint8_t m = cpu_fetch_data(cpu, inst.a);
-        uint16_t res = cpu->reg.a + m + cpu_get_pflag(cpu, P_STATUS_NEGATIVE);
+        uint16_t res = (uint16_t)cpu->reg.a + m +
+            cpu_get_pflag(cpu, P_STATUS_CARRY);
 
-        cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
         cpu_write_pflag(cpu, P_STATUS_NEGATIVE, res & (1 << 7));
         cpu_write_pflag(cpu, P_STATUS_CARRY, res > 0xff);
         cpu_write_pflag(cpu, P_STATUS_OVERFLOW,
                 (cpu->reg.a ^ res) & (m ^ res) & (1 << 7));
 
-        cpu->reg.a = res;
+        cpu->reg.a = res & 0xff;
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+
+        break;
+    }
+    case OP_SBC: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        int res = (int)(int8_t)cpu->reg.a - (int)(int8_t)m -
+            (1 - cpu_get_pflag(cpu, P_STATUS_CARRY));
+
+        cpu_write_pflag(cpu, P_STATUS_CARRY, res >= 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, res & (1 << 7));
+        cpu_write_pflag(cpu, P_STATUS_OVERFLOW,
+                (cpu->reg.a ^ res) & (m ^ res) & (1 << 7));
+
+        cpu->reg.a = res & 0xff;
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
 
         break;
     }
