@@ -639,13 +639,13 @@ int cpu_step(CPU *cpu) {
         cpu_write_pflag(cpu, P_STATUS_IRQ, 0);
         break;
     case OP_SEI:
-        cpu_set_pflag(cpu, P_STATUS_IRQ);
+        cpu_write_pflag(cpu, P_STATUS_IRQ, 1);
         break;
     case OP_CLV:
         cpu_write_pflag(cpu, P_STATUS_OVERFLOW, 0);
         break;
     case OP_SEC:
-        cpu_set_pflag(cpu, P_STATUS_CARRY);
+        cpu_write_pflag(cpu, P_STATUS_CARRY, 1);
         break;
     case OP_LDA: {
         cpu->reg.a = cpu_fetch_data(cpu, inst.a);
@@ -684,33 +684,40 @@ int cpu_step(CPU *cpu) {
     case OP_TAX:
         cpu->reg.x = cpu->reg.a;
 
-        cpubus_write(cpu->bus, P_STATUS_ZERO, cpu->reg.x == 0);
-        cpubus_write(cpu->bus, P_STATUS_NEGATIVE, (cpu->reg.x >> 7) & 1);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.x >> 7) & 1);
 
         break;
     case OP_TAY:
         cpu->reg.y = cpu->reg.a;
 
-        cpubus_write(cpu->bus, P_STATUS_ZERO, cpu->reg.y == 0);
-        cpubus_write(cpu->bus, P_STATUS_NEGATIVE, (cpu->reg.y >> 7) & 1);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.y == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.y >> 7) & 1);
 
         break;
     case OP_TXA:
         cpu->reg.a = cpu->reg.x;
 
-        cpubus_write(cpu->bus, P_STATUS_ZERO, cpu->reg.a == 0);
-        cpubus_write(cpu->bus, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
 
         break;
     case OP_TYA:
         cpu->reg.a = cpu->reg.y;
 
-        cpubus_write(cpu->bus, P_STATUS_ZERO, cpu->reg.a == 0);
-        cpubus_write(cpu->bus, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
 
         break;
     case OP_TXS:
         cpu->reg.sp = cpu->reg.x;
+        break;
+    case OP_TSX:
+        cpu->reg.x = cpu->reg.sp;
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.x >> 7) & 1);
+
         break;
     case OP_PHA:
         cpu_stack_push(cpu, cpu->reg.a);
