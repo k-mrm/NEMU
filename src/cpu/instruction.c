@@ -329,6 +329,15 @@ int cpu_step(CPU *cpu) {
 
         break;
     }
+    case OP_EOR: {
+        uint8_t m = cpu_fetch_data(cpu, inst.a);
+        cpu->reg.a = cpu->reg.a ^ m;
+
+        cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
+
+        break;
+    }
     case OP_ASL: {
         uint8_t addr = cpu_fetch_operand(cpu, inst.a);
         uint8_t m = inst.a == ADDR_ACCUMULATOR ?
