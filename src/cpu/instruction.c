@@ -568,7 +568,7 @@ int cpu_step(CPU *cpu) {
         break;
     }
     case OP_JSR: {
-        uint16_t pc = cpu->reg.pc;
+        uint16_t pc = cpu->reg.pc + 2;
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
         cpu_stack_push(cpu, pc >> 8);
         cpu_stack_push(cpu, pc & 0xff);
@@ -619,11 +619,11 @@ int cpu_step(CPU *cpu) {
         cpu_interrupt(cpu, BRK);
         break;
     case OP_RTI: {
-        puts("rti");
         cpu->reg.p = cpu_stack_pop(cpu);
         uint8_t low = cpu_stack_pop(cpu);
         uint8_t high = cpu_stack_pop(cpu);
         cpu->reg.pc = ((uint16_t)high << 8) | low;
+        printf("rti pc%d\n", cpu->reg.pc);
         break;
     }
     case OP_CLD:
