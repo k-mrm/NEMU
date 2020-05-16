@@ -568,8 +568,8 @@ int cpu_step(CPU *cpu) {
         break;
     }
     case OP_JSR: {
-        uint16_t pc = cpu->reg.pc + 2;
         uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+        uint16_t pc = cpu->reg.pc - 1;
         cpu_stack_push(cpu, pc >> 8);
         cpu_stack_push(cpu, pc & 0xff);
         cpu->reg.pc = addr;
