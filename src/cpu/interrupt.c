@@ -18,7 +18,7 @@ void cpu_interrupt(CPU *cpu, int inter) {
         cpu_write_pflag(cpu, P_STATUS_BRK, 1);
         cpu->reg.pc++;
         cpu_stack_push(cpu, cpu->reg.pc >> 8);
-        cpu_stack_push(cpu, cpu->reg.pc & 0x7f);
+        cpu_stack_push(cpu, cpu->reg.pc & 0xff);
         cpu_stack_push(cpu, cpu->reg.p);
 
         cpu_write_pflag(cpu, P_STATUS_IRQ, 1);
