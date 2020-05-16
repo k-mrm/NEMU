@@ -695,6 +695,13 @@ int cpu_step(CPU *cpu) {
         cpubus_write(cpu->bus, P_STATUS_NEGATIVE, (cpu->reg.y >> 7) & 1);
 
         break;
+    case OP_TYA:
+        cpu->reg.a = cpu->reg.y;
+
+        cpubus_write(cpu->bus, P_STATUS_ZERO, cpu->reg.a == 0);
+        cpubus_write(cpu->bus, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
+
+        break;
     case OP_TXS:
         cpu->reg.sp = cpu->reg.x;
         break;
