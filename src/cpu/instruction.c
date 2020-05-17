@@ -201,8 +201,8 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
         return cpu_fetch(cpu);
     case ADDR_RELATIVE: {
         uint8_t offset = cpu_fetch(cpu);
-        int data = (int)(int8_t)offset + (int)cpu->reg.pc;
-        return (uint16_t)data;
+        int addr = (int)(int8_t)offset + (int)cpu->reg.pc;
+        return (uint16_t)addr;
     }
     case ADDR_ZEROPAGEX:
         return (cpu_fetch(cpu) + cpu->reg.x) & 0xff;
@@ -281,9 +281,17 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
 }
 
 int cpu_step(CPU *cpu) {
+    uint16_t op_pc = cpu->reg.pc;
     uint8_t code = cpu_fetch(cpu);
     CPUInst inst = code_decoder[code];
-    printf("now: %s\n", inst_dump(inst.op));
+
+    printf("%04x %02x ", op_pc, code);
+    printf("A:%02x X:%02x Y:%02x P:%02x SP:%02x\n",
+            cpu->reg.a,
+            cpu->reg.x,
+            cpu->reg.y,
+            cpu->reg.p,
+            cpu->reg.sp);
 
     int cycle = inst.cycle;
 
@@ -293,7 +301,7 @@ int cpu_step(CPU *cpu) {
         uint16_t res = (uint16_t)cpu->reg.a + m +
             cpu_get_pflag(cpu, P_STATUS_CARRY);
 
-        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, res & (1 << 7));
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
         cpu_write_pflag(cpu, P_STATUS_CARRY, res > 0xff);
         cpu_write_pflag(cpu, P_STATUS_OVERFLOW,
                 (cpu->reg.a ^ res) & (m ^ res) & (1 << 7));
@@ -652,7 +660,6 @@ int cpu_step(CPU *cpu) {
     }
     case OP_LDY: {
         cpu->reg.y = cpu_fetch_data(cpu, inst.a);
-        printf("regy %d\n", cpu->reg.y);
         cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.y == 0);
         cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.y & (1 << 7));
         break;
@@ -717,7 +724,7 @@ int cpu_step(CPU *cpu) {
         cpu->reg.a = cpu_stack_pop(cpu);
 
         cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
-        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.a >> 7) & 1);
+        cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.a) & (1 << 7));
 
         break;
     case OP_PHP:
