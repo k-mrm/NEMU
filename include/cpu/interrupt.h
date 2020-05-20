@@ -4,10 +4,10 @@
 #include "cpu/cpu.h"
 
 enum Interrupt {
-    NMI,
-    RESET,
-    IRQ,
-    BRK,
+  NMI,
+  RESET,
+  IRQ,
+  BRK,
 };
 
 void cpu_interrupt(CPU *, int);

@@ -4,8 +4,8 @@
 
 typedef struct GUI GUI;
 struct GUI {
-    ALLEGRO_BITMAP *bitmap;
-    ALLEGRO_DISPLAY *display;
+  ALLEGRO_BITMAP *bitmap;
+  ALLEGRO_DISPLAY *display;
 };
 
 void gui_init(GUI *);

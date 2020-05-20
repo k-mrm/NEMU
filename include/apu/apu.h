@@ -5,7 +5,7 @@
 
 typedef struct APU APU;
 struct APU {
-    ;
+  ;
 };
 
 #endif
