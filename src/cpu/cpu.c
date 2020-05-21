@@ -7,6 +7,11 @@ void cpu_init(CPU *cpu, CPUBus *cpubus) {
   cpu->reg.y = 0;
   cpu->reg.pc = 0;
   cpu->reg.sp = 0xfd;
+  /*
+   * reg.p:
+   *    NV*BDIZC
+   *    00110100
+   */
   cpu->reg.p = 0x34;
   cpu->bus = cpubus;
 }

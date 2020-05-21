@@ -57,6 +57,7 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->line = 0;
   ppu->bus = bus;
   ppu->cpu_cycle = 0;
+  ppu->vblank = 0;
 }
 
 enum {
@@ -115,7 +116,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
   /* TODO: draw sprite */
 }
 
-int ppu_step(PPU *ppu, int cyclex3, Disp screen) {
+int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
   ppu->cpu_cycle += cyclex3;
   if(ppu->cpu_cycle >= 341) {
     ppu->cpu_cycle -= 341;
@@ -130,9 +131,12 @@ int ppu_step(PPU *ppu, int cyclex3, Disp screen) {
         break;
       case LINE_VERTICAL_BLANKING:
         ppu->line++;
+        ppu->vblank = 1;
+        *nmi = 1;
         break;
       case LINE_PRERENDER:
         ppu->line = 0;
+        ppu->vblank = 0;
         return 1;
     }
   }

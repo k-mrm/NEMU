@@ -1,4 +1,5 @@
 #include "nemu.h"
+#include "cpu/register.h"
 
 static void nemu_init(NEMU *nes, int *argc, char **argv) {
   cpu_define_inst();
@@ -10,6 +11,7 @@ static void nemu_init(NEMU *nes, int *argc, char **argv) {
 }
 
 int nemu_start(NEMU *nes, int *argc, char **argv) {
+  int nmi;
   nemu_init(nes, argc, argv);
   cpu_interrupt(&nes->cpu, RESET);
 
@@ -18,8 +20,12 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
 #endif
 
   for(;;) {
+    nmi = 0;
     int cycle = cpu_step(&nes->cpu);
-    int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen);
+    int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen, &nmi);
+    if(nmi) {
+      cpu_interrupt(&nes->cpu, NMI);
+    }
     if(draw) {
       gui_render(&nes->gui, nes->screen);
     }
