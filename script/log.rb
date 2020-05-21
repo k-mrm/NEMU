@@ -7,7 +7,7 @@ def failed(ans, res, line)
 end
 
 log = File.open("../roms/nestest.log", "r")
-nes = File.open("./nemu.txt")
+nes = File.open("./nemu3.txt")
 
 while(1) do
   ans = log.readline.split("  ");

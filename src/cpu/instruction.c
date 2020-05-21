@@ -318,9 +318,9 @@ int cpu_step(CPU *cpu) {
         (1 - cpu_get_pflag(cpu, P_STATUS_CARRY));
 
       cpu_write_pflag(cpu, P_STATUS_CARRY, res >= 0);
-      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, res & (1 << 7));
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
       cpu_write_pflag(cpu, P_STATUS_OVERFLOW,
-          (cpu->reg.a ^ res) & (m ^ res) & (1 << 7));
+          (cpu->reg.a ^ m) & (cpu->reg.a ^ ((uint8_t)res)) & (1 << 7));
 
       cpu->reg.a = res & 0xff;
 
