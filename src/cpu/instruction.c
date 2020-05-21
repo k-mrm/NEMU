@@ -314,7 +314,7 @@ int cpu_step(CPU *cpu) {
     }
     case OP_SBC: {
       uint8_t m = cpu_fetch_data(cpu, inst.a);
-      int res = (int)(int8_t)cpu->reg.a - (int)(int8_t)m -
+      int res = (int)cpu->reg.a - (int)m -
         (1 - cpu_get_pflag(cpu, P_STATUS_CARRY));
 
       cpu_write_pflag(cpu, P_STATUS_CARRY, res >= 0);
