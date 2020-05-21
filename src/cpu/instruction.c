@@ -229,8 +229,7 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
       uint8_t low = cpu_fetch(cpu);
       uint8_t high = cpu_fetch(cpu);
       uint16_t lowaddr = ((uint16_t)(high) << 8) | low;
-      uint8_t lowinc = low + 1;
-      uint16_t highaddr = ((uint16_t)(high) << 8) | lowinc;
+      uint16_t highaddr = ((uint16_t)(high) << 8) | ((low + 1) & 0xff);
 
       uint8_t res_low = cpubus_read(cpu->bus, lowaddr);
       uint8_t res_high = cpubus_read(cpu->bus, highaddr);
