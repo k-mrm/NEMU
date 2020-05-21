@@ -191,6 +191,12 @@ uint8_t cpu_fetch(CPU *cpu) {
   return cpubus_read(cpu->bus, cpu->reg.pc++);
 }
 
+uint16_t cpu_fetch16(CPU *cpu) {
+  uint8_t low = cpubus_read(cpu->bus, cpu->reg.pc++);
+  uint8_t high = cpubus_read(cpu->bus, cpu->reg.pc++);
+  return ((uint16_t)(high) << 8) | low;
+}
+
 uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
   switch(addrmode) {
     case ADDR_ACCUMULATOR:
@@ -209,19 +215,15 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     case ADDR_ZEROPAGEY:
       return (cpu_fetch(cpu) + cpu->reg.y) & 0xff;
     case ADDR_ABSOLUTE: {
-      uint8_t low = cpu_fetch(cpu);
-      uint8_t high = cpu_fetch(cpu);
-      return ((uint16_t)(high) << 8) | low;
+      return cpu_fetch16(cpu);
     }
     case ADDR_ABSOLUTEX: {
-      uint8_t low = cpu_fetch(cpu);
-      uint8_t high = cpu_fetch(cpu);
-      return (((uint16_t)(high) << 8) | low) + cpu->reg.x;
+      uint16_t addr = cpu_fetch16(cpu);
+      return addr + cpu->reg.x;
     }
     case ADDR_ABSOLUTEY: {
-      uint8_t low = cpu_fetch(cpu);
-      uint8_t high = cpu_fetch(cpu);
-      return (((uint16_t)(high) << 8) | low) + cpu->reg.y;
+      uint16_t addr = cpu_fetch16(cpu);
+      return addr + cpu->reg.y;
     }
     case ADDR_INDIRECT: {
       uint8_t low = cpu_fetch(cpu);
