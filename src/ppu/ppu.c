@@ -5,6 +5,11 @@
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
+    case 2: {
+      ppu->addr = 0;
+      ppu->addr_write_once = false;
+      return ppu->reg.status;
+    }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);
       printf("ppuaddr read %#x\n", ppu->addr);
@@ -18,13 +23,14 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
 
 void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
   switch(idx) {
-    case 3:
-      ppu->reg.oamaddr = data;
-      break;
+    case 0: ppu->reg.ctrl = data; break;
+    case 1: ppu->reg.mask = data; break;
+    case 3: ppu->reg.oamaddr = data; break;
     case 4:
       ppu->bus->oam[ppu->reg.oamaddr] = data;
       ppu->reg.oamaddr++;
       break;
+    case 5:
     case 6:
       ppu->addr = ppu->state.addr_write_once ?
         ppu->addr | data :
