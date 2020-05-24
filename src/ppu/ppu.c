@@ -145,7 +145,7 @@ int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
       case LINE_VERTICAL_BLANKING:
         if(ppu->line == 241) {
           enable_VBlank(ppu);
-          *nmi = 1;
+          *nmi = is_enable_NMI(ppu)? 1: 0;
         }
         ppu->line++;
         break;
