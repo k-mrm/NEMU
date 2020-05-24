@@ -8,7 +8,6 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
     case 2: {
       uint8_t stat = ppu->reg.status;
-      ppu->addr = 0;
       ppu->state.addr_write_once = false;
       disable_VBlank(ppu);
       return stat;
@@ -144,9 +143,11 @@ int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
         ppu->line++;
         break;
       case LINE_VERTICAL_BLANKING:
+        if(ppu->line == 241) {
+          enable_VBlank(ppu);
+          *nmi = 1;
+        }
         ppu->line++;
-        enable_VBlank(ppu);
-        *nmi = 1;
         break;
       case LINE_PRERENDER:
         ppu->line = 0;

@@ -25,15 +25,15 @@ while(1) do
     break
   end
 
-  if failed(ansa, res[2], nes.lineno) then
+  if failed(ansa, res[3], nes.lineno) then
     break
   end
 
-  if failed(ansx, res[3], nes.lineno) then
+  if failed(ansx, res[4], nes.lineno) then
     break
   end
 
-  if failed(ansy, res[4], nes.lineno) then
+  if failed(ansy, res[5], nes.lineno) then
     break
   end
 end

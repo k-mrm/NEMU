@@ -28,7 +28,6 @@ struct PPU {
   uint16_t scrollx;
   uint16_t scrolly;
   uint16_t cpu_cycle;
-  int vblank;
 };
 
 typedef uint8_t Disp[240][256];

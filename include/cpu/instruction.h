@@ -90,6 +90,9 @@ extern CPUInst code_decoder[256];
 #define DEF_INST(hex, op, a, len, cycle)  \
   code_decoder[(hex)] = (CPUInst){(op), (a), (len), (cycle)}
 
+#define INVALID_INST(hex) \
+  code_decoder[(hex)] = (CPUInst){(255), (255), (0), (0)}
+
 void cpu_define_inst(void);
 int cpu_step(CPU *);
 
