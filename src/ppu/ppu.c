@@ -137,12 +137,12 @@ int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
         break;
       case LINE_VERTICAL_BLANKING:
         ppu->line++;
-        ppu->vblank = 1;
+        enable_VBlank(ppu);
         *nmi = 1;
         break;
       case LINE_PRERENDER:
         ppu->line = 0;
-        ppu->vblank = 0;
+        disable_VBlank(ppu);
         return 1;
     }
   }
