@@ -7,7 +7,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
     case 2: {
       ppu->addr = 0;
-      ppu->addr_write_once = false;
+      ppu->state.addr_write_once = false;
       return ppu->reg.status;
     }
     case 7: {
