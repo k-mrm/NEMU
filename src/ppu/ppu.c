@@ -2,13 +2,16 @@
 #include "ppu/ppu.h"
 #include "ppu/tile.h"
 #include "ppu/palette.h"
+#include "log/log.h"
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
     case 2: {
+      uint8_t stat = ppu->reg.status;
       ppu->addr = 0;
       ppu->state.addr_write_once = false;
-      return ppu->reg.status;
+      disable_VBlank(ppu);
+      return stat;
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);
@@ -31,6 +34,12 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       ppu->reg.oamaddr++;
       break;
     case 5:
+      if(!ppu->state.addr_write_once)
+        ppu->scrollx = data;
+      else
+        ppu->scrolly = data;
+      ppu->state.addr_write_once ^= 1;
+      break;
     case 6:
       ppu->addr = ppu->state.addr_write_once ?
         ppu->addr | data :
@@ -63,7 +72,6 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->line = 0;
   ppu->bus = bus;
   ppu->cpu_cycle = 0;
-  ppu->vblank = 0;
 }
 
 enum {
