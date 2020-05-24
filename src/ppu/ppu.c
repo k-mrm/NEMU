@@ -15,7 +15,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);
       printf("ppuaddr read %#x\n", ppu->addr);
-      ppu->addr++;
+      ppu->addr += is_addr_inc32(ppu)? 32 : 1;
       return data;
     }
     default:

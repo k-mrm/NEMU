@@ -42,6 +42,7 @@ void ppu_write(PPU *, uint16_t, uint8_t);
 #define enable_VBlank(ppu)  (ppu)->reg.status |= (1 << 7)
 #define disable_VBlank(ppu) (ppu)->reg.status &= ~(1 << 7)
 
-#define is_enable_NMI(ppu)  (ppu)->reg.ctrl & (1 << 7)
+#define is_enable_NMI(ppu)  ((ppu)->reg.ctrl & (1 << 7))
+#define is_addr_inc32(ppu)  ((ppu)->reg.ctrl & (1 << 2))
 
 #endif
