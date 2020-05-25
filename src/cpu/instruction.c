@@ -393,6 +393,7 @@ int cpu_step(CPU *cpu) {
   uint8_t code = cpu_fetch(cpu);
   CPUInst inst = code_decoder[code];
 
+  /*
   printf("%04x %02x ", op_pc, code);
   printf("%s ", inst_dump(inst.op));
   printf("A:%02x X:%02x Y:%02x P:%02x SP:%02x\n",
@@ -401,6 +402,7 @@ int cpu_step(CPU *cpu) {
       cpu->reg.y,
       cpu->reg.p,
       cpu->reg.sp);
+      */
 
   int cycle = inst.cycle;
 
@@ -692,7 +694,6 @@ int cpu_step(CPU *cpu) {
     }
     case OP_JMP:
       cpu->reg.pc = cpu_fetch_operand(cpu, inst.a);
-      log_error("pyo~n -> %#x\n", cpu->reg.pc);
       break;
     case OP_CMP: {
       uint8_t m = cpu_fetch_data(cpu, inst.a);

@@ -104,6 +104,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
     Tile *tile;
     uint8_t palette[4];
     uint8_t y = ppu->line / 8;
+    /* draw background */
     for(uint8_t x = 0; x < 32; x++) {
       tile = ppu_make_tile(ppu, x, y, 0x2000);
       for(int i = 0; i < 4; ++i) {

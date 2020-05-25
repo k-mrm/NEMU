@@ -19,6 +19,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
   nes->cpu.reg.pc = 0xc000;
 #endif
 
+  int f = 0;
   for(;;) {
     nmi = 0;
     int cycle = cpu_step(&nes->cpu);
@@ -28,6 +29,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
     }
     if(draw) {
       gui_render(&nes->gui, nes->screen);
+      printf("frame %d\n", f++);
     }
 #ifdef CPU_DEBUG
     // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
