@@ -164,7 +164,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
   /* draw sprite */
   for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
     Sprite sprite = ppu->tmp_sprite[idx];
-    tile = ppu_make_sprite_tile(ppu, sprite.tileid, sprite.attr & 0x3);
+    tile = ppu_make_sprite_tile(ppu, sprite.tileid, sprite.attr & 0x3, 0x1000);
     tile_dump(tile);
     for(int i = 0; i < 4; ++i) {
       palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile->paletteid * 4 + i);
