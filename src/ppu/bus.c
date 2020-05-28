@@ -49,5 +49,9 @@ void ppubus_init(PPUBus *bus, Cassette *cas) {
   bus->cassette = cas;
   bus->vram = calloc(1, sizeof(uint8_t) * 0x800); /* 2 KiB */
   bus->palette = calloc(1, sizeof(uint8_t) * 0x20);
-  bus->oam = calloc(1, sizeof(uint8_t) * 256);
+  bus->oam = malloc(sizeof(uint8_t) * 256);
+  for(int i = 0; i < 64; ++i) {
+    /* 0x4 = 0b100 */
+    bus->oam[i] = (Sprite){0, 0, 0x4, 0};
+  }
 }

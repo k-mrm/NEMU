@@ -28,8 +28,8 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
       cpu_interrupt(&nes->cpu, NMI);
     }
     if(draw) {
-      gui_render(&nes->gui, nes->screen);
-      printf("frame %d\n", f++);
+      gui_render_console(&nes->gui, nes->screen);
+      // printf("frame %d\n", f++);
     }
 #ifdef CPU_DEBUG
     // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));

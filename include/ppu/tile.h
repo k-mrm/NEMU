@@ -13,5 +13,6 @@ struct Tile {
 
 Tile *new_tile(void);
 Tile *ppu_make_tile(PPU *, uint8_t, uint8_t, uint16_t);
+Tile *ppu_make_sprite_tile(PPU *, uint16_t, uint8_t);
 
 #endif

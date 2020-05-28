@@ -7,6 +7,20 @@ Tile *new_tile() {
   return t;
 }
 
+void tile_dump(Tile *tile) {
+  for(int i = 0; i < 8; ++i) {
+    for(int j = 0; j < 8; ++j) {
+      switch(tile->pp[i][j]) {
+        case 0: printf("  "); break;
+        case 1: printf(". "); break;
+        case 2: printf("* "); break;
+        case 3: printf("# "); break;
+      }
+      puts("");
+    }
+  }
+}
+
 static Tile *ppu_make_pixelpat(PPU *ppu, uint16_t sid) {
   uint8_t spr[16];
   uint16_t idx = sid * 16;
@@ -32,7 +46,7 @@ static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
   return ppubus_read(ppu->bus, offset + 0x3c0 + x / 4 + y / 4 * 8);
 }
 
-static Tile *make_tile(PPU *ppu, uint16_t sid, uint8_t pid) {
+Tile *ppu_make_sprite_tile(PPU *ppu, uint16_t sid, uint8_t pid) {
   Tile *tile = ppu_make_pixelpat(ppu, sid);
   tile->paletteid = pid;
   return tile;
@@ -44,6 +58,6 @@ Tile *ppu_make_tile(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
   uint8_t blockpos = x % 4 / 2 + y % 4 / 2 * 2;
   uint8_t pid = (aid >> blockpos) & 0x03;
 
-  return make_tile(ppu, sid, pid);
+  return ppu_make_sprite_tile(ppu, sid, pid);
 }
 

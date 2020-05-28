@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "ppu/bus.h"
 #include "ppu/palette.h"
+#include "ppu/sprite.h"
 
 typedef struct PPU PPU;
 struct PPU {
@@ -28,6 +29,8 @@ struct PPU {
   uint16_t scrollx;
   uint16_t scrolly;
   uint16_t cpu_cycle;
+  Sprite tmp_sprite[8];
+  uint8_t tmp_sprite_len;
 };
 
 typedef uint8_t Disp[240][256];
