@@ -173,8 +173,9 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
 
     for(int i = 0; i < 8; ++i) {
       for(int j = 0; j < 8; ++j) {
-        uint8_t c = palette[tile->pp[j][i]];
-        screen[ppu->line + j][sprite.x + i] = c;
+        uint8_t cidx = tile->pp[j][i];
+        if(cidx != 0)
+          screen[sprite.y + 1 + j][sprite.x + i] = palette[cidx];
       }
     }
 
