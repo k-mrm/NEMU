@@ -16,7 +16,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);
       printf("ppuaddr read %#x\n", ppu->addr);
-      ppu->addr += is_addr_inc32(ppu)? 32 : 1;
+      ppu->addr += is_addr_inc32(ppu)? 32: 1;
       return data;
     }
     default:
@@ -115,7 +115,7 @@ void ppu_fetch_sprite(PPU *ppu) {
   }
   ppu->tmp_sprite_len = 0;
 
-  for(int i = 0; i < 64; ++i, ++tmps_idx) {
+  for(int i = 0; i < 64; ++i) {
     Sprite spr = ppu->bus->oam[i];
     if(tmps_idx >= 8) {
       break;
@@ -125,6 +125,7 @@ void ppu_fetch_sprite(PPU *ppu) {
       ppu->tmp_sprite[tmps_idx].tileid = spr.tileid;
       ppu->tmp_sprite[tmps_idx].attr = spr.attr;
       ppu->tmp_sprite[tmps_idx].x = spr.x;
+      ++tmps_idx;
     }
   }
 
@@ -165,7 +166,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
   for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
     Sprite sprite = ppu->tmp_sprite[idx];
     tile = ppu_make_sprite_tile(ppu, sprite.tileid, sprite.attr & 0x3, 0x1000);
-    tile_dump(tile);
+    // tile_dump(tile);
     for(int i = 0; i < 4; ++i) {
       palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile->paletteid * 4 + i);
     }
