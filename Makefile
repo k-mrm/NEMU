@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS = -Wall -Wextra -I ./include/ -g #-DCPU_DEBUG
+CFLAGS = -Wall -Wextra -I ./include/ -O3 #-DCPU_DEBUG
 LDFLAGS := -lallegro -lallegro_main -lallegro_primitives
 SRCROOT = ./src
 SRCDIRS := $(shell find $(SRCROOT) -type d)

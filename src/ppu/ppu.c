@@ -79,6 +79,8 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->line = 0;
   ppu->bus = bus;
   ppu->cpu_cycle = 0;
+
+  memset(ppu->priority, 0, sizeof(uint8_t) * 240 * 256);
 }
 
 enum {
@@ -148,12 +150,14 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
 
       for(int i = 0; i < 8; ++i) {
         for(int j = 0; j < 8; ++j) {
-          uint8_t c = palette[tile->pp[j][i]];
           /* printf("%02x", c);
              if(tile->pp[j][i])
              printf("at %#x %#x\n", x * 8 + i, ppu->line + j);
              */
-          screen[ppu->line + j][x * 8 + i] = c;
+          uint8_t cidx = tile->pp[j][i];
+          if(!ppu->priority[ppu->line + j][x * 8 + i]) {
+            screen[ppu->line + j][x * 8 + i] = palette[cidx];
+          }
         }
       }
 
@@ -174,8 +178,10 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
     for(int i = 0; i < 8; ++i) {
       for(int j = 0; j < 8; ++j) {
         uint8_t cidx = tile->pp[j][i];
-        if(cidx != 0)
+        if(cidx != 0) {
           screen[sprite.y + 1 + j][sprite.x + i] = palette[cidx];
+          ppu->priority[sprite.y + 1 + j][sprite.x + i] = 1;
+        }
       }
     }
 
