@@ -46,7 +46,7 @@ void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
   else if(addr < 0x4000) {
     ppu_write(bus->ppu, (addr - 0x2000) & 0x7, data);
   }
-  else if(addr == 4014) {
+  else if(addr == 0x4014) {
     ppu_dma_write(bus->ppu, bus, data);
   }
   else if(addr < 0x4018) {
