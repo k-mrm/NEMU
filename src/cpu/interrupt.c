@@ -5,7 +5,6 @@
 void cpu_interrupt(CPU *cpu, int inter) {
   switch(inter) {
     case NMI: {
-      puts("suman");
       cpu_write_pflag(cpu, P_STATUS_BRK, 0);
       cpu_stack_push(cpu, cpu->reg.pc >> 8);
       cpu_stack_push(cpu, cpu->reg.pc & 0xff);

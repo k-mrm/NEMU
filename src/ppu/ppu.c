@@ -15,7 +15,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);
-      printf("ppuaddr read %#x\n", ppu->addr);
+      // printf("ppuaddr read %#x\n", ppu->addr);
       ppu->addr += is_addr_inc32(ppu)? 32: 1;
       return data;
     }
@@ -55,7 +55,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       break;
     case 7:
       ppubus_write(ppu->bus, ppu->addr, data);
-      printf("ppuaddr write %#x\n", ppu->addr);
+      // printf("ppuaddr write %#x\n", ppu->addr);
       ppu->addr++;
       break;
     default:
@@ -144,8 +144,10 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
     /* draw background */
     for(uint8_t x = 0; x < 32; x++) {
       tile = ppu_make_tile(ppu, x, y, 0x2000);
+      // tile_dump(tile);
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile->paletteid * 4 + i);
+        // printf("palette %d = %d ", i, palette[i]);
       }
 
       for(int i = 0; i < 8; ++i) {

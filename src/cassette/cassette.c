@@ -13,7 +13,6 @@ static void cassette_dump(Cassette *cassette) {
      for(int i = 0; i < cassette->nprgrom_byte; ++i) {
      printf("%02x ", cassette->prgrom[i]);
      }
-     */
   puts("chrrom:");
   for(int i = 0; i < cassette->nchrrom_byte; ++i) {
     if(cassette->chrrom[i] != 0) {
@@ -22,6 +21,7 @@ static void cassette_dump(Cassette *cassette) {
     printf("%x ", cassette->chrrom[i]);
   }
   puts("");
+  */
 }
 
 static int parse_ines_format(Cassette *cassette, unsigned char *ines) {
