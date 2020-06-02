@@ -13,6 +13,7 @@
 #include "ppu/palette.h"
 #include "ppu/ppu.h"
 #include "gui/gui.h"
+#include "joypad/joypad.h"
 
 typedef struct NEMU NEMU;
 struct NEMU {
@@ -22,9 +23,10 @@ struct NEMU {
     PPU ppu;
     PPUBus ppubus;
     APU apu;
-    Cassette *cassette;
+    Joypad pad;
     Disp screen;
     GUI gui;
+    Cassette *cassette;
 };
 
 int nemu_start(NEMU *, int *, char **);

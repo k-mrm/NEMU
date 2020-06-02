@@ -389,20 +389,22 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
 }
 
 int cpu_step(CPU *cpu) {
+  static uint64_t cpu_cycle = 0;
   uint16_t op_pc = cpu->reg.pc;
   uint8_t code = cpu_fetch(cpu);
   CPUInst inst = code_decoder[code];
 
-  /*
+#ifdef CPU_DEBUG
   printf("%04x %02x ", op_pc, code);
   printf("%s ", inst_dump(inst.op));
-  printf("A:%02x X:%02x Y:%02x P:%02x SP:%02x\n",
+  printf("A:%02x X:%02x Y:%02x P:%02x SP:%02x CYCLE:%ld\n",
       cpu->reg.a,
       cpu->reg.x,
       cpu->reg.y,
       cpu->reg.p,
-      cpu->reg.sp);
-      */
+      cpu->reg.sp,
+      cpu_cycle);
+#endif
 
   int cycle = inst.cycle;
 
@@ -849,6 +851,7 @@ int cpu_step(CPU *cpu) {
       panic("Unhandled opcode: %s", inst_dump(inst.op));
       break;
   }
+  cpu_cycle += cycle;
 
   return cycle;
 }
