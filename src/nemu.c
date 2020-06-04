@@ -3,11 +3,12 @@
 
 static void nemu_init(NEMU *nes, int *argc, char **argv) {
   cpu_define_inst();
-  cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette);
+  cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette, &nes->pad);
   cpu_init(&nes->cpu, &nes->cpubus);
   ppubus_init(&nes->ppubus, nes->cassette);
   ppu_init(&nes->ppu, &nes->ppubus);
   gui_init(&nes->gui);
+  joypad_init(&nes->pad);
 }
 
 int nemu_start(NEMU *nes, int *argc, char **argv) {

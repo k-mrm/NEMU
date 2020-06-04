@@ -1,11 +1,12 @@
 #include "cpu/cpu.h"
 #include "cpu/bus.h"
 
-void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c) {
+void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c, Joypad *pad) {
   bus->wram = r;
   bus->ppu = p;
   bus->apu = a;
   bus->cas = c;
+  bus->pad = pad;
 }
 
 uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
@@ -14,6 +15,12 @@ uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
   }
   else if(addr < 0x4000) {
     return ppu_read(bus->ppu, (addr - 0x2000) & 0x7);
+  }
+  else if(addr == 0x4016) {
+    return joypad_read(bus->pad, 1);
+  }
+  else if(addr == 0x4017) {
+    return joypad_read(bus->pad, 2);
   }
   else if(addr < 0x4018) {
     return 0;   /* TODO */
@@ -48,6 +55,12 @@ void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
   }
   else if(addr == 0x4014) {
     ppu_dma_write(bus->ppu, bus, data);
+  }
+  else if(addr == 0x4016) {
+    return joypad_write(bus->pad, 1, data);
+  }
+  else if(addr == 0x4017) {
+    return joypad_write(bus->pad, 2, data);
   }
   else if(addr < 0x4018) {
     ;   /* TODO */
