@@ -214,6 +214,7 @@ int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
       case LINE_PRERENDER:
         ppu->line = 0;
         disable_VBlank(ppu);
+        memset(ppu->priority, 0, sizeof(uint8_t) * 240 * 256);
         return 1;
     }
   }
