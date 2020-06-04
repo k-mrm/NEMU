@@ -9,10 +9,13 @@ struct Joypad {
     uint8_t pad1; /* $4016 */
     uint8_t pad2; /* $4017 */
   } reg;
-  uint8_t times;
+  struct {
+    uint8_t pad1;
+    uint8_t pad2;
+  } btnstate;
 };
 
-enum {
+enum button {
   BUTTON_A,
   BUTTON_B,
   BUTTON_SELECT,
