@@ -29,8 +29,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
     case 0: ppu->reg.ctrl = data; break;
     case 1: ppu->reg.mask = data; break;
     case 3: ppu->reg.oamaddr = data; break;
-    case 4:
-      printf("oam %#x %#x\n", ppu->reg.oamaddr, data);
+    case 4: {
       uint8_t idx = ppu->reg.oamaddr / 4;
       switch(ppu->reg.oamaddr % 4) {
         case 0: ppu->bus->oam[idx].y = data; break;
@@ -40,6 +39,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       }
       ppu->reg.oamaddr++;
       break;
+    }
     case 5:
       if(!ppu->state.addr_write_once)
         ppu->scrollx = data;

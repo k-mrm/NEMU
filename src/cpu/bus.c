@@ -1,5 +1,6 @@
 #include "cpu/cpu.h"
 #include "cpu/bus.h"
+#include "ppu/dma.h"
 
 void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c, Joypad *pad) {
   bus->wram = r;
