@@ -56,7 +56,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
     case 7:
       ppubus_write(ppu->bus, ppu->addr, data);
       // printf("ppuaddr write %#x\n", ppu->addr);
-      ppu->addr++;
+      ppu->addr += is_addr_inc32(ppu)? 32: 1;
       break;
     default:
       break;
@@ -134,6 +134,11 @@ void ppu_fetch_sprite(PPU *ppu) {
   ppu->tmp_sprite_len = tmps_idx;
 }
 
+uint16_t get_nametable_addr(PPU *ppu) {
+  uint8_t f = ppu->reg.ctrl & 0x03;
+  return 0x2000 + f * 0x400;
+}
+
 void ppu_draw_line(PPU *ppu, Disp screen) {
   ppu_fetch_sprite(ppu);
   Tile *tile;
@@ -143,7 +148,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
     uint8_t y = ppu->line / 8;
     /* draw background */
     for(uint8_t x = 0; x < 32; x++) {
-      tile = ppu_make_tile(ppu, x, y, 0x2000);
+      tile = ppu_make_bg_tile(ppu, x, y, get_nametable_addr(ppu), 0x0);
       // tile_dump(tile);
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile->paletteid * 4 + i);
@@ -207,7 +212,7 @@ int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
       case LINE_VERTICAL_BLANKING:
         if(ppu->line == 241) {
           enable_VBlank(ppu);
-          *nmi = is_enable_NMI(ppu)? 1: 0;
+          *nmi = is_enable_nmi(ppu)? 1: 0;
         }
         ppu->line++;
         break;

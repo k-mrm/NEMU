@@ -52,12 +52,12 @@ Tile *ppu_make_sprite_tile(PPU *ppu, uint16_t sid, uint8_t pid, uint16_t base_ad
   return tile;
 }
 
-Tile *ppu_make_tile(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
+Tile *ppu_make_bg_tile(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset, uint16_t base_addr) {
   uint16_t sid = get_spriteid(ppu, x, y, offset);
   uint8_t aid = get_attrid(ppu, x, y, offset);
   uint8_t blockpos = x % 4 / 2 + y % 4 / 2 * 2;
   uint8_t pid = (aid >> blockpos) & 0x03;
 
-  return ppu_make_sprite_tile(ppu, sid, pid, 0x0);
+  return ppu_make_sprite_tile(ppu, sid, pid, base_addr);
 }
 
