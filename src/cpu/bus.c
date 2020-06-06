@@ -60,7 +60,6 @@ void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
     return joypad_write(bus->pad, 1, data);
   }
   else if(addr == 0x4017) {
-    return joypad_write(bus->pad, 2, data);
   }
   else if(addr < 0x4018) {
     ;   /* TODO */
