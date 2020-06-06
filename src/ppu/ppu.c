@@ -134,9 +134,19 @@ void ppu_fetch_sprite(PPU *ppu) {
   ppu->tmp_sprite_len = tmps_idx;
 }
 
-uint16_t get_nametable_addr(PPU *ppu) {
-  uint8_t f = ppu->reg.ctrl & 0x03;
+uint16_t nametable_addr(PPU *ppu) {
+  uint16_t f = ppu->reg.ctrl & 0x03;
   return 0x2000 + f * 0x400;
+}
+
+uint16_t bg_pattable_addr(PPU *ppu) {
+  uint16_t f = (ppu->reg.ctrl >> 4) & 0x01;
+  return f * 0x1000;
+}
+
+uint16_t sprite_pattable_addr(PPU *ppu) {
+  uint16_t f = (ppu->reg.ctrl >> 3) & 0x01;
+  return f * 0x1000;
 }
 
 void ppu_draw_line(PPU *ppu, Disp screen) {
@@ -148,7 +158,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
     uint8_t y = ppu->line / 8;
     /* draw background */
     for(uint8_t x = 0; x < 32; x++) {
-      tile = ppu_make_bg_tile(ppu, x, y, get_nametable_addr(ppu), 0x0);
+      tile = ppu_make_bg_tile(ppu, x, y, nametable_addr(ppu), bg_pattable_addr(ppu));
       // tile_dump(tile);
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile->paletteid * 4 + i);
@@ -176,7 +186,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
   /* draw sprite */
   for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
     Sprite sprite = ppu->tmp_sprite[idx];
-    tile = ppu_make_sprite_tile(ppu, sprite.tileid, sprite.attr & 0x3, 0x1000);
+    tile = ppu_make_sprite_tile(ppu, sprite.tileid, sprite.attr & 0x3, sprite_pattable_addr(ppu));
     // tile_dump(tile);
     for(int i = 0; i < 4; ++i) {
       palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile->paletteid * 4 + i);
