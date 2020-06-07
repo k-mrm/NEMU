@@ -8,10 +8,10 @@
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
     case 2: {
-      uint8_t stat = ppu->reg.status;
+      uint8_t status = ppu->reg.status;
       ppu->state.addr_write_once = false;
       disable_VBlank(ppu);
-      return stat;
+      return status;
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);

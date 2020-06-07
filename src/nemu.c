@@ -22,6 +22,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
 
   int f = 0;
   for(;;) {
+    // request_frame(&nes->gui);
     nmi = 0;
     int cycle = cpu_step(&nes->cpu);
     int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen, &nmi);
