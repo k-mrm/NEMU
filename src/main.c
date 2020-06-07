@@ -5,19 +5,19 @@
 
 int main(int argc, char **argv) {
   Cassette cassette;
-
+  char *cname;
 #ifdef CPU_DEBUG
-  if(read_cassette(&cassette, "roms/nestest.nes")) return 1;
+  cname = "roms/nestest.nes";
 #else
   if(argc != 2) {
     panic("invalid arguments");
   }
-
-  if(read_cassette(&cassette, argv[1])) return 1;
+  cname = argv[1];
 #endif
+
+  if(read_cassette(&cassette, cname)) return 1;
+
   NEMU nes;
   nes.cassette = &cassette;
-  int status = nemu_start(&nes, &argc, argv);
-
-  return status;
+  return nemu_start(&nes, &argc, argv);
 }

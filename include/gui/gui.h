@@ -10,7 +10,6 @@ struct GUI {
   ALLEGRO_DISPLAY *display;
   ALLEGRO_EVENT_QUEUE *event_queue;
   ALLEGRO_TIMER *timer;
-  ALLEGRO_VERTEX vtx[240 * 256];
 };
 
 void gui_init(GUI *);
