@@ -173,7 +173,8 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
              */
           uint8_t cidx = tile->pp[j][i];
           if(!ppu->priority[ppu->line + j][x * 8 + i]) {
-            screen[ppu->line + j][x * 8 + i] = palette[cidx];
+            RGB rgb = colors[palette[cidx]];
+            screen[ppu->line + j][x * 8 + i] = rgb;
           }
         }
       }
@@ -196,7 +197,8 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
       for(int j = 0; j < 8; ++j) {
         uint8_t cidx = tile->pp[j][i];
         if(cidx != 0) {
-          screen[sprite.y + 1 + j][sprite.x + i] = palette[cidx];
+          RGB rgb = colors[palette[cidx]];
+          screen[sprite.y + 1 + j][sprite.x + i] = rgb;
           ppu->priority[sprite.y + 1 + j][sprite.x + i] = 1;
         }
       }
@@ -207,31 +209,26 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
 }
 
 int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
-  ppu->cpu_cycle += cyclex3;
-  if(ppu->cpu_cycle >= 341) {
-    ppu->cpu_cycle -= 341;
-
-    switch(linestate_from(ppu->line)) {
-      case LINE_VISIBLE:
-        ppu_draw_line(ppu, screen);
-        ppu->line++;
-        break;
-      case LINE_POSTRENDER:
-        ppu->line++;
-        break;
-      case LINE_VERTICAL_BLANKING:
-        if(ppu->line == 241) {
-          enable_VBlank(ppu);
-          *nmi = is_enable_nmi(ppu)? 1: 0;
-        }
-        ppu->line++;
-        break;
-      case LINE_PRERENDER:
-        ppu->line = 0;
-        disable_VBlank(ppu);
-        memset(ppu->priority, 0, sizeof(uint8_t) * 240 * 256);
-        return 1;
-    }
+  switch(linestate_from(ppu->line)) {
+    case LINE_VISIBLE:
+      ppu_draw_line(ppu, screen);
+      ppu->line++;
+      break;
+    case LINE_POSTRENDER:
+      ppu->line++;
+      break;
+    case LINE_VERTICAL_BLANKING:
+      if(ppu->line == 241) {
+        enable_VBlank(ppu);
+        *nmi = is_enable_nmi(ppu)? 1: 0;
+      }
+      ppu->line++;
+      break;
+    case LINE_PRERENDER:
+      ppu->line = 0;
+      disable_VBlank(ppu);
+      memset(ppu->priority, 0, sizeof(uint8_t) * 240 * 256);
+      return 1;
   }
   return 0;
 }

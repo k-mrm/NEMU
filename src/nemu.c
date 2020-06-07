@@ -21,18 +21,22 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
 #endif
 
   int f = 0;
+  int d = 0;
+  int lpf;
   for(;;) {
-    // request_frame(&nes->gui);
+    request_frame(&nes->gui);
     nmi = 0;
-    int cycle = cpu_step(&nes->cpu);
-    int draw = ppu_step(&nes->ppu, cycle * 3, nes->screen, &nmi);
-    if(nmi) {
-      cpu_interrupt(&nes->cpu, NMI);
+    lpf = 262;
+    /* draw 1frame */
+    while(lpf--) {
+      ppu_step(&nes->ppu, 0, nes->screen, &nmi);
+      cpu_run(&nes->cpu, 341 / 3);
+      if(nmi) {
+        cpu_interrupt(&nes->cpu, NMI);
+        nmi = 0;
+      }
     }
-    if(draw) {
-      gui_render(&nes->gui, nes->screen);
-      // printf("frame %d\n", f++);
-    }
+    gui_render(&nes->gui, nes->screen);
 #ifdef CPU_DEBUG
     // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
     // printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));

@@ -95,5 +95,6 @@ extern CPUInst code_decoder[256];
 
 void cpu_define_inst(void);
 int cpu_step(CPU *);
+void cpu_run(CPU *, int);
 
 #endif

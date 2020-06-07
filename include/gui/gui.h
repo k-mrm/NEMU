@@ -15,6 +15,6 @@ struct GUI {
 
 void gui_init(GUI *);
 void gui_render(GUI *, Disp);
-void gui_render_console(GUI *, Disp);
+void request_frame(GUI *);
 
 #endif

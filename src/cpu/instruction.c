@@ -388,6 +388,13 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
   }
 }
 
+void cpu_run(CPU *cpu, int cycle) {
+  while(cycle > 0) {
+    int c = cpu_step(cpu);
+    cycle -= c;
+  }
+}
+
 int cpu_step(CPU *cpu) {
   static uint64_t cpu_cycle = 0;
   uint16_t op_pc = cpu->reg.pc;
