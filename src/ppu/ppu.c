@@ -5,6 +5,12 @@
 #include "ppu/palette.h"
 #include "log/log.h"
 
+#define put_pixel(disp, py, px, rgb) do { \
+  disp[py][px].x = (px);  \
+  disp[py][px].y = (py);  \
+  disp[py][px].color = al_map_rgb(rgb.r, rgb.g, rgb.b);  \
+} while(0)
+
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
     case 2: {
@@ -174,7 +180,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
           uint8_t cidx = tile->pp[j][i];
           if(!ppu->priority[ppu->line + j][x * 8 + i]) {
             RGB rgb = colors[palette[cidx]];
-            screen[ppu->line + j][x * 8 + i] = rgb;
+            put_pixel(screen, ppu->line + j, x * 8 + i, rgb);
           }
         }
       }
@@ -198,7 +204,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
         uint8_t cidx = tile->pp[j][i];
         if(cidx != 0) {
           RGB rgb = colors[palette[cidx]];
-          screen[sprite.y + 1 + j][sprite.x + i] = rgb;
+          put_pixel(screen, sprite.y + 1 + j, sprite.x + i, rgb);
           ppu->priority[sprite.y + 1 + j][sprite.x + i] = 1;
         }
       }

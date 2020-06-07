@@ -12,7 +12,9 @@ static void nemu_init(NEMU *nes, int *argc, char **argv) {
 }
 
 int nemu_start(NEMU *nes, int *argc, char **argv) {
-  int nmi;
+  int nmi = 0;
+  int f = 0;
+  int lpf;
   nemu_init(nes, argc, argv);
   cpu_interrupt(&nes->cpu, RESET);
 
@@ -20,12 +22,8 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
   nes->cpu.reg.pc = 0xc000;
 #endif
 
-  int f = 0;
-  int d = 0;
-  int lpf;
   for(;;) {
     request_frame(&nes->gui);
-    nmi = 0;
     lpf = 262;
     /* draw 1frame */
     while(lpf--) {

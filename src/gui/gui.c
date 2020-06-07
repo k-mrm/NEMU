@@ -24,19 +24,7 @@ void request_frame(GUI *gui) {
 
 void gui_render(GUI *gui, Disp screen) {
   static int times = 0;
-  int size = 0;
-  int b = 0;
   printf("ora gokuu%d\n", times++);
-  for(int y = 0; y < 240; ++y) {
-    for(int x = 0; x < 256; ++x) {
-      RGB rgb = screen[y][x];
-      gui->vtx[size].x = x;
-      gui->vtx[size].y = y;
-      gui->vtx[size].color = al_map_rgb(rgb.r, rgb.g, rgb.b);
-      ++size;
-    }
-  }
-
-  al_draw_prim(gui->vtx, NULL, NULL, 0, 240 * 256, ALLEGRO_PRIM_POINT_LIST);
+  al_draw_prim(screen, NULL, NULL, 0, 240 * 256, ALLEGRO_PRIM_POINT_LIST);
   al_flip_display();
 }
