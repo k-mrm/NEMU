@@ -17,16 +17,16 @@
 
 typedef struct NEMU NEMU;
 struct NEMU {
-    CPU cpu;
-    CPUBus cpubus;
-    RAM ram;
-    PPU ppu;
-    PPUBus ppubus;
-    APU apu;
-    Joypad pad;
-    GUI gui;
-    Disp screen;
-    Cassette *cassette;
+  CPU cpu;
+  CPUBus cpubus;
+  RAM ram;
+  PPU ppu;
+  PPUBus ppubus;
+  APU apu;
+  Joypad pad;
+  Disp screen;
+  GUI gui;
+  Cassette *cassette;
 };
 
 int nemu_start(NEMU *, int *, char **);
