@@ -11,9 +11,8 @@ struct Tile {
   uint8_t paletteid;
 };
 
-Tile *new_tile(void);
-Tile *ppu_make_bg_tile(PPU *, uint8_t, uint8_t, uint16_t, uint16_t);
-Tile *ppu_make_sprite_tile(PPU *, uint16_t, uint8_t, uint16_t);
+void ppu_make_bg_tile(PPU *, Tile *, uint8_t, uint8_t, uint16_t, uint16_t);
+void ppu_make_sprite_tile(PPU *, Tile *, uint16_t, uint8_t, uint16_t);
 void tile_dump(Tile *);
 
 #endif
