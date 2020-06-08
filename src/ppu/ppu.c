@@ -5,11 +5,9 @@
 #include "ppu/palette.h"
 #include "log/log.h"
 
-#define put_pixel(disp, py, px, rgb) do { \
-  disp[py][px].x = (px);  \
-  disp[py][px].y = (py);  \
-  disp[py][px].color = al_map_rgb(rgb.r, rgb.g, rgb.b);  \
-} while(0)
+#define put_pixel(disp, py, px, rgb) disp[py][px] = (ALLEGRO_VERTEX){ \
+  .x = (px), .y = (py), .color = al_map_rgb(rgb.r, rgb.g, rgb.b)  \
+}
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
@@ -128,11 +126,8 @@ void ppu_fetch_sprite(PPU *ppu) {
     if(tmps_idx >= 8) {
       break;
     }
-    else if(is_valid_sprite(spr) && ppu->line == spr.y + 1) {
-      ppu->tmp_sprite[tmps_idx].y = spr.y;
-      ppu->tmp_sprite[tmps_idx].tileid = spr.tileid;
-      ppu->tmp_sprite[tmps_idx].attr = spr.attr;
-      ppu->tmp_sprite[tmps_idx].x = spr.x;
+    else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
+      ppu->tmp_sprite[tmps_idx] = spr;
       ++tmps_idx;
     }
   }
@@ -173,15 +168,14 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
 
       for(int i = 0; i < 8; ++i) {
         for(int j = 0; j < 8; ++j) {
-          /* printf("%02x", c);
-             if(tile->pp[j][i])
-             printf("at %#x %#x\n", x * 8 + i, ppu->line + j);
-             */
+          /*
+          printf("%02x", c);
+          if(tile->pp[j][i])
+           printf("at %#x %#x\n", x * 8 + i, ppu->line + j);
+          */
           uint8_t cidx = tile->pp[j][i];
-          if(!ppu->priority[ppu->line + j][x * 8 + i]) {
-            RGB rgb = colors[palette[cidx]];
-            put_pixel(screen, ppu->line + j, x * 8 + i, rgb);
-          }
+          RGB rgb = colors[palette[cidx]];
+          put_pixel(screen, ppu->line + j, x * 8 + i, rgb);
         }
       }
 
@@ -200,13 +194,10 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
     }
 
     for(int i = 0; i < 8; ++i) {
-      for(int j = 0; j < 8; ++j) {
-        uint8_t cidx = tile->pp[j][i];
-        if(cidx != 0) {
-          RGB rgb = colors[palette[cidx]];
-          put_pixel(screen, sprite.y + 1 + j, sprite.x + i, rgb);
-          ppu->priority[sprite.y + 1 + j][sprite.x + i] = 1;
-        }
+      uint8_t cidx = tile->pp[ppu->line - (sprite.y + 1)][i];
+      if(cidx != 0) {
+        RGB rgb = colors[palette[cidx]];
+        put_pixel(screen, ppu->line, sprite.x + i, rgb);
       }
     }
 
