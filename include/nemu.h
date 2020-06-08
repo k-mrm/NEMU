@@ -24,8 +24,8 @@ struct NEMU {
     PPUBus ppubus;
     APU apu;
     Joypad pad;
-    Disp screen;
     GUI gui;
+    Disp screen;
     Cassette *cassette;
 };
 

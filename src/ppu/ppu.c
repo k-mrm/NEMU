@@ -8,6 +8,11 @@
 #define put_pixel(disp, py, px, rgb) disp[py][px] = (ALLEGRO_VERTEX){ \
   .x = (px), .y = (py), .color = al_map_rgb(rgb.r, rgb.g, rgb.b)  \
 }
+#define enable_VBlank(ppu)  (ppu)->reg.status |= (1 << 7)
+#define disable_VBlank(ppu) (ppu)->reg.status &= ~(1 << 7)
+
+#define is_enable_nmi(ppu)  ((ppu)->reg.ctrl & (1 << 7))
+#define is_addr_inc32(ppu)  ((ppu)->reg.ctrl & (1 << 2))
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   switch(idx) {
@@ -85,33 +90,24 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->cpu_cycle = 0;
 }
 
-enum {
+enum linestate {
   VISIBLE,
   POSTRENDER,
   VERTICAL_BLANKING,
   PRERENDER,
 };
 
-int linestate_from(uint16_t line) {
-  if(line < 240) {
-    return VISIBLE;
-  }
-  else if(line == 240) {
-    return POSTRENDER;
-  }
-  else if(line < 261) {
-    return VERTICAL_BLANKING;
-  }
-  else if(line == 261) {
-    return PRERENDER;
-  }
-  else {
-    panic("invalid line");
-    return -1;
-  }
+static enum linestate linestate_from(uint16_t line) {
+  if(line < 240) return VISIBLE;
+  else if(line == 240) return POSTRENDER;
+  else if(line < 261) return VERTICAL_BLANKING;
+  else if(line == 261) return PRERENDER;
+
+  panic("invalid line");
+  return 0;
 }
 
-void ppu_fetch_sprite(PPU *ppu) {
+static void ppu_fetch_sprite(PPU *ppu) {
   uint8_t tmps_idx = 0;
   uint8_t sprite_y = 0;
   for(int i = 0; i < 8; ++i) {
@@ -133,22 +129,22 @@ void ppu_fetch_sprite(PPU *ppu) {
   ppu->tmp_sprite_len = tmps_idx;
 }
 
-uint16_t nametable_addr(PPU *ppu) {
+static uint16_t nametable_addr(PPU *ppu) {
   uint16_t f = ppu->reg.ctrl & 0x03;
   return 0x2000 + f * 0x400;
 }
 
-uint16_t bg_pattable_addr(PPU *ppu) {
+static uint16_t bg_pattable_addr(PPU *ppu) {
   uint16_t f = (ppu->reg.ctrl >> 4) & 0x01;
   return f * 0x1000;
 }
 
-uint16_t sprite_pattable_addr(PPU *ppu) {
+static uint16_t sprite_pattable_addr(PPU *ppu) {
   uint16_t f = (ppu->reg.ctrl >> 3) & 0x01;
   return f * 0x1000;
 }
 
-void ppu_draw_line(PPU *ppu, Disp screen) {
+static void ppu_draw_line(PPU *ppu, Disp screen) {
   ppu_fetch_sprite(ppu);
   Tile *tile;
   uint8_t palette[4];
@@ -195,6 +191,9 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
       uint8_t cidx = tile->pp[ppu->line - (sprite.y + 1)][i];
       if(cidx != 0) {
         RGB rgb = colors[palette[cidx]];
+        // printf("@@%d %d\n", sprite.x + i, ppu->line);
+        if(sprite.x + i > 255)
+          break;
         put_pixel(screen, ppu->line, sprite.x + i, rgb);
       }
     }
@@ -203,7 +202,7 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
   }
 }
 
-int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
+int ppu_step(PPU *ppu, Disp screen, int *nmi) {
   switch(linestate_from(ppu->line)) {
     case VISIBLE:
       ppu_draw_line(ppu, screen);

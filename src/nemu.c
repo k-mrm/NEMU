@@ -27,7 +27,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
     lpf = 262;
     /* draw 1frame */
     while(lpf--) {
-      ppu_step(&nes->ppu, 0, nes->screen, &nmi);
+      ppu_step(&nes->ppu, nes->screen, &nmi);
       cpu_run(&nes->cpu, 341 / 3);
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);

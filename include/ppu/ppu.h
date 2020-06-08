@@ -37,17 +37,10 @@ struct PPU {
   uint8_t tmp_sprite_len;
 };
 
-void ppu_run(PPU *, int);
 void ppu_render(PPU *, Disp);
-int ppu_step(PPU *, int, Disp, int *);
+int ppu_step(PPU *, Disp, int *);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);
 void ppu_write(PPU *, uint16_t, uint8_t);
-
-#define enable_VBlank(ppu)  (ppu)->reg.status |= (1 << 7)
-#define disable_VBlank(ppu) (ppu)->reg.status &= ~(1 << 7)
-
-#define is_enable_nmi(ppu)  ((ppu)->reg.ctrl & (1 << 7))
-#define is_addr_inc32(ppu)  ((ppu)->reg.ctrl & (1 << 2))
 
 #endif
