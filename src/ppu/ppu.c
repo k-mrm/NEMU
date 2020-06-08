@@ -4,6 +4,7 @@
 #include "ppu/tile.h"
 #include "ppu/palette.h"
 #include "log/log.h"
+#include "gui/gui.h"
 
 #define put_pixel(disp, py, px, rgb) disp[py][px] = (ALLEGRO_VERTEX){ \
   .x = (px), .y = (py), .color = al_map_rgb(rgb.r, rgb.g, rgb.b)  \

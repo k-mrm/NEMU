@@ -19,5 +19,5 @@ int main(int argc, char **argv) {
 
   NEMU nes;
   nes.cassette = &cassette;
-  return nemu_start(&nes, &argc, argv);
+  return nemu_start(&nes);
 }

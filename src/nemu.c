@@ -1,7 +1,7 @@
 #include "nemu.h"
 #include "cpu/register.h"
 
-static void nemu_init(NEMU *nes, int *argc, char **argv) {
+static void nemu_init(NEMU *nes) {
   cpu_define_inst();
   cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette, &nes->pad);
   cpu_init(&nes->cpu, &nes->cpubus);
@@ -11,11 +11,12 @@ static void nemu_init(NEMU *nes, int *argc, char **argv) {
   joypad_init(&nes->pad);
 }
 
-int nemu_start(NEMU *nes, int *argc, char **argv) {
+int nemu_start(NEMU *nes) {
   int nmi = 0;
   int f = 0;
+  int c = 0;
   int lpf;
-  nemu_init(nes, argc, argv);
+  nemu_init(nes);
   cpu_interrupt(&nes->cpu, RESET);
 
 #ifdef CPU_DEBUG
@@ -34,7 +35,7 @@ int nemu_start(NEMU *nes, int *argc, char **argv) {
         nmi = 0;
       }
     }
-    gui_render(&nes->gui, nes->screen);
+    gui_render(nes->screen);
 #ifdef CPU_DEBUG
     // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
     // printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));
