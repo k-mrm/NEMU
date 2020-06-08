@@ -35,7 +35,6 @@ struct PPU {
   uint16_t cpu_cycle;
   Sprite tmp_sprite[8];
   uint8_t tmp_sprite_len;
-  uint8_t priority[240][256];
 };
 
 void ppu_run(PPU *, int);

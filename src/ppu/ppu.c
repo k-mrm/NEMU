@@ -83,29 +83,27 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->line = 0;
   ppu->bus = bus;
   ppu->cpu_cycle = 0;
-
-  memset(ppu->priority, 0, sizeof(uint8_t) * 240 * 256);
 }
 
 enum {
-  LINE_VISIBLE,
-  LINE_POSTRENDER,
-  LINE_VERTICAL_BLANKING,
-  LINE_PRERENDER,
+  VISIBLE,
+  POSTRENDER,
+  VERTICAL_BLANKING,
+  PRERENDER,
 };
 
 int linestate_from(uint16_t line) {
   if(line < 240) {
-    return LINE_VISIBLE;
+    return VISIBLE;
   }
   else if(line == 240) {
-    return LINE_POSTRENDER;
+    return POSTRENDER;
   }
   else if(line < 261) {
-    return LINE_VERTICAL_BLANKING;
+    return VERTICAL_BLANKING;
   }
   else if(line == 261) {
-    return LINE_PRERENDER;
+    return PRERENDER;
   }
   else {
     panic("invalid line");
@@ -207,24 +205,23 @@ void ppu_draw_line(PPU *ppu, Disp screen) {
 
 int ppu_step(PPU *ppu, int cyclex3, Disp screen, int *nmi) {
   switch(linestate_from(ppu->line)) {
-    case LINE_VISIBLE:
+    case VISIBLE:
       ppu_draw_line(ppu, screen);
       ppu->line++;
       break;
-    case LINE_POSTRENDER:
+    case POSTRENDER:
       ppu->line++;
       break;
-    case LINE_VERTICAL_BLANKING:
+    case VERTICAL_BLANKING:
       if(ppu->line == 241) {
         enable_VBlank(ppu);
         *nmi = is_enable_nmi(ppu)? 1: 0;
       }
       ppu->line++;
       break;
-    case LINE_PRERENDER:
+    case PRERENDER:
       ppu->line = 0;
       disable_VBlank(ppu);
-      memset(ppu->priority, 0, sizeof(uint8_t) * 240 * 256);
       return 1;
   }
   return 0;
