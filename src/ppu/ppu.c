@@ -111,9 +111,6 @@ static enum linestate linestate_from(uint16_t line) {
 static void ppu_fetch_sprite(PPU *ppu) {
   uint8_t tmps_idx = 0;
   uint8_t sprite_y = 0;
-  for(int i = 0; i < 8; ++i) {
-    ppu->tmp_sprite[i] = (Sprite){0, 0, 0x4, 0};
-  }
   ppu->tmp_sprite_len = 0;
 
   for(int i = 0; i < 64; ++i) {
@@ -149,37 +146,54 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
   ppu_fetch_sprite(ppu);
   uint8_t palette[4];
 
-  if(ppu->line % 8 == 0) {
+  /* draw background sprite */
+  for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
     Tile tile;
-    uint8_t y = ppu->line / 8;
-    /* draw background */
-    for(uint8_t x = 0; x < 32; x++) {
-      ppu_make_bg_tile(ppu, &tile, x, y, nametable_addr(ppu), bg_pattable_addr(ppu));
-      for(int i = 0; i < 4; ++i) {
-        palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
-        // printf("palette %d = %d ", i, palette[i]);
-      }
+    Sprite sprite = ppu->tmp_sprite[idx];
+    if(!(sprite.attr & (1 << 5))) continue;
+    ppu_make_sprite_tile(ppu, &tile, sprite.tileid, sprite.attr & 0x3, sprite_pattable_addr(ppu));
+    for(int i = 0; i < 4; ++i) {
+      palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile.paletteid * 4 + i);
+    }
 
-      for(int i = 0; i < 8; ++i) {
-        for(int j = 0; j < 8; ++j) {
-          /*
-          printf("%02x", c);
-          if(tile->pp[j][i])
-           printf("at %#x %#x\n", x * 8 + i, ppu->line + j);
-          */
-          uint8_t cidx = tile.pp[j][i];
-          RGB rgb = colors[palette[cidx]];
-          put_pixel(screen, ppu->line + j, x * 8 + i, rgb);
-        }
+    for(int i = 0; i < 8; ++i) {
+      uint8_t cidx = tile.pp[ppu->line - (sprite.y + 1)][i];
+      if(cidx != 0) {
+        RGB rgb = colors[palette[cidx]];
+        // printf("@@%d %d\n", sprite.x + i, ppu->line);
+        if(sprite.x + i > 255)
+          break;
+        put_pixel(screen, ppu->line, sprite.x + i, rgb);
       }
     }
-    //puts("");
   }
+
+  /* draw background */
+  Tile tile;
+  uint8_t y = ppu->line / 8;
+  uint8_t y_in_tile = ppu->line % 8;
+  for(uint8_t x = 0; x < 32; x++) {
+    ppu_make_bg_tile(ppu, &tile, x, y, nametable_addr(ppu), bg_pattable_addr(ppu));
+    for(int i = 0; i < 4; ++i) {
+      palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
+      // printf("palette %d = %d ", i, palette[i]);
+    }
+
+    for(int i = 0; i < 8; ++i) {
+      uint8_t cidx = tile.pp[y_in_tile][i];
+      if(cidx != 0) {
+        RGB rgb = colors[palette[cidx]];
+        put_pixel(screen, ppu->line, x * 8 + i, rgb);
+      }
+    }
+  }
+  //puts("");
 
   /* draw sprite */
   for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
     Tile tile;
     Sprite sprite = ppu->tmp_sprite[idx];
+    if(sprite.attr & (1 << 5)) continue;
     ppu_make_sprite_tile(ppu, &tile, sprite.tileid, sprite.attr & 0x3, sprite_pattable_addr(ppu));
     for(int i = 0; i < 4; ++i) {
       palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile.paletteid * 4 + i);
@@ -217,7 +231,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi) {
     case PRERENDER:
       ppu->line = 0;
       disable_VBlank(ppu);
-      return 1;
+      return ppubus_read(ppu->bus, 0x3f00);
   }
   return 0;
 }

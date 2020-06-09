@@ -28,14 +28,18 @@ int nemu_start(NEMU *nes) {
     lpf = 262;
     /* draw 1frame */
     while(lpf--) {
-      ppu_step(&nes->ppu, nes->screen, &nmi);
+      c = ppu_step(&nes->ppu, nes->screen, &nmi);
       cpu_run(&nes->cpu, 341 / 3);
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);
         nmi = 0;
       }
     }
+    RGB rgb = colors[c];
     gui_render(nes->screen);
+    al_clear_to_color(al_map_rgb(rgb.r, rgb.g, rgb.b));
+
+    memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
 #ifdef CPU_DEBUG
     // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
     // printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));

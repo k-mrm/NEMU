@@ -14,6 +14,7 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
     return bus->vram[addr - 0x3000];
   }
   else if(addr < 0x4000) {
+    addr = 0x3f00 | (addr & 0x1f);
     // printf("read!! %u@%x ", bus->palette[(addr-0x3f00)&0x1f], (addr-0x3f00)&0x1f);
     if(addr == 0x3f10 || addr == 0x3f14 || addr == 0x3f18 || addr == 0x3f1c) {
       addr -= 0x10;
@@ -39,6 +40,7 @@ void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
     bus->vram[addr - 0x3000] = data;
   }
   else if(addr < 0x4000) {
+    addr = 0x3f00 | (addr & 0x1f);
     if(addr == 0x3f10 || addr == 0x3f14 || addr == 0x3f18 || addr == 0x3f1c) {
       addr -= 0x10;
     }
