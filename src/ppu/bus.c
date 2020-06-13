@@ -3,7 +3,8 @@
 #include "log/log.h"
 
 uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
-  log_dbg("ppubus_read %#x\n", addr);
+  addr &= 0x3fff;
+  // log_dbg("ppubus_read %#x\n", addr);
   uint8_t res;
   if(addr < 0x2000) {
     res = cassette_read_chrrom(bus->cassette, addr);
@@ -32,7 +33,8 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
 }
 
 void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
-  log_dbg("ppubus_write %#x <- %u\n", addr, data);
+  addr &= 0x3fff;
+  // log_dbg("ppubus_write %#x <- %u\n", addr, data);
   if(addr < 0x2000) {
     ;
   }
@@ -61,5 +63,5 @@ void ppubus_init(PPUBus *bus, Cassette *cas) {
   bus->cassette = cas;
   bus->vram = calloc(1, sizeof(uint8_t) * 0x800); /* 2 KiB */
   bus->palette = calloc(1, sizeof(uint8_t) * 0x20);
-  bus->oam = calloc(1, sizeof(uint8_t) * 256);
+  bus->oam = calloc(1, sizeof(Sprite) * 64);
 }

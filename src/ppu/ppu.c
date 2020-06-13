@@ -240,6 +240,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi) {
       break;
     case PRERENDER:
       ppu->line = 0;
+      ppu->reg.status = 0;
       disable_VBlank(ppu);
       return ppubus_read(ppu->bus, 0x3f00);
   }
