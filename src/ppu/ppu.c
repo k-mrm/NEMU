@@ -16,25 +16,33 @@
 #define is_addr_inc32(ppu)  ((ppu)->reg.ctrl & (1 << 2))
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
+  log_dbg("ppu_read %u\n", idx);
+  uint8_t res;
   switch(idx) {
     case 2: {
       uint8_t status = ppu->reg.status;
       ppu->state.addr_write_once = false;
       disable_VBlank(ppu);
-      return status;
+      res = status;
+      break;
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->addr);
       // printf("ppuaddr read %#x\n", ppu->addr);
       ppu->addr += is_addr_inc32(ppu)? 32: 1;
-      return data;
+      res = data;
+      break;
     }
     default:
-      return 0;
+      res = 0;
+      break;
   }
+
+  return res;
 }
 
 void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
+  log_dbg("ppu_write %u <- %u\n", idx, data);
   switch(idx) {
     case 0: ppu->reg.ctrl = data; break;
     case 1: ppu->reg.mask = data; break;
@@ -58,8 +66,8 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       ppu->state.addr_write_once ^= 1;
       break;
     case 6:
-      ppu->addr = ppu->state.addr_write_once ?
-        ppu->addr | data :
+      ppu->addr = ppu->state.addr_write_once?
+        ppu->addr | data:
         (uint16_t)data << 8;
       ppu->state.addr_write_once ^= 1;
       break;
@@ -99,6 +107,7 @@ enum linestate {
 };
 
 static enum linestate linestate_from(uint16_t line) {
+  log_dbg("linestate_from %u\n", line);
   if(line < 240) return VISIBLE;
   else if(line == 240) return POSTRENDER;
   else if(line < 261) return VERTICAL_BLANKING;
@@ -176,8 +185,9 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     ppu_make_bg_tile(ppu, &tile, x, y, nametable_addr(ppu), bg_pattable_addr(ppu));
     for(int i = 0; i < 4; ++i) {
       palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
-      // printf("palette %d = %d ", i, palette[i]);
+      // printf("palette %#x = %d ", 0x3f00+tile.paletteid*4+i, palette[i]);
     }
+    //puts("");
 
     for(int i = 0; i < 8; ++i) {
       uint8_t cidx = tile.pp[y_in_tile][i];

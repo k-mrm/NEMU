@@ -27,6 +27,7 @@ void gui_render(Disp screen) {
   static int times = 0;
   printf("ora gokuu%d\n", times++);
   al_draw_prim(screen, NULL, NULL, 0, 240 * 256, ALLEGRO_PRIM_POINT_LIST);
+  puts("cyhinpo");
   al_flip_display();
   puts("owaowa");
 }

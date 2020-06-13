@@ -1,6 +1,7 @@
 #include "cpu/cpu.h"
 #include "cpu/bus.h"
 #include "ppu/dma.h"
+#include "log/log.h"
 
 void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c, Joypad *pad) {
   bus->wram = r;
@@ -11,6 +12,7 @@ void cpubus_init(CPUBus *bus, RAM *r, PPU *p, APU *a, Cassette *c, Joypad *pad) 
 }
 
 uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
+  // log_dbg("cpubus_read %#x\n", addr);
   if(addr < 0x2000) {
     return ram_read(bus->wram, addr & 0x7ff);
   }
@@ -38,7 +40,7 @@ uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
   else if(addr < 0xc000) {
     return cassette_read_rom(bus->cas, addr - 0x8000);
   }
-  else if(addr < 0x10000 && bus->cas->nprgrom_byte <= 0x4000) {
+  else if(bus->cas->nprgrom_byte <= 0x4000) {
     /* mirror $8000-$bfff == $c0000-$ffff */
     return cassette_read_rom(bus->cas, addr - 0xc000);
   }
@@ -48,6 +50,7 @@ uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
 }
 
 void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
+  // log_dbg("cpubus_write %#x <- %u\n", addr, data);
   if(addr < 0x2000) {
     ram_write(bus->wram, addr & 0x7ff, data);
   }
@@ -58,7 +61,7 @@ void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
     ppu_dma_write(bus->ppu, bus, data);
   }
   else if(addr == 0x4016) {
-    return joypad_write(bus->pad, 1, data);
+    joypad_write(bus->pad, 1, data);
   }
   else if(addr == 0x4017) {
   }

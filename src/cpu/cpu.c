@@ -12,7 +12,7 @@ void cpu_init(CPU *cpu, CPUBus *cpubus) {
    *    NV*BDIZC
    *    00110100
    */
-  cpu->reg.p = 0x34;
+  cpu->reg.p = 0x24; // 0x34?
   cpu->bus = cpubus;
 }
 

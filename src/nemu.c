@@ -36,8 +36,8 @@ int nemu_start(NEMU *nes) {
       }
     }
     RGB rgb = colors[c];
-    gui_render(nes->screen);
     al_clear_to_color(al_map_rgb(rgb.r, rgb.g, rgb.b));
+    gui_render(nes->screen);
 
     memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
 #ifdef CPU_DEBUG

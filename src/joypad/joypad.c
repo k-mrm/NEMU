@@ -29,8 +29,8 @@ static uint8_t read_btnstate(enum button btn) {
   switch(btn) {
     case BUTTON_A: return al_key_down(&state, ALLEGRO_KEY_K);
     case BUTTON_B: return al_key_down(&state, ALLEGRO_KEY_J);
-    case BUTTON_SELECT: return al_key_down(&state, ALLEGRO_KEY_SPACE);
-    case BUTTON_START: return al_key_down(&state, ALLEGRO_KEY_ENTER);
+    case BUTTON_SELECT: return al_key_down(&state, ALLEGRO_KEY_I);
+    case BUTTON_START: return al_key_down(&state, ALLEGRO_KEY_U);
     case BUTTON_UP: return al_key_down(&state, ALLEGRO_KEY_W);
     case BUTTON_DOWN: return al_key_down(&state, ALLEGRO_KEY_S);
     case BUTTON_LEFT: return al_key_down(&state, ALLEGRO_KEY_A);
