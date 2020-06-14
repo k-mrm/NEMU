@@ -57,3 +57,4 @@ emu
 *.log
 roms/
 core
+log/

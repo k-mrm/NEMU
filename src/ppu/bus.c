@@ -63,5 +63,5 @@ void ppubus_init(PPUBus *bus, Cassette *cas) {
   bus->cassette = cas;
   bus->vram = calloc(1, sizeof(uint8_t) * 0x800); /* 2 KiB */
   bus->palette = calloc(1, sizeof(uint8_t) * 0x20);
-  bus->oam = calloc(1, sizeof(Sprite) * 64);
+  bus->oam = calloc(1, sizeof(uint8_t) * 256);
 }

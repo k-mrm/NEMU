@@ -12,11 +12,13 @@
 #define enable_VBlank(ppu)  (ppu)->reg.status |= (1 << 7)
 #define disable_VBlank(ppu) (ppu)->reg.status &= ~(1 << 7)
 
+#define sprite_0hit(ppu)    (ppu)->reg.status |= (1 << 6)
+
 #define is_enable_nmi(ppu)  ((ppu)->reg.ctrl & (1 << 7))
 #define is_addr_inc32(ppu)  ((ppu)->reg.ctrl & (1 << 2))
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
-  log_dbg("ppu_read %u\n", idx);
+  // log_dbg("ppu_read %u\n", idx);
   uint8_t res;
   switch(idx) {
     case 2: {
@@ -42,22 +44,12 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
 }
 
 void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
-  log_dbg("ppu_write %u <- %u\n", idx, data);
+  // log_dbg("ppu_write %u <- %u\n", idx, data);
   switch(idx) {
     case 0: ppu->reg.ctrl = data; break;
     case 1: ppu->reg.mask = data; break;
     case 3: ppu->reg.oamaddr = data; break;
-    case 4: {
-      uint8_t idx = ppu->reg.oamaddr / 4;
-      switch(ppu->reg.oamaddr % 4) {
-        case 0: ppu->bus->oam[idx].y = data; break;
-        case 1: ppu->bus->oam[idx].tileid = data; break;
-        case 2: ppu->bus->oam[idx].attr = data; break;
-        case 3: ppu->bus->oam[idx].x = data; break;
-      }
-      ppu->reg.oamaddr++;
-      break;
-    }
+    case 4: ppu_oam_write(ppu, data); break;
     case 5:
       if(!ppu->state.addr_write_once)
         ppu->scrollx = data;
@@ -107,7 +99,7 @@ enum linestate {
 };
 
 static enum linestate linestate_from(uint16_t line) {
-  log_dbg("linestate_from %u\n", line);
+  log_dbg("scanline %u\n", line);
   if(line < 240) return VISIBLE;
   else if(line == 240) return POSTRENDER;
   else if(line < 261) return VERTICAL_BLANKING;
@@ -123,11 +115,20 @@ static void ppu_fetch_sprite(PPU *ppu) {
   ppu->tmp_sprite_len = 0;
 
   for(int i = 0; i < 64; ++i) {
-    Sprite spr = ppu->bus->oam[i];
+    uint8_t y = ppu->bus->oam[i * 4];
+    uint8_t tileid = ppu->bus->oam[i * 4 + 1];
+    uint8_t attr = ppu->bus->oam[i * 4 + 2];
+    uint8_t x = ppu->bus->oam[i * 4 + 3];
+    Sprite spr = (Sprite){
+      .y = y, .tileid = tileid, .attr = attr, .x = x,
+    };
     if(tmps_idx >= 8) {
       break;
     }
     else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
+      if(i == 0) {
+        sprite_0hit(ppu);
+      }
       ppu->tmp_sprite[tmps_idx] = spr;
       ++tmps_idx;
     }
@@ -149,6 +150,11 @@ static uint16_t bg_pattable_addr(PPU *ppu) {
 static uint16_t sprite_pattable_addr(PPU *ppu) {
   uint16_t f = (ppu->reg.ctrl >> 3) & 0x01;
   return f * 0x1000;
+}
+
+void ppu_oam_write(PPU *ppu, uint8_t data) {
+  printf("%d\n", data);
+  ppu->bus->oam[ppu->reg.oamaddr++] = data;
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {

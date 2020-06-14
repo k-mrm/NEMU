@@ -50,7 +50,7 @@ uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
 }
 
 void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
-  // log_dbg("cpubus_write %#x <- %u\n", addr, data);
+  log_dbg("cpubus_write %#x <- %u\n", addr, data);
   if(addr < 0x2000) {
     ram_write(bus->wram, addr & 0x7ff, data);
   }

@@ -23,11 +23,8 @@ void request_frame(GUI *gui) {
 }
 
 void gui_render(Disp screen) {
-  puts("on");
   static int times = 0;
-  printf("ora gokuu%d\n", times++);
+  // printf("ora gokuu%d\n", times++);
   al_draw_prim(screen, NULL, NULL, 0, 240 * 256, ALLEGRO_PRIM_POINT_LIST);
-  puts("cyhinpo");
   al_flip_display();
-  puts("owaowa");
 }

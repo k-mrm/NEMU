@@ -37,6 +37,7 @@ struct PPU {
   uint8_t tmp_sprite_len;
 };
 
+void ppu_oam_write(PPU *, uint8_t);
 void ppu_render(PPU *, Disp);
 int ppu_step(PPU *, Disp, int *);
 void ppu_init(PPU *, PPUBus *);
