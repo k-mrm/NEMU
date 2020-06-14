@@ -401,9 +401,9 @@ int cpu_step(CPU *cpu) {
   uint8_t code = cpu_fetch(cpu);
   CPUInst inst = code_decoder[code];
 
-  printf("%04x %02x ", op_pc, code);
-  printf("%s ", inst_dump(inst.op));
-  printf("A:%02x X:%02x Y:%02x P:%02x SP:%02x CYCLE:%ld\n",
+  log_dbg("%04x %02x ", op_pc, code);
+  log_dbg("%s ", inst_dump(inst.op));
+  log_dbg("A:%02x X:%02x Y:%02x P:%02x SP:%02x CYCLE:%ld\n",
       cpu->reg.a,
       cpu->reg.x,
       cpu->reg.y,
