@@ -13,15 +13,12 @@ static void cassette_dump(Cassette *cassette) {
      for(int i = 0; i < cassette->nprgrom_byte; ++i) {
      printf("%02x ", cassette->prgrom[i]);
      }
-  puts("chrrom:");
-  for(int i = 0; i < cassette->nchrrom_byte; ++i) {
-    if(cassette->chrrom[i] != 0) {
-      printf("no 0 %d ", i);
-    }
-    printf("%x ", cassette->chrrom[i]);
-  }
-  puts("");
-  */
+     puts("chrrom:");
+     for(int i = 0; i < cassette->nchrrom_byte; ++i) {
+     printf("%x ", cassette->chrrom[i]);
+     }
+     puts("");
+     */
 }
 
 static int parse_ines_format(Cassette *cas, unsigned char *ines) {
@@ -76,6 +73,10 @@ int read_cassette(Cassette *cassette, const char *fname) {
 end:
   fclose(cas);
   return exitcode;
+}
+
+enum mirroring cassette_mirroring(Cassette *cas) {
+  return cas->mirror;
 }
 
 uint8_t cassette_read_rom(Cassette *cas, int addr) {

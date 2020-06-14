@@ -23,5 +23,6 @@ struct Cassette {
 int read_cassette(Cassette *, const char *);
 uint8_t cassette_read_rom(Cassette *, int);
 uint8_t cassette_read_chrrom(Cassette *, int);
+enum mirroring cassette_mirroring(Cassette *);
 
 #endif

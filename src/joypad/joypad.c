@@ -1,8 +1,6 @@
 #include "joypad/joypad.h"
 
 void joypad_init(Joypad *pad) {
-  al_install_keyboard();
-
   pad->reg.pad1 = 0;
   pad->reg.pad2 = 0;
   pad->btnstate.pad1 = 0;

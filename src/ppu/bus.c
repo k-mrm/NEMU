@@ -2,6 +2,51 @@
 #include "ppu/bus.h"
 #include "log/log.h"
 
+uint16_t vram_address(PPUBus *bus, uint16_t addr) {
+  enum mirroring mirr = cassette_mirroring(bus->cassette);
+  switch(mirr) {
+    case HORIZONTAL:
+      /*
+       *  A 0x2000~ == 0x2400~
+       *  B 0x2800~ == 0x2c00~ 
+       */
+      if(addr < 0x2400) {
+        return addr - 0x2000;
+      }
+      else if(addr < 0x2800) {
+        return addr - 0x2400;
+      }
+      else if(addr < 0x2c00) {
+        return addr - 0x2400;
+      }
+      else if(addr < 0x3000) {
+        return addr - 0x2800;
+      }
+      break;
+    case VERTICAL:
+      /*
+       *  A 0x2000~ == 0x2800~
+       *  B 0x2400~ == 0x2c00~
+       */
+      if(addr < 0x2400) {
+        return addr - 0x2000;
+      }
+      else if(addr < 0x2800) {
+        return addr - 0x2000;
+      }
+      else if(addr < 0x2c00) {
+        return addr - 0x2800;
+      }
+      else if(addr < 0x3000) {
+        return addr - 0x2800;
+      }
+      break;
+  }
+
+  panic("invalid address");
+  return 0;
+}
+
 uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
   addr &= 0x3fff;
   // log_dbg("ppubus_read %#x\n", addr);
@@ -10,12 +55,11 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
     res = cassette_read_chrrom(bus->cassette, addr);
   }
   else if(addr < 0x3000) {
-    /* TODO: Mirror */
-    res = bus->vram[addr - 0x2000];
+    res = bus->vram[vram_address(bus, addr)];
   }
   else if(addr < 0x3f00) {
     /* TODO: Mirror */
-    res = bus->vram[addr - 0x3000];
+    res = bus->vram[vram_address(bus, addr - 0x1000)];
   }
   else if(addr < 0x4000) {
     addr = 0x3f00 | (addr & 0x1f);
@@ -39,12 +83,10 @@ void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
     ;
   }
   else if(addr < 0x3000) {
-    /* TODO: BG Mirror */
-    bus->vram[addr - 0x2000] = data;
+    bus->vram[vram_address(bus, addr)] = data;
   }
   else if(addr < 0x3f00) {
-    /* TODO: BG Mirror */
-    bus->vram[addr - 0x3000] = data;
+    bus->vram[vram_address(bus, addr - 0x1000)] = data;
   }
   else if(addr < 0x4000) {
     addr = 0x3f00 | (addr & 0x1f);
