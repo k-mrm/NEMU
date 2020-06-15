@@ -10,11 +10,11 @@ void joypad_init(Joypad *pad) {
 void joypad_write(Joypad *pad, int padn, uint8_t data) {
   switch(padn) {
     case 1: {
-      if(pad->reg.pad1 == 1 && data == 0) {
+      if(pad->reg.pad1 == 1 && (data & 1) == 0) {
         pad->btnstate.pad1 = 0;
         pad->btnstate.pad2 = 0;
       }
-      pad->reg.pad1 = data;
+      pad->reg.pad1 = data & 1;
       break;
     }
     default: break;
@@ -34,6 +34,7 @@ static uint8_t read_btnstate(enum button btn) {
     case BUTTON_LEFT: return al_key_down(&state, ALLEGRO_KEY_A);
     case BUTTON_RIGHT: return al_key_down(&state, ALLEGRO_KEY_D);
   }
+  panic("nandaomae %d", btn);
 }
 
 uint8_t joypad_read(Joypad *pad, int padn) {
