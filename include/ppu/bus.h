@@ -17,6 +17,4 @@ uint8_t ppubus_read(PPUBus *, uint16_t);
 void ppubus_write(PPUBus *, uint16_t, uint8_t);
 void ppubus_init(PPUBus *, Cassette *);
 
-#define is_valid_sprite(sprite) (!((sprite).attr & 0x04))
-
 #endif
