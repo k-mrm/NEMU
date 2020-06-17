@@ -5,6 +5,7 @@
 void tile_dump(Tile *tile) {
   for(int i = 0; i < 8; ++i) {
     for(int j = 0; j < 8; ++j) {
+      printf("%d%d", i, j);
       switch(tile->pp[i][j]) {
         case 0: printf("  "); break;
         case 1: printf(". "); break;
@@ -36,21 +37,21 @@ static void ppu_make_pixelpat(PPU *ppu, Tile *tile, uint16_t sid, uint8_t vhflip
     case 1: /* hflip */
       for(int i = 0; i < 16; ++i) {
         for(int j = 0; j < 8; ++j) {
-          tile->pp[7 - i % 8][j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
+          tile->pp[i % 8][7 - j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
         }
       }
       break;
-    case 2:
+    case 2: /* vflip */
       for(int i = 0; i < 16; ++i) {
         for(int j = 0; j < 8; ++j) {
-          tile->pp[i % 8][j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
+          tile->pp[7 - i % 8][j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
         }
       }
       break;
     case 3:
       for(int i = 0; i < 16; ++i) {
         for(int j = 0; j < 8; ++j) {
-          tile->pp[i % 8][j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
+          tile->pp[7 - i % 8][7 - j] |= ((spr[i] & (0x80 >> j)) != 0) << (i / 8);
         }
       }
       break;
