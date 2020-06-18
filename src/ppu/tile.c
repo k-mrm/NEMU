@@ -18,13 +18,13 @@ void tile_dump(Tile *tile) {
 }
 
 static void ppu_make_pixelpat(PPU *ppu, Tile *tile, uint16_t sid, uint8_t vhflip, uint16_t baseaddr) {
+  memset(tile, 0, sizeof(Tile));
+
   uint8_t spr[16];
   uint16_t idx = baseaddr + sid * 16;
   for(int i = 0; i < 16; ++i, ++idx) {
     spr[i] = ppubus_read(ppu->bus, idx);
   }
-
-  memset(tile, 0, sizeof(Tile));
 
   uint8_t hflip = vhflip & 1;
   uint8_t vflip = vhflip & 2;
