@@ -202,7 +202,8 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     uint8_t y = ppu->line / 8;
     uint8_t y_in_tile = ppu->line % 8;
     for(uint8_t x = 0; x < 32; x++) {
-      ppu_make_bg_tile(ppu, &tile, x + ppu->scrollx, y + ppu->scrolly, nametable_addr(ppu), bg_pattable_addr(ppu));
+      // printf("scrollx: %d, scrolly: %d\n", ppu->scrollx / 8, ppu->scrolly / 8);
+      ppu_make_bg_tile(ppu, &tile, x + ppu->scrollx / 8, y + ppu->scrolly / 8, nametable_addr(ppu), bg_pattable_addr(ppu));
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
         // printf("palette %#x = %d ", 0x3f00+tile.paletteid*4+i, palette[i]);

@@ -44,7 +44,7 @@ static uint16_t get_spriteid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
 }
 
 static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
-  return ppubus_read(ppu->bus, offset + 0x3c0 + x / 4 + y / 4 * 8);
+  return ppubus_read(ppu->bus, offset + 0x3c0 + x / 4 + y * 8 / 4);
 }
 
 void ppu_make_sprite_tile(PPU *ppu, Tile *tile, uint16_t sid, uint8_t pid, uint8_t vhflip, uint16_t baseaddr) {

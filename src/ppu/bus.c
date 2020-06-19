@@ -47,6 +47,16 @@ uint16_t vram_address(PPUBus *bus, uint16_t addr) {
   return 0;
 }
 
+uint16_t safe_vram_address(PPUBus *bus, uint16_t addr) {
+  uint16_t res = vram_address(bus, addr);
+  if(res >= 0x800) {
+    panic("okapi");
+  }
+
+  return res;
+}
+
+
 uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
   addr &= 0x3fff;
   // log_dbg("ppubus_read %#x\n", addr);
@@ -55,11 +65,11 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
     res = cassette_read_chrrom(bus->cassette, addr);
   }
   else if(addr < 0x3000) {
-    res = bus->vram[vram_address(bus, addr)];
+    res = bus->vram[safe_vram_address(bus, addr)];
   }
   else if(addr < 0x3f00) {
     /* TODO: Mirror */
-    res = bus->vram[vram_address(bus, addr - 0x1000)];
+    res = bus->vram[safe_vram_address(bus, addr - 0x1000)];
   }
   else if(addr < 0x4000) {
     addr = 0x3f00 | (addr & 0x1f);
@@ -83,10 +93,10 @@ void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
     ;
   }
   else if(addr < 0x3000) {
-    bus->vram[vram_address(bus, addr)] = data;
+    bus->vram[safe_vram_address(bus, addr)] = data;
   }
   else if(addr < 0x3f00) {
-    bus->vram[vram_address(bus, addr - 0x1000)] = data;
+    bus->vram[safe_vram_address(bus, addr - 0x1000)] = data;
   }
   else if(addr < 0x4000) {
     addr = 0x3f00 | (addr & 0x1f);
