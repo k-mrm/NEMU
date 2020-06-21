@@ -75,7 +75,7 @@ end:
   return exitcode;
 }
 
-enum mirroring cassette_mirroring(Cassette *cas) {
+enum mirroring nes_mirroring(Cassette *cas) {
   return cas->mirror;
 }
 

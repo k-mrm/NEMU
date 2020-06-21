@@ -66,7 +66,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       break;
     case 6:
       ppu->addr = ppu->state.addr_write_once?
-        ppu->addr | data:
+        ppu->addr | data :
         (uint16_t)data << 8;
       ppu->state.addr_write_once ^= 1;
       break;
@@ -162,7 +162,7 @@ static uint16_t sprite_pattable_addr(PPU *ppu) {
 }
 
 void ppu_oam_write(PPU *ppu, uint8_t data) {
-  printf("%d\n", data);
+  // printf("%d\n", data);
   ppu->bus->oam[ppu->reg.oamaddr++] = data;
 }
 
@@ -202,13 +202,13 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     uint8_t y = ppu->line / 8;
     uint8_t y_in_tile = ppu->line % 8;
     for(uint8_t x = 0; x < 32; x++) {
-      // printf("scrollx: %d, scrolly: %d\n", ppu->scrollx / 8, ppu->scrolly / 8);
+      log_dbg("scrollx: %d, scrolly: %d\n", x + ppu->scrollx / 8, y + ppu->scrolly / 8);
       ppu_make_bg_tile(ppu, &tile, x + ppu->scrollx / 8, y + ppu->scrolly / 8, nametable_addr(ppu), bg_pattable_addr(ppu));
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
         // printf("palette %#x = %d ", 0x3f00+tile.paletteid*4+i, palette[i]);
       }
-      //puts("");
+      // puts("");
 
       for(int i = 0; i < 8; ++i) {
         uint8_t cidx = tile.pp[y_in_tile][i];
@@ -218,7 +218,6 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
         }
       }
     }
-    //puts("");
   }
 
   /* draw sprite */

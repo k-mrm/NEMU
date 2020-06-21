@@ -3,7 +3,8 @@
 #include "log/log.h"
 
 uint16_t vram_address(PPUBus *bus, uint16_t addr) {
-  enum mirroring mirr = cassette_mirroring(bus->cassette);
+  enum mirroring mirr = nes_mirroring(bus->cassette);
+  // printf("vramaddress %#x\n", addr);
   switch(mirr) {
     case HORIZONTAL:
       /*
