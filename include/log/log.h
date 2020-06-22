@@ -9,7 +9,6 @@
 # define log_dbg(...)
 #endif
 
-void nemu_error(char *, ...);
 void panic(char *, ...);
 
 #endif

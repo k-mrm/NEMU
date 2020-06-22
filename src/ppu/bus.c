@@ -4,12 +4,14 @@
 
 uint16_t vram_address(PPUBus *bus, uint16_t addr) {
   enum mirroring mirr = nes_mirroring(bus->cassette);
-  // printf("vramaddress %#x\n", addr);
+  // printf("%s\n", mirr? "VERTICAL" : "HORIZONTAL");
   switch(mirr) {
     case HORIZONTAL:
       /*
        *  A 0x2000~ == 0x2400~
        *  B 0x2800~ == 0x2c00~ 
+       *  A A
+       *  B B
        */
       if(addr < 0x2400) {
         return addr - 0x2000;
@@ -28,6 +30,8 @@ uint16_t vram_address(PPUBus *bus, uint16_t addr) {
       /*
        *  A 0x2000~ == 0x2800~
        *  B 0x2400~ == 0x2c00~
+       *  A B
+       *  A B
        */
       if(addr < 0x2400) {
         return addr - 0x2000;
@@ -51,7 +55,7 @@ uint16_t vram_address(PPUBus *bus, uint16_t addr) {
 uint16_t safe_vram_address(PPUBus *bus, uint16_t addr) {
   uint16_t res = vram_address(bus, addr);
   if(res >= 0x800) {
-    panic("okapi");
+    panic("vram_address");
   }
 
   return res;
