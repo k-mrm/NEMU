@@ -96,6 +96,8 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->line = 0;
   ppu->bus = bus;
   ppu->cpu_cycle = 0;
+  ppu->scrollx = 0;
+  ppu->scrolly = 0;
 }
 
 enum linestate {
@@ -151,12 +153,12 @@ static uint16_t nametable_addr(PPU *ppu) {
   return 0x2000 + f * 0x400;
 }
 
-static uint16_t bg_pattable_addr(PPU *ppu) {
+static uint16_t bg_paltable_addr(PPU *ppu) {
   uint16_t f = (ppu->reg.ctrl >> 4) & 0x01;
   return f * 0x1000;
 }
 
-static uint16_t sprite_pattable_addr(PPU *ppu) {
+static uint16_t sprite_paltable_addr(PPU *ppu) {
   uint16_t f = (ppu->reg.ctrl >> 3) & 0x01;
   return f * 0x1000;
 }
@@ -178,7 +180,7 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
       if(!(sprite.attr & (1 << 5))) continue;
       uint8_t pid = sprite.attr & 0x3;
       uint8_t vhflip = (sprite.attr >> 6) & 0x3;
-      ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_pattable_addr(ppu));
+      ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_paltable_addr(ppu));
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile.paletteid * 4 + i);
       }
@@ -202,9 +204,9 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     uint8_t y = ppu->line / 8;
     uint8_t y_in_tile = ppu->line % 8;
     for(uint8_t x = 0; x < 32; x++) {
-      printf("nametable %#x ", nametable_addr(ppu));
-      printf("scrollx: %d, scrolly: %d\n", x + ppu->scrollx / 8, y + ppu->scrolly / 8);
-      ppu_make_bg_tile(ppu, &tile, x + ppu->scrollx / 8, y + ppu->scrolly / 8, nametable_addr(ppu), bg_pattable_addr(ppu));
+      // printf("nametable %#x ", nametable_addr(ppu));
+      printf("scrollx: %d, scrolly: %d\n", ppu->scrollx / 8, ppu->scrolly / 8);
+      ppu_make_bg_tile(ppu, &tile, x + ppu->scrollx / 8, y + ppu->scrolly / 8, nametable_addr(ppu), bg_paltable_addr(ppu));
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
         // printf("palette %#x = %d ", 0x3f00+tile.paletteid*4+i, palette[i]);
@@ -229,7 +231,7 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
       if(sprite.attr & (1 << 5)) continue;
       uint8_t pid = sprite.attr & 0x3;
       uint8_t vhflip = (sprite.attr >> 6) & 0x3;
-      ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_pattable_addr(ppu));
+      ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_paltable_addr(ppu));
       // tile_dump(&tile);
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile.paletteid * 4 + i);

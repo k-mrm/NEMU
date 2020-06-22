@@ -11,9 +11,9 @@ static void nemu_init(NEMU *nes) {
   joypad_init(&nes->pad);
 }
 
-int nemu_start(NEMU *nes) {
+int nemu_boot(NEMU *nes, Cassette *cas) {
+  nes->cassette = cas;
   int nmi = 0;
-  int f = 0;
   int c = 0;
   int lpf;
   nemu_init(nes);

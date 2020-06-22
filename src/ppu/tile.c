@@ -40,6 +40,7 @@ static void ppu_make_pixelpat(PPU *ppu, Tile *tile, uint16_t sid, uint8_t vhflip
 }
 
 static uint16_t get_spriteid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
+  // printf("%x ", offset + x + y * 0x20);
   return ppubus_read(ppu->bus, offset + x + y * 0x20);
 }
 

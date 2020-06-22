@@ -29,6 +29,6 @@ struct NEMU {
   Cassette *cassette;
 };
 
-int nemu_start(NEMU *);
+int nemu_boot(NEMU *, Cassette *);
 
 #endif
