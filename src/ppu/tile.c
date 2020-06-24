@@ -45,6 +45,7 @@ static uint16_t get_spriteid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
 }
 
 static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
+  printf("attrid %x\n", offset + 0x3c0 + x / 4 + y * 8 / 4);
   return ppubus_read(ppu->bus, offset + 0x3c0 + x / 4 + y * 8 / 4);
 }
 
