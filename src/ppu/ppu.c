@@ -20,7 +20,7 @@
 #define is_enable_bg(ppu)     ((ppu)->reg.mask & (1 << 3))
 #define is_enable_sprite(ppu) ((ppu)->reg.mask & (1 << 4))
 
-uint8_t ppu_vram_inc(PPU *ppu) {
+uint8_t ppu_vramaddr_inc(PPU *ppu) {
   return is_addr_inc32(ppu)? 32: 1;
 }
 
@@ -36,9 +36,9 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
       break;
     }
     case 7: {
-      uint8_t data = ppubus_read(ppu->bus, ppu->addr);
+      uint8_t data = ppubus_read(ppu->bus, ppu->vramaddr);
       // printf("ppuaddr read %#x\n", ppu->addr);
-      ppu->addr += ppu_vram_inc(ppu);
+      ppu->vramaddr += ppu_vramaddr_inc(ppu);
       res = data;
       break;
     }
@@ -65,15 +65,15 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       ppu->state.addr_write_once ^= 1;
       break;
     case 6:
-      ppu->addr = ppu->state.addr_write_once?
-        ppu->addr | data :
+      ppu->vramaddr = ppu->state.addr_write_once?
+        ppu->vramaddr | data :
         (uint16_t)data << 8;
       ppu->state.addr_write_once ^= 1;
       break;
     case 7:
-      ppubus_write(ppu->bus, ppu->addr, data);
+      ppubus_write(ppu->bus, ppu->vramaddr, data);
       // printf("ppuaddr write %#x\n", ppu->addr);
-      ppu->addr += ppu_vram_inc(ppu);
+      ppu->vramaddr += ppu_vramaddr_inc(ppu);
       break;
     default:
       break;
@@ -92,7 +92,7 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
 
   ppu->state.addr_write_once = false;
 
-  ppu->addr = 0;
+  ppu->vramaddr = 0;
   ppu->line = 0;
   ppu->bus = bus;
   ppu->cpu_cycle = 0;

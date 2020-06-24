@@ -27,7 +27,16 @@ struct PPU {
   struct {
     bool addr_write_once;
   } state;
-  uint16_t addr;
+  /*
+   *  15bit vramaddr
+   *  yyy NN YYYYY XXXXX
+   *  ||| || ||||| +++++-- coarse X scroll
+   *  ||| || +++++-------- coarse Y scroll
+   *  ||| ++-------------- nametable select
+   *  +++----------------- fine Y scroll
+   *  see: http://wiki.nesdev.com/w/index.php/PPU_scrolling#PPU_internal_registers
+   */
+  uint16_t vramaddr;
   uint16_t line;
   PPUBus *bus;
   uint16_t scrollx;
