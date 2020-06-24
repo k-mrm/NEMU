@@ -9,16 +9,16 @@
 #define put_pixel(disp, py, px, rgb) disp[py][px] = (ALLEGRO_VERTEX){ \
   .x = (px), .y = (py), .color = al_map_rgb(rgb.r, rgb.g, rgb.b)  \
 }
-#define enable_VBlank(ppu)  (ppu)->reg.status |= (1 << 7)
-#define disable_VBlank(ppu) (ppu)->reg.status &= ~(1 << 7)
+#define enable_VBlank(ppu)  (ppu)->io.status |= (1 << 7)
+#define disable_VBlank(ppu) (ppu)->io.status &= ~(1 << 7)
 
-#define sprite_0hit(ppu)    (ppu)->reg.status |= (1 << 6)
+#define sprite_0hit(ppu)    (ppu)->io.status |= (1 << 6)
 
-#define is_enable_nmi(ppu)  ((ppu)->reg.ctrl & (1 << 7))
-#define is_addr_inc32(ppu)  ((ppu)->reg.ctrl & (1 << 2))
+#define is_enable_nmi(ppu)  ((ppu)->io.ctrl & (1 << 7))
+#define is_addr_inc32(ppu)  ((ppu)->io.ctrl & (1 << 2))
 
-#define is_enable_bg(ppu)     ((ppu)->reg.mask & (1 << 3))
-#define is_enable_sprite(ppu) ((ppu)->reg.mask & (1 << 4))
+#define is_enable_bg(ppu)     ((ppu)->io.mask & (1 << 3))
+#define is_enable_sprite(ppu) ((ppu)->io.mask & (1 << 4))
 
 uint8_t ppu_vramaddr_inc(PPU *ppu) {
   return is_addr_inc32(ppu)? 32: 1;
@@ -29,8 +29,8 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   uint8_t res;
   switch(idx) {
     case 2: {
-      uint8_t status = ppu->reg.status;
-      ppu->state.addr_write_once = false;
+      uint8_t status = ppu->io.status;
+      ppu->write_once = false;
       disable_VBlank(ppu);
       res = status;
       break;
@@ -53,22 +53,22 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
 void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
   // log_dbg("ppu_write %u <- %u\n", idx, data);
   switch(idx) {
-    case 0: ppu->reg.ctrl = data; break;
-    case 1: ppu->reg.mask = data; break;
-    case 3: ppu->reg.oamaddr = data; break;
+    case 0: ppu->io.ctrl = data; break;
+    case 1: ppu->io.mask = data; break;
+    case 3: ppu->io.oamaddr = data; break;
     case 4: ppu_oam_write(ppu, data); break;
     case 5:
-      if(!ppu->state.addr_write_once)
+      if(!ppu->write_once)
         ppu->scrollx = data;
       else
         ppu->scrolly = data;
-      ppu->state.addr_write_once ^= 1;
+      ppu->write_once ^= 1;
       break;
     case 6:
-      ppu->vramaddr = ppu->state.addr_write_once?
+      ppu->vramaddr = ppu->write_once?
         ppu->vramaddr | data :
         (uint16_t)data << 8;
-      ppu->state.addr_write_once ^= 1;
+      ppu->write_once ^= 1;
       break;
     case 7:
       ppubus_write(ppu->bus, ppu->vramaddr, data);
@@ -81,16 +81,16 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
 }
 
 void ppu_init(PPU *ppu, PPUBus *bus) {
-  ppu->reg.ctrl = 0;
-  ppu->reg.mask = 0;
-  ppu->reg.status = 0;
-  ppu->reg.oamaddr = 0;
-  ppu->reg.scroll = 0;
-  ppu->reg.addr = 0;
-  ppu->reg.data = 0;
-  ppu->reg.oamdma = 0;
+  ppu->io.ctrl = 0;
+  ppu->io.mask = 0;
+  ppu->io.status = 0;
+  ppu->io.oamaddr = 0;
+  ppu->io.scroll = 0;
+  ppu->io.addr = 0;
+  ppu->io.data = 0;
+  ppu->io.oamdma = 0;
 
-  ppu->state.addr_write_once = false;
+  ppu->write_once = false;
 
   ppu->vramaddr = 0;
   ppu->line = 0;
@@ -149,23 +149,23 @@ static void ppu_fetch_sprite(PPU *ppu) {
 }
 
 static uint16_t nametable_addr(PPU *ppu) {
-  uint16_t f = ppu->reg.ctrl & 0x03;
+  uint16_t f = ppu->io.ctrl & 0x03;
   return 0x2000 + f * 0x400;
 }
 
 static uint16_t bg_paltable_addr(PPU *ppu) {
-  uint16_t f = (ppu->reg.ctrl >> 4) & 0x01;
+  uint16_t f = (ppu->io.ctrl >> 4) & 0x01;
   return f * 0x1000;
 }
 
 static uint16_t sprite_paltable_addr(PPU *ppu) {
-  uint16_t f = (ppu->reg.ctrl >> 3) & 0x01;
+  uint16_t f = (ppu->io.ctrl >> 3) & 0x01;
   return f * 0x1000;
 }
 
 void ppu_oam_write(PPU *ppu, uint8_t data) {
   // printf("%d\n", data);
-  ppu->bus->oam[ppu->reg.oamaddr++] = data;
+  ppu->bus->oam[ppu->io.oamaddr++] = data;
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {
@@ -266,7 +266,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi) {
       break;
     case PRERENDER:
       ppu->line = 0;
-      ppu->reg.status = 0;
+      ppu->io.status = 0;
       disable_VBlank(ppu);
       return ppubus_read(ppu->bus, 0x3f00);
   }

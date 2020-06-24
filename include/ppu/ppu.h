@@ -23,10 +23,7 @@ struct PPU {
     uint8_t addr;       /* $2006 */
     uint8_t data;       /* $2007 */
     uint8_t oamdma;     /* $4014 */
-  } reg;
-  struct {
-    bool addr_write_once;
-  } state;
+  } io;
   /*
    *  15bit vramaddr
    *  yyy NN YYYYY XXXXX
@@ -37,13 +34,15 @@ struct PPU {
    *  see: http://wiki.nesdev.com/w/index.php/PPU_scrolling#PPU_internal_registers
    */
   uint16_t vramaddr;
+  uint16_t tmp_vramaddr;
   uint16_t line;
-  PPUBus *bus;
   uint16_t scrollx;
   uint16_t scrolly;
   uint16_t cpu_cycle;
+  bool write_once;
   Sprite tmp_sprite[8];
   uint8_t tmp_sprite_len;
+  PPUBus *bus;
 };
 
 void ppu_oam_write(PPU *, uint8_t);
