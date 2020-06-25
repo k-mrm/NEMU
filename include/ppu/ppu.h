@@ -31,10 +31,14 @@ struct PPU {
    *  ||| || +++++-------- coarse Y scroll
    *  ||| ++-------------- nametable select
    *  +++----------------- fine Y scroll
-   *  see: http://wiki.nesdev.com/w/index.php/PPU_scrolling#PPU_internal_registers
+   *  see http://wiki.nesdev.com/w/index.php/PPU_scrolling#PPU_internal_registers
    */
-  uint16_t vramaddr;
-  uint16_t tmp_vramaddr;
+  uint16_t vramaddr: 15;
+  uint16_t tmp_vramaddr: 15;
+  /*
+   *  3bit fine X scroll
+   */
+  uint8_t fine_x: 3;
   uint16_t line;
   uint16_t scrollx;
   uint16_t scrolly;

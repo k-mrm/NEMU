@@ -53,21 +53,56 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
 void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
   // log_dbg("ppu_write %u <- %u\n", idx, data);
   switch(idx) {
-    case 0: ppu->io.ctrl = data; break;
+    case 0:
+      ppu->io.ctrl = data;
+      ppu->tmp_vramaddr =
+        (ppu->tmp_vramaddr & 0b111001111111111) | ((data & 0x3) << 10);
+      break;
     case 1: ppu->io.mask = data; break;
     case 3: ppu->io.oamaddr = data; break;
     case 4: ppu_oam_write(ppu, data); break;
     case 5:
-      if(!ppu->write_once)
+      if(!ppu->write_once) {
+        /*
+         *  t: ....... ...HGFED = d: HGFED...
+         *  x:              CBA = d: .....CBA
+         */
+        ppu->fine_x = data & 0x7;
+        uint8_t x_scroll = data >> 3;
+        ppu->tmp_vramaddr =
+          (ppu->tmp_vramaddr & 0b111111111100000) | x_scroll;
         ppu->scrollx = data;
-      else
+      }
+      else {
+        /* t: CBA..HG FED..... = d: HGFEDCBA */
+        uint16_t fine_y = data & 0x7;
+        uint16_t y_scroll = data >> 3;
+        ppu->tmp_vramaddr =
+          (ppu->tmp_vramaddr & 0b000110000011111) | (y_scroll << 5) | (fine_y << 12);
         ppu->scrolly = data;
+      }
       ppu->write_once ^= 1;
       break;
     case 6:
-      ppu->vramaddr = ppu->write_once?
-        ppu->vramaddr | data :
-        (uint16_t)data << 8;
+      if(!ppu->write_once) {
+        /*
+         *  t: .FEDCBA ........ = d: ..FEDCBA
+         *  t: X...... ........ = 0
+         */
+        uint16_t high_addr = data & 0x3f;
+        ppu->tmp_vramaddr =
+          (ppu->tmp_vramaddr & 0b000000011111111) | (high_addr << 8);
+      }
+      else {
+        /*
+         *  t: ....... HGFEDCBA = d: HGFEDCBA
+         *  v                   = t
+         *  w:                  = 0
+         */
+        ppu->tmp_vramaddr =
+          (ppu->tmp_vramaddr & 0b111111100000000) | data;
+        ppu->vramaddr = ppu->tmp_vramaddr;
+      }
       ppu->write_once ^= 1;
       break;
     case 7:
