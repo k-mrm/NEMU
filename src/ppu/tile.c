@@ -45,7 +45,7 @@ static uint16_t get_spriteid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
 }
 
 static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
-  printf("attrid %x\n", offset + 0x3c0 + x / 4 + y * 8 / 4);
+  // printf("attrid %x\n", offset + 0x3c0 + x / 4 + y * 8 / 4);
   return ppubus_read(ppu->bus, offset + 0x3c0 + x / 4 + y * 8 / 4);
 }
 
@@ -54,9 +54,9 @@ void ppu_make_sprite_tile(PPU *ppu, Tile *tile, uint16_t sid, uint8_t pid, uint8
   tile->paletteid = pid;
 }
 
-void ppu_make_bg_tile(PPU *ppu, Tile *tile, uint8_t x, uint8_t y, uint16_t offset, uint16_t baseaddr) {
-  uint16_t sid = get_spriteid(ppu, x, y, offset);
-  uint8_t aid = get_attrid(ppu, x, y, offset);
+void ppu_make_bg_tile(PPU *ppu, Tile *tile, uint16_t baseaddr) {
+  uint16_t sid = get_spriteid(ppu);
+  uint8_t aid = get_attrid(ppu);
   uint8_t blockpos = x % 4 / 2 + y % 4 / 2 * 2;
   uint8_t pid = (aid >> blockpos) & 0x03;
 

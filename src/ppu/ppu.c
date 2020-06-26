@@ -203,6 +203,19 @@ void ppu_oam_write(PPU *ppu, uint8_t data) {
   ppu->bus->oam[ppu->io.oamaddr++] = data;
 }
 
+static void hori_increment(PPU *ppu) {
+  if((ppu->vramaddr & 0x1f) == 0x1f) {
+    ppu->vramaddr &= ~0x1f;
+    ppu->vramaddr ^= 0x400;
+  }
+  else {
+    ppu->vramaddr++;
+  }
+}
+
+static void vert_increment(PPU *ppu) {
+}
+
 static void ppu_draw_line(PPU *ppu, Disp screen) {
   ppu_fetch_sprite(ppu);
   uint8_t palette[4];
@@ -253,6 +266,8 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
           put_pixel(screen, ppu->line, x * 8 + i, rgb);
         }
       }
+
+      x != 31? hori_increment(ppu) : vert_increment(ppu);
     }
   }
 
@@ -288,6 +303,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi) {
     case VISIBLE:
       ppu_draw_line(ppu, screen);
       ppu->line++;
+      /* dot 256 */
       break;
     case POSTRENDER:
       ppu->line++;
