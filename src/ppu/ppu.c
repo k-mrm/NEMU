@@ -97,7 +97,6 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         /*
          *  t: ....... HGFEDCBA = d: HGFEDCBA
          *  v                   = t
-         *  w:                  = 0
          */
         ppu->tmp_vramaddr =
           (ppu->tmp_vramaddr & 0b111111100000000) | data;
@@ -172,9 +171,8 @@ static void ppu_fetch_sprite(PPU *ppu) {
       break;
     }
     else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
-      if(i == 0) {
+      if(i == 0)
         sprite_0hit(ppu);
-      }
       ppu->tmp_sprite[tmps_idx] = spr;
       ++tmps_idx;
     }
@@ -221,14 +219,14 @@ static void vert_increment(PPU *ppu) {
     ppu->vramaddr &= ~(0x7000);
     uint8_t coarse_y = (ppu->vramaddr >> 5) & 0x1f;
     if(coarse_y == 29) {
-      ppu->vramaddr &= ~(0x3e0);
+      ppu->vramaddr &= ~0x3e0;
       ppu->vramaddr ^= 0x800;
     }
     else if(coarse_y == 31) {
-      ppu->vramaddr &= ~(0x3e0);
+      ppu->vramaddr &= ~0x3e0;
     }
     else {
-      ppu->vramaddr = (ppu->vramaddr & ~(0x3e0)) | (coarse_y + 1);
+      ppu->vramaddr = (ppu->vramaddr & ~0x3e0) | ((coarse_y + 1) << 5);
     }
   }
   else {
