@@ -203,6 +203,9 @@ void ppu_oam_write(PPU *ppu, uint8_t data) {
   ppu->bus->oam[ppu->io.oamaddr++] = data;
 }
 
+/*
+ *  see http://wiki.nesdev.com/w/index.php/PPU_scrolling#Wrapping_around
+ */
 static void hori_increment(PPU *ppu) {
   if((ppu->vramaddr & 0x1f) == 0x1f) {
     ppu->vramaddr &= ~0x1f;
@@ -214,6 +217,23 @@ static void hori_increment(PPU *ppu) {
 }
 
 static void vert_increment(PPU *ppu) {
+  if((ppu->vramaddr & 0x7000) == 0x7000) {
+    ppu->vramaddr &= ~(0x7000);
+    uint8_t coarse_y = (ppu->vramaddr >> 5) & 0x1f;
+    if(coarse_y == 29) {
+      ppu->vramaddr &= ~(0x3e0);
+      ppu->vramaddr ^= 0x800;
+    }
+    else if(coarse_y == 31) {
+      ppu->vramaddr &= ~(0x3e0);
+    }
+    else {
+      ppu->vramaddr = (ppu->vramaddr & ~(0x3e0)) | (coarse_y + 1);
+    }
+  }
+  else {
+    ppu->vramaddr += 0x1000;
+  }
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {
