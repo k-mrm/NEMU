@@ -44,8 +44,8 @@ struct PPU {
   uint16_t scrolly;
   uint16_t cpu_cycle;
   bool write_once;
-  Sprite tmp_sprite[8];
-  uint8_t tmp_sprite_len;
+  Sprite snd_sprite[8];
+  uint8_t snd_sprite_len;
   PPUBus *bus;
 };
 

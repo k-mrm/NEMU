@@ -160,7 +160,7 @@ static void ppu_fetch_sprite(PPU *ppu) {
 
   uint8_t tmps_idx = 0;
   uint8_t sprite_y = 0;
-  ppu->tmp_sprite_len = 0;
+  ppu->snd_sprite_len = 0;
 
   for(int i = 0; i < 64; ++i) {
     uint8_t y = ppu->bus->oam[i * 4];
@@ -176,12 +176,12 @@ static void ppu_fetch_sprite(PPU *ppu) {
     else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
       if(i == 0)
         sprite_0hit(ppu);
-      ppu->tmp_sprite[tmps_idx] = spr;
+      ppu->snd_sprite[tmps_idx] = spr;
       ++tmps_idx;
     }
   }
 
-  ppu->tmp_sprite_len = tmps_idx;
+  ppu->snd_sprite_len = tmps_idx;
 }
 
 static uint16_t nametable_addr(PPU *ppu) {
@@ -263,9 +263,9 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
 
   /* draw background sprite */
   if(is_enable_sprite(ppu)) {
-    for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
+    for(uint8_t idx = 0; idx < ppu->snd_sprite_len; ++idx) {
       Tile tile;
-      Sprite sprite = ppu->tmp_sprite[idx];
+      Sprite sprite = ppu->snd_sprite[idx];
       if(!(sprite.attr & (1 << 5))) continue;
       uint8_t pid = sprite.attr & 0x3;
       uint8_t vhflip = (sprite.attr >> 6) & 0x3;
@@ -290,7 +290,6 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
   /* draw background */
   if(is_enable_bg(ppu)) {
     Tile tile;
-    uint8_t y = ppu->line / 8;
     uint8_t y_in_tile = ppu->line % 8;
     for(uint8_t x = 0; x < 32; x++) {
       // printf("nametable %#x ", nametable_addr(ppu));
@@ -317,9 +316,9 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
 
   /* draw sprite */
   if(is_enable_sprite(ppu)) {
-    for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
+    for(uint8_t idx = 0; idx < ppu->snd_sprite_len; ++idx) {
       Tile tile;
-      Sprite sprite = ppu->tmp_sprite[idx];
+      Sprite sprite = ppu->snd_sprite[idx];
       if(sprite.attr & (1 << 5)) continue;
       uint8_t pid = sprite.attr & 0x3;
       uint8_t vhflip = (sprite.attr >> 6) & 0x3;
