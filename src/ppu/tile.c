@@ -39,14 +39,15 @@ static void ppu_make_pixelpat(PPU *ppu, Tile *tile, uint16_t sid, uint8_t vhflip
   }
 }
 
-static uint16_t get_spriteid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
-  // printf("%x ", offset + x + y * 0x20);
-  return ppubus_read(ppu->bus, offset + x + y * 0x20);
+/*
+ *  see http://wiki.nesdev.com/w/index.php/PPU_scrolling#Tile_and_attribute_fetching
+ */
+static uint16_t get_spriteid(PPU *ppu) {
+  return ppubus_read(ppu->bus, 0x2000 | (ppu->vramaddr & 0xfff));
 }
 
-static uint8_t get_attrid(PPU *ppu, uint8_t x, uint8_t y, uint16_t offset) {
-  // printf("attrid %x\n", offset + 0x3c0 + x / 4 + y * 8 / 4);
-  return ppubus_read(ppu->bus, offset + 0x3c0 + x / 4 + y * 8 / 4);
+static uint8_t get_attrid(PPU *ppu) {
+  return ppubus_read(ppu->bus, 0x23c0 | ((ppu->vramaddr >> 5) & 0x38) | ((ppu->vramaddr >> 2) & 0x07));
 }
 
 void ppu_make_sprite_tile(PPU *ppu, Tile *tile, uint16_t sid, uint8_t pid, uint8_t vhflip, uint16_t baseaddr) {
@@ -57,6 +58,8 @@ void ppu_make_sprite_tile(PPU *ppu, Tile *tile, uint16_t sid, uint8_t pid, uint8
 void ppu_make_bg_tile(PPU *ppu, Tile *tile, uint16_t baseaddr) {
   uint16_t sid = get_spriteid(ppu);
   uint8_t aid = get_attrid(ppu);
+  uint8_t x = ppu->vramaddr & 0x1f;
+  uint8_t y = (ppu->vramaddr >> 5) & 0x1f;
   uint8_t blockpos = x % 4 / 2 + y % 4 / 2 * 2;
   uint8_t pid = (aid >> blockpos) & 0x03;
 
