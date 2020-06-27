@@ -54,6 +54,9 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
   // log_dbg("ppu_write %u <- %u\n", idx, data);
   switch(idx) {
     case 0:
+      /*
+       *  t: ...BA.. ........ = d: ......BA
+       */
       ppu->io.ctrl = data;
       ppu->tmp_vramaddr =
         (ppu->tmp_vramaddr & 0b111001111111111) | ((data & 0x3) << 10);
@@ -216,7 +219,7 @@ static void hori_increment(PPU *ppu) {
 
 static void vert_increment(PPU *ppu) {
   if((ppu->vramaddr & 0x7000) == 0x7000) {
-    ppu->vramaddr &= ~(0x7000);
+    ppu->vramaddr &= ~0x7000;
     uint8_t coarse_y = (ppu->vramaddr >> 5) & 0x1f;
     if(coarse_y == 29) {
       ppu->vramaddr &= ~0x3e0;
@@ -234,7 +237,7 @@ static void vert_increment(PPU *ppu) {
   }
 }
 
-static void hori_t2v(PPU *ppu) {
+static void copy_horizontal_t2v(PPU *ppu) {
   /*
    *  v: ....F.. ...EDCBA = t: ....F.. ...EDCBA
    */
@@ -242,6 +245,16 @@ static void hori_t2v(PPU *ppu) {
     (ppu->vramaddr & ~0x400) | (ppu->tmp_vramaddr & 0x400);
   ppu->vramaddr =
     (ppu->vramaddr & ~0x1f) | (ppu->tmp_vramaddr & 0x1f);
+}
+
+static void copy_vertical_t2v(PPU *ppu) {
+  /*
+   *  v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
+   */
+  ppu->vramaddr =
+    (ppu->vramaddr & ~0x7800) | (ppu->tmp_vramaddr & 0x7800);
+  ppu->vramaddr =
+    (ppu->vramaddr & ~0x3e0) | (ppu->tmp_vramaddr & 0x3e0);
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {
@@ -300,7 +313,7 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
   }
 
   /* cycle 257: hori(v) = hori(t) */
-  hori_t2v(ppu);
+  copy_horizontal_t2v(ppu);
 
   /* draw sprite */
   if(is_enable_sprite(ppu)) {
@@ -349,6 +362,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi) {
       ppu->line = 0;
       ppu->io.status = 0;
       disable_VBlank(ppu);
+      copy_vertical_t2v(ppu);
       return ppubus_read(ppu->bus, 0x3f00);
   }
   return 0;

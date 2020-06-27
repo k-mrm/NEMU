@@ -1,6 +1,7 @@
 #include "cpu/cpu.h"
 #include "cpu/register.h"
 #include "cpu/interrupt.h"
+#include "log/log.h"
 
 void cpu_interrupt(CPU *cpu, int inter) {
   switch(inter) {
@@ -25,7 +26,7 @@ void cpu_interrupt(CPU *cpu, int inter) {
       cpu->reg.pc = ((uint16_t)high << 8) | low;
       break;
     }
-    case IRQ:   break;
+    case IRQ: panic("IRQ: unimplemented"); break;
     case BRK: {
       if(cpu_get_pflag(cpu, P_STATUS_IRQ) || cpu_get_pflag(cpu, P_STATUS_BRK))
         break;
