@@ -234,6 +234,16 @@ static void vert_increment(PPU *ppu) {
   }
 }
 
+static void hori_t2v(PPU *ppu) {
+  /*
+   *  v: ....F.. ...EDCBA = t: ....F.. ...EDCBA
+   */
+  ppu->vramaddr =
+    (ppu->vramaddr & ~0x400) | (ppu->tmp_vramaddr & 0x400);
+  ppu->vramaddr =
+    (ppu->vramaddr & ~0x1f) | (ppu->tmp_vramaddr & 0x1f);
+}
+
 static void ppu_draw_line(PPU *ppu, Disp screen) {
   ppu_fetch_sprite(ppu);
   uint8_t palette[4];
@@ -289,6 +299,9 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     }
   }
 
+  /* cycle 257: hori(v) = hori(t) */
+  hori_t2v(ppu);
+
   /* draw sprite */
   if(is_enable_sprite(ppu)) {
     for(uint8_t idx = 0; idx < ppu->tmp_sprite_len; ++idx) {
@@ -321,7 +334,6 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi) {
     case VISIBLE:
       ppu_draw_line(ppu, screen);
       ppu->line++;
-      /* dot 256 */
       break;
     case POSTRENDER:
       ppu->line++;
