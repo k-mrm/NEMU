@@ -37,7 +37,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->vramaddr);
-      // printf("ppuaddr read %#x\n", ppu->addr);
+      printf("ppuaddr read %#x\n", ppu->vramaddr);
       ppu->vramaddr += ppu_vramaddr_inc(ppu);
       res = data;
       break;
@@ -74,7 +74,6 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         uint8_t x_scroll = data >> 3;
         ppu->tmp_vramaddr =
           (ppu->tmp_vramaddr & 0b111111111100000) | x_scroll;
-        ppu->scrollx = data;
       }
       else {
         /* t: CBA..HG FED..... = d: HGFEDCBA */
@@ -82,7 +81,6 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         uint16_t y_scroll = data >> 3;
         ppu->tmp_vramaddr =
           (ppu->tmp_vramaddr & 0b000110000011111) | (y_scroll << 5) | (fine_y << 12);
-        ppu->scrolly = data;
       }
       ppu->write_once ^= 1;
       break;
@@ -109,7 +107,6 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       break;
     case 7:
       ppubus_write(ppu->bus, ppu->vramaddr, data);
-      // printf("ppuaddr write %#x\n", ppu->addr);
       ppu->vramaddr += ppu_vramaddr_inc(ppu);
       break;
     default:
@@ -132,9 +129,7 @@ void ppu_init(PPU *ppu, PPUBus *bus) {
   ppu->vramaddr = 0;
   ppu->line = 0;
   ppu->bus = bus;
-  ppu->cpu_cycle = 0;
-  ppu->scrollx = 0;
-  ppu->scrolly = 0;
+  ppu->cycle = 0;
 }
 
 enum linestate {
@@ -242,9 +237,7 @@ static void copy_horizontal_t2v(PPU *ppu) {
    *  v: ....F.. ...EDCBA = t: ....F.. ...EDCBA
    */
   ppu->vramaddr =
-    (ppu->vramaddr & ~0x400) | (ppu->tmp_vramaddr & 0x400);
-  ppu->vramaddr =
-    (ppu->vramaddr & ~0x1f) | (ppu->tmp_vramaddr & 0x1f);
+    (ppu->vramaddr & ~0x41f) | (ppu->tmp_vramaddr & 0x41f);
 }
 
 static void copy_vertical_t2v(PPU *ppu) {
@@ -252,9 +245,17 @@ static void copy_vertical_t2v(PPU *ppu) {
    *  v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
    */
   ppu->vramaddr =
-    (ppu->vramaddr & ~0x7800) | (ppu->tmp_vramaddr & 0x7800);
-  ppu->vramaddr =
-    (ppu->vramaddr & ~0x3e0) | (ppu->tmp_vramaddr & 0x3e0);
+    (ppu->vramaddr & ~0x7be0) | (ppu->tmp_vramaddr & 0x7be0);
+}
+
+static void update_background(PPU *ppu, Disp screen) {
+  switch(ppu->cycle % 8) {
+    case 2:
+    case 4:
+    case 6:
+    case 0:
+    default: return;
+  }
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {
@@ -292,8 +293,6 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     Tile tile;
     uint8_t y_in_tile = ppu->line % 8;
     for(uint8_t x = 0; x < 32; x++) {
-      // printf("nametable %#x ", nametable_addr(ppu));
-      // printf("scrollx: %d, scrolly: %d\n", ppu->scrollx / 8, ppu->scrolly / 8);
       ppu_make_bg_tile(ppu, &tile, bg_paltable_addr(ppu));
       for(int i = 0; i < 4; ++i) {
         palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
@@ -341,28 +340,56 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
   }
 }
 
-int ppu_step(PPU *ppu, Disp screen, int *nmi) {
-  switch(linestate_from(ppu->line)) {
-    case VISIBLE:
-      ppu_draw_line(ppu, screen);
-      ppu->line++;
-      break;
-    case POSTRENDER:
-      ppu->line++;
-      break;
-    case VERTICAL_BLANKING:
-      if(ppu->line == 241) {
-        enable_VBlank(ppu);
-        *nmi = is_enable_nmi(ppu)? 1 : 0;
-      }
-      ppu->line++;
-      break;
-    case PRERENDER:
-      ppu->line = 0;
-      ppu->io.status = 0;
-      disable_VBlank(ppu);
-      copy_vertical_t2v(ppu);
-      return ppubus_read(ppu->bus, 0x3f00);
+static void next_scanline(PPU *ppu) {
+  if(linestate_from(ppu->line) == PRERENDER)
+    ppu->line = 0;
+  else
+    ppu->line++;
+}
+
+static void ppu_tick(PPU *ppu) {
+  if(ppu->cycle == 340) {
+    ppu->cycle = 0;
+    next_scanline(ppu);
   }
-  return 0;
+  else {
+    ppu->cycle++;
+  }
+}
+
+int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
+  int ret = 0;
+  while(ncycle--) {
+    ppu_tick(ppu);
+
+    switch(linestate_from(ppu->line)) {
+      case VISIBLE:
+        update_background(ppu, screen);
+        if(ppu->cycle % 8 == 0)
+          hori_increment(ppu);
+        if(ppu->cycle == 256)
+          vert_increment(ppu);
+        if(ppu->cycle == 257)
+          copy_horizontal_t2v(ppu);
+        break;
+      case POSTRENDER:
+        break;
+      case VERTICAL_BLANKING:
+        if(ppu->line == 241 && ppu->cycle == 1) {
+          enable_VBlank(ppu);
+          *nmi = is_enable_nmi(ppu)? 1 : 0;
+        }
+        break;
+      case PRERENDER:
+        if(ppu->cycle == 1) {
+          ppu->io.status = 0;
+          disable_VBlank(ppu);
+        }
+        if(280 <= ppu->cycle && ppu->cycle <= 304)
+          copy_vertical_t2v(ppu);
+        ret = ppubus_read(ppu->bus, 0x3f00);
+        break;
+    }
+  }
+  return ret;
 }

@@ -40,9 +40,7 @@ struct PPU {
    */
   uint8_t fine_x: 3;
   uint16_t line;
-  uint16_t scrollx;
-  uint16_t scrolly;
-  uint16_t cpu_cycle;
+  uint16_t cycle;
   bool write_once;
   Sprite snd_sprite[8];
   uint8_t snd_sprite_len;
@@ -51,7 +49,7 @@ struct PPU {
 
 void ppu_oam_write(PPU *, uint8_t);
 void ppu_render(PPU *, Disp);
-int ppu_step(PPU *, Disp, int *);
+int ppu_step(PPU *, Disp, int *, int);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);
 void ppu_write(PPU *, uint16_t, uint8_t);

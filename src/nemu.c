@@ -25,11 +25,12 @@ int nemu_boot(NEMU *nes, Cassette *cas) {
 
   for(;;) {
     request_frame(&nes->gui);
-    lpf = 262;
+    int pcycle = 0;
     /* draw 1frame */
-    while(lpf--) {
-      c = ppu_step(&nes->ppu, nes->screen, &nmi);
-      cpu_run(&nes->cpu, 341 / 3);
+    while(pcycle < 262 * 341) {
+      int cycle = cpu_step(&nes->cpu);
+      c = ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
+      pcycle += cycle * 3;
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);
         nmi = 0;
