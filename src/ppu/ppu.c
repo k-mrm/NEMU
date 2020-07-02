@@ -20,6 +20,8 @@
 #define is_enable_bg(ppu)     ((ppu)->io.mask & (1 << 3))
 #define is_enable_sprite(ppu) ((ppu)->io.mask & (1 << 4))
 
+#define fine_y(vramaddr) (((vramaddr) >> 12) & 0x7)
+
 uint8_t ppu_vramaddr_inc(PPU *ppu) {
   return is_addr_inc32(ppu)? 32: 1;
 }
@@ -248,12 +250,21 @@ static void copy_vertical_t2v(PPU *ppu) {
     (ppu->vramaddr & ~0x7be0) | (ppu->tmp_vramaddr & 0x7be0);
 }
 
+#define tile_addr(vaddr)  (0x2000 | ((vaddr) & 0xfff))
+#define attr_addr(vaddr)  (0x23c0 | (((vaddr) >> 5) & 0x38) | (((vaddr) >> 2) & 0x7))
+
 static void update_background(PPU *ppu, Disp screen) {
   switch(ppu->cycle % 8) {
     case 2:
+      ppu->tileid = ppubus_read(ppu->bus, tile_addr(ppu->vramaddr));
+      break;
     case 4:
+      ppu->aid = ppubus_read(ppu->bus, attr_addr(ppu->vramaddr));
+      break;
     case 6:
+      ppu->lowtile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->tileid * 16 + fine_y(ppu->vramaddr));
     case 0:
+      ppu->hightile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->tileid * 16 + 8 + fine_y(ppu->vramaddr));
     default: return;
   }
 }
