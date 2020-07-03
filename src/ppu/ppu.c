@@ -117,19 +117,14 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
 }
 
 void ppu_init(PPU *ppu, PPUBus *bus) {
-  ppu->io.ctrl = 0;
-  ppu->io.mask = 0;
-  ppu->io.status = 0;
-  ppu->io.oamaddr = 0;
-  ppu->io.scroll = 0;
-  ppu->io.addr = 0;
-  ppu->io.data = 0;
-  ppu->io.oamdma = 0;
+  memset(ppu->io, 0, sizeof(ppu->io));
 
   ppu->write_once = false;
 
   ppu->vramaddr = 0;
   ppu->line = 0;
+  ppu->tileid = 0;
+  ppu->aid = 0;
   ppu->bus = bus;
   ppu->cycle = 0;
 }
@@ -253,20 +248,48 @@ static void copy_vertical_t2v(PPU *ppu) {
 #define tile_addr(vaddr)  (0x2000 | ((vaddr) & 0xfff))
 #define attr_addr(vaddr)  (0x23c0 | (((vaddr) >> 5) & 0x38) | (((vaddr) >> 2) & 0x7))
 
-static void update_background(PPU *ppu, Disp screen) {
+static void store_tile(PPU *ppu) {
+  ppu->bglow_reg >>= 8;
+  ppu->bghigh_reg >>= 8;
+  ppu->bglow_reg |= ((uint16_t)ppu->lowtile << 8);
+  ppu->bghigh_reg |= ((uint16_t)ppu->hightile << 8);
+}
+
+static void bg_shift(PPU *ppu) {
+  ppu->bglow_reg <<= 1;
+  ppu->bghigh_reg <<= 1;
+  ppu->attrlow_reg <<= 1;
+  ppu->attrhigh_reg <<= 1;
+}
+
+#define coarse_x(vaddr) ((vaddr) & 0x1f)
+#define coarse_y(vaddr) (((vaddr) >> 5) & 0x1f)
+
+static void update_background(PPU *ppu) {
   switch(ppu->cycle % 8) {
-    case 2:
-      ppu->tileid = ppubus_read(ppu->bus, tile_addr(ppu->vramaddr));
+    case 1:
+      ppu->ntbyte = ppubus_read(ppu->bus, tile_addr(ppu->vramaddr));
       break;
-    case 4:
-      ppu->aid = ppubus_read(ppu->bus, attr_addr(ppu->vramaddr));
+    case 3: {
+      ppu->atbyte = ppubus_read(ppu->bus, attr_addr(ppu->vramaddr));
       break;
-    case 6:
+    }
+    case 5:
       ppu->lowtile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->tileid * 16 + fine_y(ppu->vramaddr));
-    case 0:
+      break;
+    case 7:
       ppu->hightile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->tileid * 16 + 8 + fine_y(ppu->vramaddr));
+      break;
     default: return;
   }
+}
+
+static void reload_shifter(PPU *ppu) {
+  ;
+}
+
+static void draw_bgpixel(PPU *ppu, Disp screen) {
+  ;
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {
@@ -373,11 +396,18 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
   while(ncycle--) {
     ppu_tick(ppu);
 
+    /* see https://wiki.nesdev.com/w/images/4/4f/Ppu.svg */
     switch(linestate_from(ppu->line)) {
       case VISIBLE:
-        update_background(ppu, screen);
-        if(ppu->cycle % 8 == 0)
-          hori_increment(ppu);
+        draw_bgpixel(ppu, screen);
+        if(1 <= ppu->cycle && ppu->cycle <= 256 || 321 <= ppu->cycle && ppu->cycle <= 336) {
+          update_background(ppu);
+          if(ppu->cycle % 8 == 0)
+            hori_increment(ppu);
+        }
+        if((ppu->cycle - 1) % 8 == 0) {
+          reload_shifter(ppu);
+        }
         if(ppu->cycle == 256)
           vert_increment(ppu);
         if(ppu->cycle == 257)
@@ -396,6 +426,15 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           ppu->io.status = 0;
           disable_VBlank(ppu);
         }
+        if(1 <= ppu->cycle && ppu->cycle <= 256 || 321 <= ppu->cycle && ppu->cycle <= 336) {
+          update_background(ppu, screen);
+          if(ppu->cycle % 8 == 0)
+            hori_increment(ppu);
+        }
+        if(ppu->cycle == 256)
+          vert_increment(ppu);
+        if(ppu->cycle == 257)
+          copy_horizontal_t2v(ppu);
         if(280 <= ppu->cycle && ppu->cycle <= 304)
           copy_vertical_t2v(ppu);
         ret = ppubus_read(ppu->bus, 0x3f00);

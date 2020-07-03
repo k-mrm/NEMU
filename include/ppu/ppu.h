@@ -41,8 +41,15 @@ struct PPU {
   uint8_t fine_x: 3;
   uint16_t line;
   uint16_t cycle;
-  uint16_t tileid;
-  uint8_t aid;
+  uint16_t ntbyte;
+  uint8_t atbyte;
+  uint8_t lowtile;
+  uint8_t hightile;
+  uint16_t bglow_reg;
+  uint16_t bghigh_reg;
+  uint8_t attrlow_reg;
+  uint8_t attrhigh_reg;
+  uint8_t attr_latch: 2;
   bool write_once;
   Sprite snd_sprite[8];
   uint8_t snd_sprite_len;
