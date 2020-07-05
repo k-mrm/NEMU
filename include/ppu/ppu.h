@@ -49,7 +49,7 @@ struct PPU {
   uint16_t bghigh_reg;
   uint8_t attrlow_reg;
   uint8_t attrhigh_reg;
-  uint8_t attr_latch: 2;
+  uint8_t attr_latch;
   bool write_once;
   Sprite snd_sprite[8];
   uint8_t snd_sprite_len;

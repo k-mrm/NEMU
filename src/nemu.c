@@ -36,8 +36,10 @@ int nemu_boot(NEMU *nes, Cassette *cas) {
         nmi = 0;
       }
     }
+    /*
     RGB rgb = colors[c];
     al_clear_to_color(al_map_rgb(rgb.r, rgb.g, rgb.b));
+    */
     gui_render(nes->screen);
 
     memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);

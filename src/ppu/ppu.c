@@ -39,7 +39,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->vramaddr);
-      printf("ppuaddr read %#x\n", ppu->vramaddr);
+      // printf("ppuaddr read %#x\n", ppu->vramaddr);
       ppu->vramaddr += ppu_vramaddr_inc(ppu);
       res = data;
       break;
@@ -117,16 +117,8 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
 }
 
 void ppu_init(PPU *ppu, PPUBus *bus) {
-  memset(&ppu->io, 0, sizeof(ppu->io));
-
-  ppu->write_once = false;
-
-  ppu->vramaddr = 0;
-  ppu->line = 0;
-  ppu->ntbyte = 0;
-  ppu->atbyte = 0;
+  memset(ppu, 0, sizeof(PPU));
   ppu->bus = bus;
-  ppu->cycle = 0;
 }
 
 enum linestate {
@@ -245,14 +237,17 @@ static void copy_vertical_t2v(PPU *ppu) {
     (ppu->vramaddr & ~0x7be0) | (ppu->tmp_vramaddr & 0x7be0);
 }
 
-#define tile_addr(vaddr)  (0x2000 | ((vaddr) & 0xfff))
-#define attr_addr(vaddr)  (0x23c0 | (((vaddr) >> 5) & 0x38) | (((vaddr) >> 2) & 0x7))
+#define tile_addr(v)  (0x2000 | ((v) & 0xfff))
+#define attr_addr(v)  (0x23c0 | ((v) & 0xc00) | (((v) >> 5) & 0x38) | (((v) >> 2) & 0x7))
 
 static void bg_shift(PPU *ppu) {
   ppu->bglow_reg <<= 1;
   ppu->bghigh_reg <<= 1;
   ppu->attrlow_reg <<= 1;
   ppu->attrhigh_reg <<= 1;
+
+  ppu->attrlow_reg |= (ppu->attr_latch & 0x1) != 0;
+  ppu->attrhigh_reg |= (ppu->attr_latch & 0x2) != 0;
 }
 
 #define coarse_x(vaddr) ((vaddr) & 0x1f)
@@ -281,13 +276,24 @@ static void update_background(PPU *ppu) {
 
 static void reload_shifter(PPU *ppu) {
   ppu->bglow_reg = (ppu->bglow_reg & 0xff00) | ppu->lowtile;
-  ppu->bghigh_reg = (ppu->bglow_reg & 0xff00) | ppu->hightile;
-  ppu->attrlow_reg = (ppu->atbyte & 0x1)? 0xff : 0x00;
-  ppu->attrhigh_reg = (ppu->atbyte & 0x2)? 0xff : 0x00;
+  ppu->bghigh_reg = (ppu->bghigh_reg & 0xff00) | ppu->hightile;
+  ppu->attr_latch = ppu->atbyte;
 }
 
 static void draw_bgpixel(PPU *ppu, Disp screen) {
-  ;
+  uint8_t mux_mask = 0x80 >> ppu->fine_x;
+  uint8_t lpixel = ((ppu->bglow_reg >> 8) & mux_mask) != 0;
+  uint8_t hpixel = ((ppu->bghigh_reg >> 8) & mux_mask) != 0;
+  uint8_t pixel = lpixel | (hpixel << 1);
+  uint8_t lpid = (ppu->attrlow_reg & mux_mask) != 0;
+  uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
+  uint8_t pid = lpid | (hpid << 1);
+
+  uint8_t color = ppubus_read(ppu->bus, 0x3f00 + pid * 4 + pixel);
+  // printf("pid %d pixel %d %#x color %d\n", pid, pixel, 0x3f00 + pid * 4 + pixel, color);
+  RGB rgb = colors[color];
+
+  put_pixel(screen, ppu->line, ppu->cycle - 2, rgb);
 }
 
 static void ppu_draw_line(PPU *ppu, Disp screen) {
@@ -372,7 +378,9 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
     /* see https://wiki.nesdev.com/w/images/4/4f/Ppu.svg */
     switch(linestate_from(ppu->line)) {
       case VISIBLE:
-        draw_bgpixel(ppu, screen);
+        if(2 <= ppu->cycle && ppu->cycle <= 257) {
+          draw_bgpixel(ppu, screen);
+        }
         if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
           update_background(ppu);
           if(ppu->cycle % 8 == 0)
