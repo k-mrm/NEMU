@@ -117,14 +117,14 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
 }
 
 void ppu_init(PPU *ppu, PPUBus *bus) {
-  memset(ppu->io, 0, sizeof(ppu->io));
+  memset(&ppu->io, 0, sizeof(ppu->io));
 
   ppu->write_once = false;
 
   ppu->vramaddr = 0;
   ppu->line = 0;
-  ppu->tileid = 0;
-  ppu->aid = 0;
+  ppu->ntbyte = 0;
+  ppu->atbyte = 0;
   ppu->bus = bus;
   ppu->cycle = 0;
 }
@@ -280,7 +280,10 @@ static void update_background(PPU *ppu) {
 }
 
 static void reload_shifter(PPU *ppu) {
-  ;
+  ppu->bglow_reg = (ppu->bglow_reg & 0xff00) | ppu->lowtile;
+  ppu->bghigh_reg = (ppu->bglow_reg & 0xff00) | ppu->hightile;
+  ppu->attrlow_reg = (ppu->atbyte & 0x1)? 0xff : 0x00;
+  ppu->attrhigh_reg = (ppu->atbyte & 0x2)? 0xff : 0x00;
 }
 
 static void draw_bgpixel(PPU *ppu, Disp screen) {
@@ -370,10 +373,13 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
     switch(linestate_from(ppu->line)) {
       case VISIBLE:
         draw_bgpixel(ppu, screen);
-        if(1 <= ppu->cycle && ppu->cycle <= 256 || 321 <= ppu->cycle && ppu->cycle <= 336) {
+        if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
           update_background(ppu);
           if(ppu->cycle % 8 == 0)
             hori_increment(ppu);
+        }
+        if((2 <= ppu->cycle && ppu->cycle <= 257) || (322 <= ppu->cycle && ppu->cycle <= 337)) {
+          bg_shift(ppu);
           if((ppu->cycle - 1) % 8 == 0)
             reload_shifter(ppu);
         }
@@ -395,10 +401,15 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           ppu->io.status = 0;
           disable_VBlank(ppu);
         }
-        if(1 <= ppu->cycle && ppu->cycle <= 256 || 321 <= ppu->cycle && ppu->cycle <= 336) {
-          update_background(ppu, screen);
+        if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
+          update_background(ppu);
           if(ppu->cycle % 8 == 0)
             hori_increment(ppu);
+        }
+        if((2 <= ppu->cycle && ppu->cycle <= 257) || (322 <= ppu->cycle && ppu->cycle <= 337)) {
+          bg_shift(ppu);
+          if((ppu->cycle - 1) % 8 == 0)
+            reload_shifter(ppu);
         }
         if(ppu->cycle == 256)
           vert_increment(ppu);
