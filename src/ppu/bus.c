@@ -64,7 +64,7 @@ uint16_t safe_vram_address(PPUBus *bus, uint16_t addr) {
 
 uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
   addr &= 0x3fff;
-  // log_dbg("ppubus_read %#x\n", addr);
+  // printf("ppubus_read %#x\n", addr);
   uint8_t res;
   if(addr < 0x2000) {
     res = cassette_read_chrrom(bus->cassette, addr);
@@ -73,7 +73,6 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
     res = bus->vram[safe_vram_address(bus, addr)];
   }
   else if(addr < 0x3f00) {
-    /* TODO: Mirror */
     res = bus->vram[safe_vram_address(bus, addr - 0x1000)];
   }
   else if(addr < 0x4000) {

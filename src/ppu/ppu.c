@@ -238,7 +238,7 @@ static void copy_vertical_t2v(PPU *ppu) {
 }
 
 #define tile_addr(v)  (0x2000 | ((v) & 0xfff))
-#define attr_addr(v)  (0x23c0 | ((v) & 0xc00) | (((v) >> 5) & 0x38) | (((v) >> 2) & 0x7))
+#define attr_addr(v)  (0x23c0 | ((v) & 0xc00) | (((v) >> 4) & 0x38) | (((v) >> 2) & 0x7))
 
 static void bg_shift(PPU *ppu) {
   ppu->bglow_reg <<= 1;
@@ -260,8 +260,9 @@ static void update_background(PPU *ppu) {
       break;
     case 3: {
       uint8_t at = ppubus_read(ppu->bus, attr_addr(ppu->vramaddr));
-      uint8_t blockpos = coarse_x(ppu->vramaddr) % 4 / 2 + coarse_y(ppu->vramaddr) % 4 / 2 * 2;
-      ppu->atbyte = (at >> blockpos) & 0x03;
+      if(coarse_x(ppu->vramaddr) & 0x2) at >>= 2;
+      if(coarse_y(ppu->vramaddr) & 0x2) at >>= 4;
+      ppu->atbyte = at & 0x3;
       break;
     }
     case 5:
