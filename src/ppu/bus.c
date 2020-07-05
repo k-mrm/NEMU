@@ -77,10 +77,10 @@ uint8_t ppubus_read(PPUBus *bus, uint16_t addr) {
   }
   else if(addr < 0x4000) {
     addr = 0x3f00 | (addr & 0x1f);
-    // printf("read!! %u@%x ", bus->palette[(addr-0x3f00)&0x1f], (addr-0x3f00)&0x1f);
     if(addr == 0x3f10 || addr == 0x3f14 || addr == 0x3f18 || addr == 0x3f1c) {
       addr -= 0x10;
     }
+    // printf("read!! %u@%x\n", bus->palette[(addr-0x3f00)&0x1f], addr);
     res = bus->palette[(addr - 0x3f00) & 0x1f];
   }
   else {
@@ -108,7 +108,7 @@ void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
       addr -= 0x10;
     }
     bus->palette[(addr - 0x3f00) & 0x1f] = data;
-    // printf("write!! %u@%x ", bus->palette[(addr-0x3f00)&0x1f], (addr-0x3f00)&0x1f);
+    // printf("write!! %u@%x ", bus->palette[(addr-0x3f00)&0x1f], addr);
   }
   else {
     /* unreachable */

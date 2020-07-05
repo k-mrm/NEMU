@@ -104,10 +104,12 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         ppu->tmp_vramaddr =
           (ppu->tmp_vramaddr & 0b111111100000000) | data;
         ppu->vramaddr = ppu->tmp_vramaddr;
+        printf("now vramaddr : %#x\n", ppu->vramaddr);
       }
       ppu->write_once ^= 1;
       break;
     case 7:
+      printf("ppubus_write %#x <- %u\n", ppu->vramaddr, data);
       ppubus_write(ppu->bus, ppu->vramaddr, data);
       ppu->vramaddr += ppu_vramaddr_inc(ppu);
       break;
@@ -290,7 +292,7 @@ static void draw_bgpixel(PPU *ppu, Disp screen) {
   uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
   uint8_t pid = lpid | (hpid << 1);
 
-  uint8_t color = ppubus_read(ppu->bus, 0x3f00 + pid * 4 + pixel);
+  uint8_t color = ppubus_read(ppu->bus, 0x3f00 + (pid << 2) + pixel);
   // printf("pid %d pixel %d %#x color %d\n", pid, pixel, 0x3f00 + pid * 4 + pixel, color);
   RGB rgb = colors[color];
 
@@ -338,7 +340,7 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
       ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_paltable_addr(ppu));
       // tile_dump(&tile);
       for(int i = 0; i < 4; ++i) {
-        palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile.paletteid * 4 + i);
+        palette[i] = ppubus_read(ppu->bus, 0x3f10 + (tile.paletteid << 2) + i);
       }
 
       for(int i = 0; i < 8; ++i) {
@@ -379,23 +381,25 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
     /* see https://wiki.nesdev.com/w/images/4/4f/Ppu.svg */
     switch(linestate_from(ppu->line)) {
       case VISIBLE:
-        if(2 <= ppu->cycle && ppu->cycle <= 257) {
-          draw_bgpixel(ppu, screen);
+        if(is_enable_bg(ppu)) {
+          if(2 <= ppu->cycle && ppu->cycle <= 257) {
+            draw_bgpixel(ppu, screen);
+          }
+          if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
+            update_background(ppu);
+            if(ppu->cycle % 8 == 0)
+              hori_increment(ppu);
+          }
+          if((2 <= ppu->cycle && ppu->cycle <= 257) || (322 <= ppu->cycle && ppu->cycle <= 337)) {
+            bg_shift(ppu);
+            if((ppu->cycle - 1) % 8 == 0)
+              reload_shifter(ppu);
+          }
+          if(ppu->cycle == 256)
+            vert_increment(ppu);
+          if(ppu->cycle == 257)
+            copy_horizontal_t2v(ppu);
         }
-        if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
-          update_background(ppu);
-          if(ppu->cycle % 8 == 0)
-            hori_increment(ppu);
-        }
-        if((2 <= ppu->cycle && ppu->cycle <= 257) || (322 <= ppu->cycle && ppu->cycle <= 337)) {
-          bg_shift(ppu);
-          if((ppu->cycle - 1) % 8 == 0)
-            reload_shifter(ppu);
-        }
-        if(ppu->cycle == 256)
-          vert_increment(ppu);
-        if(ppu->cycle == 257)
-          copy_horizontal_t2v(ppu);
         break;
       case POSTRENDER:
         break;
@@ -410,22 +414,25 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           ppu->io.status = 0;
           disable_VBlank(ppu);
         }
-        if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
-          update_background(ppu);
-          if(ppu->cycle % 8 == 0)
-            hori_increment(ppu);
+
+        if(is_enable_bg(ppu)) {
+          if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
+            update_background(ppu);
+            if(ppu->cycle % 8 == 0)
+              hori_increment(ppu);
+          }
+          if((2 <= ppu->cycle && ppu->cycle <= 257) || (322 <= ppu->cycle && ppu->cycle <= 337)) {
+            bg_shift(ppu);
+            if((ppu->cycle - 1) % 8 == 0)
+              reload_shifter(ppu);
+          }
+          if(ppu->cycle == 256)
+            vert_increment(ppu);
+          if(ppu->cycle == 257)
+            copy_horizontal_t2v(ppu);
+          if(280 <= ppu->cycle && ppu->cycle <= 304)
+            copy_vertical_t2v(ppu);
         }
-        if((2 <= ppu->cycle && ppu->cycle <= 257) || (322 <= ppu->cycle && ppu->cycle <= 337)) {
-          bg_shift(ppu);
-          if((ppu->cycle - 1) % 8 == 0)
-            reload_shifter(ppu);
-        }
-        if(ppu->cycle == 256)
-          vert_increment(ppu);
-        if(ppu->cycle == 257)
-          copy_horizontal_t2v(ppu);
-        if(280 <= ppu->cycle && ppu->cycle <= 304)
-          copy_vertical_t2v(ppu);
         ret = ppubus_read(ppu->bus, 0x3f00);
         break;
     }
