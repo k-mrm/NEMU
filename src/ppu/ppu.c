@@ -317,31 +317,6 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
     }
   }
 
-  /* draw background */
-  if(is_enable_bg(ppu)) {
-    Tile tile;
-    uint8_t y_in_tile = ppu->line % 8;
-    for(uint8_t x = 0; x < 32; x++) {
-      ppu_make_bg_tile(ppu, &tile, bg_paltable_addr(ppu));
-      for(int i = 0; i < 4; ++i) {
-        palette[i] = ppubus_read(ppu->bus, 0x3f00 + tile.paletteid * 4 + i);
-      }
-
-      for(int i = 0; i < 8; ++i) {
-        uint8_t cidx = tile.pp[y_in_tile][i];
-        if(cidx != 0) {
-          RGB rgb = colors[palette[cidx]];
-          put_pixel(screen, ppu->line, x * 8 + i, rgb);
-        }
-      }
-
-      x != 31? hori_increment(ppu) : vert_increment(ppu);
-    }
-  }
-
-  /* cycle 257: hori(v) = hori(t) */
-  copy_horizontal_t2v(ppu);
-
   /* draw sprite */
   if(is_enable_sprite(ppu)) {
     for(uint8_t idx = 0; idx < ppu->snd_sprite_len; ++idx) {
