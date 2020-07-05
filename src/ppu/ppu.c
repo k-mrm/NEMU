@@ -248,13 +248,6 @@ static void copy_vertical_t2v(PPU *ppu) {
 #define tile_addr(vaddr)  (0x2000 | ((vaddr) & 0xfff))
 #define attr_addr(vaddr)  (0x23c0 | (((vaddr) >> 5) & 0x38) | (((vaddr) >> 2) & 0x7))
 
-static void store_tile(PPU *ppu) {
-  ppu->bglow_reg >>= 8;
-  ppu->bghigh_reg >>= 8;
-  ppu->bglow_reg |= ((uint16_t)ppu->lowtile << 8);
-  ppu->bghigh_reg |= ((uint16_t)ppu->hightile << 8);
-}
-
 static void bg_shift(PPU *ppu) {
   ppu->bglow_reg <<= 1;
   ppu->bghigh_reg <<= 1;
@@ -271,14 +264,16 @@ static void update_background(PPU *ppu) {
       ppu->ntbyte = ppubus_read(ppu->bus, tile_addr(ppu->vramaddr));
       break;
     case 3: {
-      ppu->atbyte = ppubus_read(ppu->bus, attr_addr(ppu->vramaddr));
+      uint8_t at = ppubus_read(ppu->bus, attr_addr(ppu->vramaddr));
+      uint8_t blockpos = coarse_x(ppu->vramaddr) % 4 / 2 + coarse_y(ppu->vramaddr) % 4 / 2 * 2;
+      ppu->atbyte = (at >> blockpos) & 0x03;
       break;
     }
     case 5:
-      ppu->lowtile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->tileid * 16 + fine_y(ppu->vramaddr));
+      ppu->lowtile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->ntbyte * 16 + fine_y(ppu->vramaddr));
       break;
     case 7:
-      ppu->hightile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->tileid * 16 + 8 + fine_y(ppu->vramaddr));
+      ppu->hightile = ppubus_read(ppu->bus, bg_paltable_addr(ppu) + ppu->ntbyte * 16 + 8 + fine_y(ppu->vramaddr));
       break;
     default: return;
   }
@@ -404,9 +399,8 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           update_background(ppu);
           if(ppu->cycle % 8 == 0)
             hori_increment(ppu);
-        }
-        if((ppu->cycle - 1) % 8 == 0) {
-          reload_shifter(ppu);
+          if((ppu->cycle - 1) % 8 == 0)
+            reload_shifter(ppu);
         }
         if(ppu->cycle == 256)
           vert_increment(ppu);
