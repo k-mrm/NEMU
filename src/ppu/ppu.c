@@ -292,7 +292,8 @@ static void draw_bgpixel(PPU *ppu, Disp screen) {
   uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
   uint8_t pid = lpid | (hpid << 1);
 
-  uint8_t color = ppubus_read(ppu->bus, 0x3f00 + (pid << 2) + pixel);
+  uint8_t color = pixel? ppubus_read(ppu->bus, 0x3f00 + (pid << 2) + pixel)
+                       : ppubus_read(ppu->bus, 0x3f00);
   // printf("pid %d pixel %d %#x color %d\n", pid, pixel, 0x3f00 + pid * 4 + pixel, color);
   RGB rgb = colors[color];
 
