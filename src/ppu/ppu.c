@@ -141,35 +141,6 @@ static enum linestate linestate_from(uint16_t line) {
   return 0;
 }
 
-static void ppu_fetch_sprite(PPU *ppu) {
-  if(!is_enable_sprite(ppu)) return;
-
-  uint8_t tmps_idx = 0;
-  uint8_t sprite_y = 0;
-  ppu->snd_sprite_len = 0;
-
-  for(int i = 0; i < 64; ++i) {
-    uint8_t y = ppu->bus->oam[i * 4];
-    uint8_t tileid = ppu->bus->oam[i * 4 + 1];
-    uint8_t attr = ppu->bus->oam[i * 4 + 2];
-    uint8_t x = ppu->bus->oam[i * 4 + 3];
-    Sprite spr = (Sprite){
-      .y = y, .tileid = tileid, .attr = attr, .x = x,
-    };
-    if(tmps_idx >= 8) {
-      break;
-    }
-    else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
-      if(i == 0)
-        sprite_0hit(ppu);
-      ppu->snd_sprite[tmps_idx] = spr;
-      ++tmps_idx;
-    }
-  }
-
-  ppu->snd_sprite_len = tmps_idx;
-}
-
 static uint16_t nametable_addr(PPU *ppu) {
   uint16_t f = ppu->io.ctrl & 0x03;
   return 0x2000 + f * 0x400;
@@ -288,6 +259,7 @@ static void draw_bgpixel(PPU *ppu, Disp screen) {
   uint8_t lpixel = ((ppu->bglow_reg >> 8) & mux_mask) != 0;
   uint8_t hpixel = ((ppu->bghigh_reg >> 8) & mux_mask) != 0;
   uint8_t pixel = lpixel | (hpixel << 1);
+
   uint8_t lpid = (ppu->attrlow_reg & mux_mask) != 0;
   uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
   uint8_t pid = lpid | (hpid << 1);
@@ -357,6 +329,48 @@ static void ppu_draw_line(PPU *ppu, Disp screen) {
   }
 }
 
+static void ppu_fetch_sprite(PPU *ppu) {
+  if(!is_enable_sprite(ppu)) return;
+
+  uint8_t tmps_idx = 0;
+  uint8_t sprite_y = 0;
+  ppu->snd_sprite_len = 0;
+
+  for(int i = 0; i < 64; ++i) {
+    uint8_t y = ppu->bus->oam[i * 4];
+    uint8_t tileid = ppu->bus->oam[i * 4 + 1];
+    uint8_t attr = ppu->bus->oam[i * 4 + 2];
+    uint8_t x = ppu->bus->oam[i * 4 + 3];
+    Sprite spr = (Sprite){
+      .y = y, .tileid = tileid, .attr = attr, .x = x,
+    };
+    if(tmps_idx >= 8) {
+      break;
+    }
+    else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
+      if(i == 0)
+        sprite_0hit(ppu);
+      ppu->snd_sprite[tmps_idx] = spr;
+      ++tmps_idx;
+    }
+  }
+
+  ppu->snd_sprite_len = tmps_idx;
+}
+
+
+static void clear_snd_oam(PPU *ppu) {
+  for(int i = 0; i < 8; i++) {
+    ppu->snd_sprite[i] = (Sprite){
+      .y = 0xff, .tileid = 0xff, .attr = 0xff, .x = 0xff,
+    };
+  }
+}
+
+static void evaluate_sprite(PPU *ppu) {
+  ;
+}
+
 static void next_scanline(PPU *ppu) {
   if(linestate_from(ppu->line) == PRERENDER)
     ppu->line = 0;
@@ -401,6 +415,11 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           if(ppu->cycle == 257)
             copy_horizontal_t2v(ppu);
         }
+        if(is_enable_sprite(ppu)) {
+          if(ppu->cycle == 1) {
+            clear_snd_oam(ppu);
+          }
+        }
         break;
       case POSTRENDER:
         break;
@@ -434,7 +453,6 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           if(280 <= ppu->cycle && ppu->cycle <= 304)
             copy_vertical_t2v(ppu);
         }
-        ret = ppubus_read(ppu->bus, 0x3f00);
         break;
     }
   }

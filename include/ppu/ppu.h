@@ -50,7 +50,7 @@ struct PPU {
   uint8_t attrlow_reg;
   uint8_t attrhigh_reg;
   uint8_t attr_latch;
-  bool write_once;
+  bool write_once: 1;
   Sprite snd_sprite[8];
   uint8_t snd_sprite_len;
   PPUBus *bus;
