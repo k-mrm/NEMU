@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "ppu/bus.h"
 #include "log/log.h"
+#include "cassette/cassette.h"
 
 uint16_t vram_address(PPUBus *bus, uint16_t addr) {
   enum mirroring mirr = nes_mirroring(bus->cassette);
