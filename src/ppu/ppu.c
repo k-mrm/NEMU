@@ -158,7 +158,7 @@ static uint16_t sprite_paltable_addr(PPU *ppu) {
 
 void ppu_oam_write(PPU *ppu, uint8_t data) {
   // printf("%d\n", data);
-  ppu->bus->oam[ppu->io.oamaddr++] = data;
+  ppu->oam[ppu->io.oamaddr++] = data;
 }
 
 /*
@@ -272,63 +272,6 @@ static void draw_bgpixel(PPU *ppu, Disp screen) {
   put_pixel(screen, ppu->line, ppu->cycle - 2, rgb);
 }
 
-static void ppu_draw_line(PPU *ppu, Disp screen) {
-  ppu_fetch_sprite(ppu);
-  uint8_t palette[4];
-
-  /* draw background sprite */
-  if(is_enable_sprite(ppu)) {
-    for(uint8_t idx = 0; idx < ppu->snd_sprite_len; ++idx) {
-      Tile tile;
-      Sprite sprite = ppu->snd_sprite[idx];
-      if(!(sprite.attr & (1 << 5))) continue;
-      uint8_t pid = sprite.attr & 0x3;
-      uint8_t vhflip = (sprite.attr >> 6) & 0x3;
-      ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_paltable_addr(ppu));
-      for(int i = 0; i < 4; ++i) {
-        palette[i] = ppubus_read(ppu->bus, 0x3f10 + tile.paletteid * 4 + i);
-      }
-
-      for(int i = 0; i < 8; ++i) {
-        uint8_t cidx = tile.pp[ppu->line - (sprite.y + 1)][i];
-        if(cidx != 0) {
-          RGB rgb = colors[palette[cidx]];
-          // printf("@@%d %d\n", sprite.x + i, ppu->line);
-          if(sprite.x + i > 255)
-            break;
-          put_pixel(screen, ppu->line, sprite.x + i, rgb);
-        }
-      }
-    }
-  }
-
-  /* draw sprite */
-  if(is_enable_sprite(ppu)) {
-    for(uint8_t idx = 0; idx < ppu->snd_sprite_len; ++idx) {
-      Tile tile;
-      Sprite sprite = ppu->snd_sprite[idx];
-      if(sprite.attr & (1 << 5)) continue;
-      uint8_t pid = sprite.attr & 0x3;
-      uint8_t vhflip = (sprite.attr >> 6) & 0x3;
-      ppu_make_sprite_tile(ppu, &tile, sprite.tileid, pid, vhflip, sprite_paltable_addr(ppu));
-      // tile_dump(&tile);
-      for(int i = 0; i < 4; ++i) {
-        palette[i] = ppubus_read(ppu->bus, 0x3f10 + (tile.paletteid << 2) + i);
-      }
-
-      for(int i = 0; i < 8; ++i) {
-        uint8_t cidx = tile.pp[ppu->line - (sprite.y + 1)][i];
-        if(cidx != 0) {
-          RGB rgb = colors[palette[cidx]];
-          if(sprite.x + i > 255)
-            break;
-          put_pixel(screen, ppu->line, sprite.x + i, rgb);
-        }
-      }
-    }
-  }
-}
-
 static void ppu_fetch_sprite(PPU *ppu) {
   if(!is_enable_sprite(ppu)) return;
 
@@ -337,10 +280,10 @@ static void ppu_fetch_sprite(PPU *ppu) {
   ppu->snd_sprite_len = 0;
 
   for(int i = 0; i < 64; ++i) {
-    uint8_t y = ppu->bus->oam[i * 4];
-    uint8_t tileid = ppu->bus->oam[i * 4 + 1];
-    uint8_t attr = ppu->bus->oam[i * 4 + 2];
-    uint8_t x = ppu->bus->oam[i * 4 + 3];
+    uint8_t y = ppu->oam[i * 4];
+    uint8_t tileid = ppu->oam[i * 4 + 1];
+    uint8_t attr = ppu->oam[i * 4 + 2];
+    uint8_t x = ppu->oam[i * 4 + 3];
     Sprite spr = (Sprite){
       .y = y, .tileid = tileid, .attr = attr, .x = x,
     };
