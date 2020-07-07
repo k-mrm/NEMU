@@ -223,6 +223,18 @@ static void bg_shift(PPU *ppu) {
   ppu->attrhigh_reg |= (ppu->attr_latch & 0x2) != 0;
 }
 
+static void sprite_shift(PPU *ppu) {
+  for(int i = 0; i < 8; i++) {
+    if(ppu->snd_sprite_xcounter[i] > 0) {
+      ppu->snd_sprite_xcounter[i]--;
+    }
+    else {
+      ppu->snd_sprite_sprlow[i] <<= 1;
+      ppu->snd_sprite_sprhigh[i] <<= 1;
+    }
+  }
+}
+
 #define coarse_x(vaddr) ((vaddr) & 0x1f)
 #define coarse_y(vaddr) (((vaddr) >> 5) & 0x1f)
 
@@ -254,64 +266,110 @@ static void reload_shifter(PPU *ppu) {
   ppu->attr_latch = ppu->atbyte;
 }
 
-static void draw_bgpixel(PPU *ppu, Disp screen) {
+static void draw_pixel(PPU *ppu, Disp screen) {
+  uint8_t color = 0;
+
   uint8_t mux_mask = 0x80 >> ppu->fine_x;
   uint8_t lpixel = ((ppu->bglow_reg >> 8) & mux_mask) != 0;
   uint8_t hpixel = ((ppu->bghigh_reg >> 8) & mux_mask) != 0;
-  uint8_t pixel = lpixel | (hpixel << 1);
+  uint8_t bgpixel = lpixel | (hpixel << 1);
 
   uint8_t lpid = (ppu->attrlow_reg & mux_mask) != 0;
   uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
-  uint8_t pid = lpid | (hpid << 1);
+  uint8_t bgpid = lpid | (hpid << 1);
 
-  uint8_t color = pixel? ppubus_read(ppu->bus, 0x3f00 + (pid << 2) + pixel)
-                       : ppubus_read(ppu->bus, 0x3f00);
+  //uint8_t bg_color = bgpixel? ppubus_read(ppu->bus, 0x3f00 + (bgpid << 2) + bgpixel)
+   //                         : ppubus_read(ppu->bus, 0x3f00);
   // printf("pid %d pixel %d %#x color %d\n", pid, pixel, 0x3f00 + pid * 4 + pixel, color);
-  RGB rgb = colors[color];
+  
+  uint8_t sprpixel = 0;
+  uint8_t sprpid = 0;
+  uint8_t priority = 0;
+  if(is_enable_sprite(ppu)) {
+    for(int i = 0; i < 8; i++) {
+      if(ppu->snd_sprite_xcounter[i] == 0) {
+        if(i == 0 && ppu->sprite_0hit) {
+          sprite_0hit(ppu);
+          ppu->sprite_0hit = 0;
+        }
+        uint8_t splo = (ppu->snd_sprite_sprlow[i] & 0x80) != 0;
+        uint8_t sphi = (ppu->snd_sprite_sprhigh[i] & 0x80) != 0;
+        sprpixel = splo | (sphi << 1);
+        sprpid = ppu->snd_sprite_atlatch[i] & 0x03;
+        priority = (ppu->snd_sprite_atlatch[i] >> 5) & 0x01;
+      }
+    }
+  }
 
+  if(bgpixel == 0 && sprpixel == 0) {
+    color = ppubus_read(ppu->bus, 0x3f00);
+  }
+  else if(bgpixel == 0 && sprpixel) {
+    color = ppubus_read(ppu->bus, 0x3f10 + (sprpid << 2) + sprpixel);
+  }
+  else if(bgpixel && sprpixel == 0) {
+    color = ppubus_read(ppu->bus, 0x3f00 + (bgpid << 2) + bgpixel);
+  }
+  else if(bgpixel && sprpixel) {
+    if(!priority) {
+      color = ppubus_read(ppu->bus, 0x3f10 + (sprpid << 2) + sprpixel);
+    }
+    else {
+      color = ppubus_read(ppu->bus, 0x3f00 + (bgpid << 2) + bgpixel);
+    }
+  }
+
+  RGB rgb = colors[color];
   put_pixel(screen, ppu->line, ppu->cycle - 2, rgb);
 }
 
-static void ppu_fetch_sprite(PPU *ppu) {
-  if(!is_enable_sprite(ppu)) return;
-
-  uint8_t tmps_idx = 0;
-  uint8_t sprite_y = 0;
-  ppu->snd_sprite_len = 0;
-
-  for(int i = 0; i < 64; ++i) {
-    uint8_t y = ppu->oam[i * 4];
-    uint8_t tileid = ppu->oam[i * 4 + 1];
-    uint8_t attr = ppu->oam[i * 4 + 2];
-    uint8_t x = ppu->oam[i * 4 + 3];
-    Sprite spr = (Sprite){
-      .y = y, .tileid = tileid, .attr = attr, .x = x,
-    };
-    if(tmps_idx >= 8) {
-      break;
-    }
-    else if(spr.y + 1 <= ppu->line && ppu->line < spr.y + 1 + 8) {
-      if(i == 0)
-        sprite_0hit(ppu);
-      ppu->snd_sprite[tmps_idx] = spr;
-      ++tmps_idx;
-    }
-  }
-
-  ppu->snd_sprite_len = tmps_idx;
-}
-
-
 static void clear_snd_oam(PPU *ppu) {
-  for(int i = 0; i < 8; i++) {
-    ppu->snd_sprite[i] = (Sprite){
-      .y = 0xff, .tileid = 0xff, .attr = 0xff, .x = 0xff,
-    };
-  }
+  memset(ppu->snd_sprite, 0xff, sizeof(Sprite) * 8);
 }
 
 static void evaluate_sprite(PPU *ppu) {
-  ;
+  uint8_t snd_idx = 0;
+  for(int i = 0; i < 64; ++i) {
+    uint8_t y = ppu->oam[i * 4];
+    if(snd_idx >= 8) break;
+
+    if(y <= ppu->line && ppu->line < y + 8) {
+      if(i == 0) {
+        ppu->sprite_0hit = 1;
+      }
+
+      ppu->snd_sprite[snd_idx++] = (Sprite){
+        .y = ppu->oam[i * 4],
+        .tileid = ppu->oam[i * 4 + 1],
+        .attr = ppu->oam[i * 4 + 2],
+        .x = ppu->oam[i * 4 + 3],
+      };
+    }
+  }
+}
+
+static void fetch_sprite(PPU *ppu) {
+  for(int i = 0; i < 8; i++) {
+    uint8_t id = ppu->snd_sprite[i].tileid;
+    uint8_t y = ppu->snd_sprite[i].y;
+    if(id == 0xff) {
+      /* dummy fetch */
+      ppu->snd_sprite_sprlow[i] = 0;
+      ppu->snd_sprite_sprhigh[i] = 0;
+    }
+    else {
+      uint8_t yoffset = ppu->line - y;
+      uint8_t vhflip = (ppu->snd_sprite[i].attr >> 6) & 0x3;
+
+      ppu->snd_sprite_sprlow[i] =
+        ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + yoffset);
+      ppu->snd_sprite_sprhigh[i] =
+        ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + 8 + yoffset);
+    }
+
+    ppu->snd_sprite_atlatch[i] = ppu->snd_sprite[i].attr;
+    ppu->snd_sprite_xcounter[i] = ppu->snd_sprite[i].x;
+  }
 }
 
 static void next_scanline(PPU *ppu) {
@@ -341,7 +399,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
       case VISIBLE:
         if(is_enable_bg(ppu)) {
           if(2 <= ppu->cycle && ppu->cycle <= 257) {
-            draw_bgpixel(ppu, screen);
+            draw_pixel(ppu, screen);
           }
           if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
             update_background(ppu);
@@ -358,10 +416,18 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           if(ppu->cycle == 257)
             copy_horizontal_t2v(ppu);
         }
+
         if(is_enable_sprite(ppu)) {
-          if(ppu->cycle == 1) {
-            clear_snd_oam(ppu);
+          if(1 <= ppu->cycle && ppu->cycle <= 256) {
+            sprite_shift(ppu);
           }
+
+          if(ppu->cycle == 1)
+            clear_snd_oam(ppu);
+          if(ppu->cycle == 65)
+            evaluate_sprite(ppu);
+          if(ppu->cycle == 257)
+            fetch_sprite(ppu);
         }
         break;
       case POSTRENDER:
@@ -395,6 +461,19 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
             copy_horizontal_t2v(ppu);
           if(280 <= ppu->cycle && ppu->cycle <= 304)
             copy_vertical_t2v(ppu);
+        }
+
+        if(is_enable_sprite(ppu)) {
+          if(1 <= ppu->cycle && ppu->cycle <= 256) {
+            sprite_shift(ppu);
+          }
+
+          if(ppu->cycle == 1)
+            clear_snd_oam(ppu);
+          if(ppu->cycle == 65)
+            evaluate_sprite(ppu);
+          if(ppu->cycle == 257)
+            fetch_sprite(ppu);
         }
         break;
     }
