@@ -104,12 +104,10 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
         ppu->tmp_vramaddr =
           (ppu->tmp_vramaddr & 0b111111100000000) | data;
         ppu->vramaddr = ppu->tmp_vramaddr;
-        printf("now vramaddr : %#x\n", ppu->vramaddr);
       }
       ppu->write_once ^= 1;
       break;
     case 7:
-      printf("ppubus_write %#x <- %u\n", ppu->vramaddr, data);
       ppubus_write(ppu->bus, ppu->vramaddr, data);
       ppu->vramaddr += ppu_vramaddr_inc(ppu);
       break;
@@ -288,15 +286,16 @@ static void draw_pixel(PPU *ppu, Disp screen) {
   if(is_enable_sprite(ppu)) {
     for(int i = 0; i < 8; i++) {
       if(ppu->snd_sprite_xcounter[i] == 0) {
-        if(i == 0 && ppu->sprite_0hit) {
-          sprite_0hit(ppu);
-          ppu->sprite_0hit = 0;
-        }
         uint8_t splo = (ppu->snd_sprite_sprlow[i] & 0x80) != 0;
         uint8_t sphi = (ppu->snd_sprite_sprhigh[i] & 0x80) != 0;
         sprpixel = splo | (sphi << 1);
         sprpid = ppu->snd_sprite_atlatch[i] & 0x03;
         priority = (ppu->snd_sprite_atlatch[i] >> 5) & 0x01;
+
+        if(i == 0 && ppu->sprite_0hit && sprpixel && bgpixel) {
+          sprite_0hit(ppu);
+          ppu->sprite_0hit = 0;
+        }
       }
     }
   }
@@ -348,6 +347,13 @@ static void evaluate_sprite(PPU *ppu) {
   }
 }
 
+#define rev_bit(x) \
+  do {  \
+    x = ((x & 0x55) << 1) | ((x >> 1) & 0x55);  \
+    x = ((x & 0x33) << 2) | ((x >> 2) & 0x33);  \
+    x = ((x & 0x0f) << 4) | ((x >> 4) & 0x0f);  \
+  } while(0)
+
 static void fetch_sprite(PPU *ppu) {
   for(int i = 0; i < 8; i++) {
     uint8_t id = ppu->snd_sprite[i].tileid;
@@ -360,11 +366,21 @@ static void fetch_sprite(PPU *ppu) {
     else {
       uint8_t yoffset = ppu->line - y;
       uint8_t vhflip = (ppu->snd_sprite[i].attr >> 6) & 0x3;
+      uint8_t vflip = vhflip & 0x2;
+      uint8_t hflip = vhflip & 0x1;
+      uint8_t sprlow, sprhigh;
 
-      ppu->snd_sprite_sprlow[i] =
-        ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + yoffset);
-      ppu->snd_sprite_sprhigh[i] =
-        ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + 8 + yoffset);
+      sprlow =
+        ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + (vflip? 7 - yoffset : yoffset));
+      sprhigh =
+        ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + 8 + (vflip? 7 - yoffset : yoffset));
+
+      if(hflip) {
+        rev_bit(sprlow);
+        rev_bit(sprhigh);
+      }
+      ppu->snd_sprite_sprlow[i] = sprlow;
+      ppu->snd_sprite_sprhigh[i] = sprhigh;
     }
 
     ppu->snd_sprite_atlatch[i] = ppu->snd_sprite[i].attr;

@@ -54,7 +54,6 @@ struct PPU {
   bool sprite_0hit: 1;
   uint8_t oam[256];
   Sprite snd_sprite[8];
-  uint8_t snd_sprite_len;
   uint8_t snd_sprite_sprlow[8];
   uint8_t snd_sprite_sprhigh[8];
   uint8_t snd_sprite_atlatch[8];
