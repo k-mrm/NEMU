@@ -276,8 +276,6 @@ static void draw_pixel(PPU *ppu, Disp screen) {
   uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
   uint8_t bgpid = lpid | (hpid << 1);
 
-  //uint8_t bg_color = bgpixel? ppubus_read(ppu->bus, 0x3f00 + (bgpid << 2) + bgpixel)
-   //                         : ppubus_read(ppu->bus, 0x3f00);
   // printf("pid %d pixel %d %#x color %d\n", pid, pixel, 0x3f00 + pid * 4 + pixel, color);
   
   uint8_t sprpixel = 0;
@@ -349,9 +347,9 @@ static void evaluate_sprite(PPU *ppu) {
 
 #define rev_bit(x) \
   do {  \
-    x = ((x & 0x55) << 1) | ((x >> 1) & 0x55);  \
-    x = ((x & 0x33) << 2) | ((x >> 2) & 0x33);  \
-    x = ((x & 0x0f) << 4) | ((x >> 4) & 0x0f);  \
+    x = (((x) & 0x55) << 1) | (((x) >> 1) & 0x55);  \
+    x = (((x) & 0x33) << 2) | (((x) >> 2) & 0x33);  \
+    x = (((x) & 0x0f) << 4) | (((x) >> 4) & 0x0f);  \
   } while(0)
 
 static void fetch_sprite(PPU *ppu) {
