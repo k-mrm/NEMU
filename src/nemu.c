@@ -14,8 +14,6 @@ static void nemu_init(NEMU *nes) {
 int nemu_boot(NEMU *nes, Cassette *cas) {
   nes->cassette = cas;
   int nmi = 0;
-  int c = 0;
-  int lpf;
   nemu_init(nes);
   cpu_interrupt(&nes->cpu, RESET);
 
@@ -24,7 +22,7 @@ int nemu_boot(NEMU *nes, Cassette *cas) {
 #endif
 
   for(;;) {
-    request_frame(&nes->gui);
+    request_frame(&nes->gui); /* 60 FPS */
     int pcycle = 0;
     /* draw 1frame */
     while(pcycle < 262 * 341) {
@@ -33,24 +31,16 @@ int nemu_boot(NEMU *nes, Cassette *cas) {
         cycle += 513;
         nes->ppu.dma_write_flag = 0;
       }
-      c = ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
+      ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
       pcycle += cycle * 3;
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);
         nmi = 0;
       }
     }
-    /*
-    RGB rgb = colors[c];
-    al_clear_to_color(al_map_rgb(rgb.r, rgb.g, rgb.b));
-    */
     gui_render(nes->screen);
 
     memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
-#ifdef CPU_DEBUG
-    // printf("@c002 %d\n", cpubus_read(nes->cpu.bus, 0xc002));
-    // printf("@c003 %d\n", cpubus_read(nes->cpu.bus, 0xc003));
-#endif
   }
 
   return 0;

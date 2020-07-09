@@ -16,14 +16,12 @@
 #define is_enable_nmi(ppu)  ((ppu)->io.ctrl & (1 << 7))
 #define is_addr_inc32(ppu)  ((ppu)->io.ctrl & (1 << 2))
 
+#define vramaddr_inc(ppu)   (is_addr_inc32((ppu))? 32 : 1)
+
 #define is_enable_bg(ppu)     ((ppu)->io.mask & (1 << 3))
 #define is_enable_sprite(ppu) ((ppu)->io.mask & (1 << 4))
 
 #define fine_y(vramaddr) (((vramaddr) >> 12) & 0x7)
-
-uint8_t ppu_vramaddr_inc(PPU *ppu) {
-  return is_addr_inc32(ppu)? 32: 1;
-}
 
 uint8_t ppu_read(PPU *ppu, uint16_t idx) {
   // log_dbg("ppu_read %u\n", idx);
@@ -39,7 +37,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->vramaddr);
       // printf("ppuaddr read %#x\n", ppu->vramaddr);
-      ppu->vramaddr += ppu_vramaddr_inc(ppu);
+      ppu->vramaddr += vramaddr_inc(ppu);
       res = data;
       break;
     }
@@ -108,7 +106,7 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       break;
     case 7:
       ppubus_write(ppu->bus, ppu->vramaddr, data);
-      ppu->vramaddr += ppu_vramaddr_inc(ppu);
+      ppu->vramaddr += vramaddr_inc(ppu);
       break;
     default:
       break;
