@@ -5,8 +5,8 @@
 #include "log/log.h"
 
 static void cassette_dump(Cassette *cassette) {
-  printf("prgrom: %#lx\n", cassette->nprgrom_byte);
-  printf("chrrom: %#lx\n", cassette->nchrrom_byte);
+  // printf("prgrom: %#lx\n", cassette->nprgrom_byte);
+  // printf("chrrom: %#lx\n", cassette->nchrrom_byte);
 
   /*
      puts("prgrom:");

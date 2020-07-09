@@ -98,8 +98,6 @@ void ppubus_write(PPUBus *bus, uint16_t addr, uint8_t data) {
     ;
   }
   else if(addr < 0x3000) {
-    if(addr == 0x2085)
-      printf("ppuaddr write %#x <= %x\n", addr, data);
     bus->vram[safe_vram_address(bus, addr)] = data;
   }
   else if(addr < 0x3f00) {
