@@ -39,6 +39,7 @@ struct PPU {
    *  3bit fine X scroll
    */
   uint8_t fine_x: 3;
+
   uint16_t line;
   uint16_t cycle;
   uint16_t ntbyte;
@@ -50,8 +51,9 @@ struct PPU {
   uint8_t attrlow_reg;
   uint8_t attrhigh_reg;
   uint8_t attr_latch;
-  bool write_once: 1;
-  bool sprite_0hit: 1;
+  uint8_t write_once: 1;
+  uint8_t sprite_0hit: 1;
+  uint8_t pre_sprite_0hit: 1;
   uint8_t oam[256];
   Sprite snd_sprite[8];
   uint8_t snd_sprite_sprlow[8];
@@ -62,7 +64,6 @@ struct PPU {
 };
 
 void ppu_oam_write(PPU *, uint8_t);
-void ppu_render(PPU *, Disp);
 int ppu_step(PPU *, Disp, int *, int);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);

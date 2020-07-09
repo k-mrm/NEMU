@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ppu/ppu.h"
-#include "ppu/tile.h"
 #include "ppu/palette.h"
 #include "log/log.h"
 #include "gui/gui.h"
@@ -294,6 +293,8 @@ static void draw_pixel(PPU *ppu, Disp screen) {
           sprite_0hit(ppu);
           ppu->sprite_0hit = 0;
         }
+
+        if(sprpixel) break;
       }
     }
   }
@@ -332,15 +333,16 @@ static void evaluate_sprite(PPU *ppu) {
 
     if(y <= ppu->line && ppu->line < y + 8) {
       if(i == 0) {
-        ppu->sprite_0hit = 1;
+        ppu->pre_sprite_0hit = 1;
       }
 
-      ppu->snd_sprite[snd_idx++] = (Sprite){
+      ppu->snd_sprite[snd_idx] = (Sprite){
         .y = ppu->oam[i * 4],
         .tileid = ppu->oam[i * 4 + 1],
         .attr = ppu->oam[i * 4 + 2],
         .x = ppu->oam[i * 4 + 3],
       };
+      snd_idx++;
     }
   }
 }
@@ -355,15 +357,16 @@ static void evaluate_sprite(PPU *ppu) {
 static void fetch_sprite(PPU *ppu) {
   for(int i = 0; i < 8; i++) {
     uint8_t id = ppu->snd_sprite[i].tileid;
-    uint8_t y = ppu->snd_sprite[i].y;
-    if(id == 0xff) {
+    uint8_t attr = ppu->snd_sprite[i].attr;
+    uint8_t x = ppu->snd_sprite[i].x;
+    if(id == 0xff && attr == 0xff && x == 0xff) {
       /* dummy fetch */
       ppu->snd_sprite_sprlow[i] = 0;
       ppu->snd_sprite_sprhigh[i] = 0;
     }
     else {
-      uint8_t yoffset = ppu->line - y;
-      uint8_t vhflip = (ppu->snd_sprite[i].attr >> 6) & 0x3;
+      uint8_t yoffset = ppu->line - ppu->snd_sprite[i].y;
+      uint8_t vhflip = (attr >> 6) & 0x3;
       uint8_t vflip = vhflip & 0x2;
       uint8_t hflip = vhflip & 0x1;
       uint8_t sprlow, sprhigh;
@@ -381,12 +384,17 @@ static void fetch_sprite(PPU *ppu) {
       ppu->snd_sprite_sprhigh[i] = sprhigh;
     }
 
-    ppu->snd_sprite_atlatch[i] = ppu->snd_sprite[i].attr;
-    ppu->snd_sprite_xcounter[i] = ppu->snd_sprite[i].x;
+    ppu->snd_sprite_atlatch[i] = attr;
+    ppu->snd_sprite_xcounter[i] = x;
   }
 }
 
 static void next_scanline(PPU *ppu) {
+  if(ppu->pre_sprite_0hit) {
+    ppu->sprite_0hit = 1;
+    ppu->pre_sprite_0hit = 0;
+  }
+
   if(linestate_from(ppu->line) == PRERENDER)
     ppu->line = 0;
   else
@@ -432,7 +440,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
         }
 
         if(is_enable_sprite(ppu)) {
-          if(1 <= ppu->cycle && ppu->cycle <= 256) {
+          if(2 <= ppu->cycle && ppu->cycle <= 257) {
             sprite_shift(ppu);
           }
 
@@ -440,8 +448,9 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
             clear_snd_oam(ppu);
           if(ppu->cycle == 65)
             evaluate_sprite(ppu);
-          if(ppu->cycle == 257)
+          if(ppu->cycle == 257) {
             fetch_sprite(ppu);
+          }
         }
         break;
       case POSTRENDER:
@@ -478,7 +487,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
         }
 
         if(is_enable_sprite(ppu)) {
-          if(1 <= ppu->cycle && ppu->cycle <= 256) {
+          if(2 <= ppu->cycle && ppu->cycle <= 257) {
             sprite_shift(ppu);
           }
 
@@ -486,8 +495,9 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
             clear_snd_oam(ppu);
           if(ppu->cycle == 65)
             evaluate_sprite(ppu);
-          if(ppu->cycle == 257)
+          if(ppu->cycle == 257) {
             fetch_sprite(ppu);
+          }
         }
         break;
     }
