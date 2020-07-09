@@ -61,6 +61,7 @@ struct PPU {
   uint8_t snd_sprite_sprhigh[8];
   uint8_t snd_sprite_atlatch[8];
   uint8_t snd_sprite_xcounter[8];
+  uint8_t data_buf;
   PPUBus *bus;
 };
 

@@ -36,9 +36,15 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->vramaddr);
-      // printf("ppuaddr read %#x\n", ppu->vramaddr);
+      if(ppu->vramaddr < 0x3eff) {
+        res = ppu->data_buf;
+        ppu->data_buf = data;
+      }
+      else {
+        // printf("ppuaddr read %#x\n", ppu->vramaddr);
+        res = data;
+      }
       ppu->vramaddr += vramaddr_inc(ppu);
-      res = data;
       break;
     }
     default:
@@ -334,13 +340,12 @@ static void evaluate_sprite(PPU *ppu) {
         ppu->pre_sprite_0hit = 1;
       }
 
-      ppu->snd_sprite[snd_idx] = (Sprite){
+      ppu->snd_sprite[snd_idx++] = (Sprite){
         .y = ppu->oam[i * 4],
         .tileid = ppu->oam[i * 4 + 1],
         .attr = ppu->oam[i * 4 + 2],
         .x = ppu->oam[i * 4 + 3],
       };
-      snd_idx++;
     }
   }
 }
@@ -417,7 +422,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
     /* see https://wiki.nesdev.com/w/images/4/4f/Ppu.svg */
     switch(linestate_from(ppu->line)) {
       case VISIBLE:
-        if(is_enable_bg(ppu)) {
+        if(is_enable_bg(ppu) || is_enable_sprite(ppu)) {
           if(2 <= ppu->cycle && ppu->cycle <= 257) {
             draw_pixel(ppu, screen);
           }
@@ -438,17 +443,14 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
         }
 
         if(is_enable_sprite(ppu)) {
-          if(2 <= ppu->cycle && ppu->cycle <= 257) {
+          if(2 <= ppu->cycle && ppu->cycle <= 257)
             sprite_shift(ppu);
-          }
-
           if(ppu->cycle == 1)
             clear_snd_oam(ppu);
           if(ppu->cycle == 65)
             evaluate_sprite(ppu);
-          if(ppu->cycle == 257) {
+          if(ppu->cycle == 257)
             fetch_sprite(ppu);
-          }
         }
         break;
       case POSTRENDER:
@@ -465,7 +467,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
           disable_VBlank(ppu);
         }
 
-        if(is_enable_bg(ppu)) {
+        if(is_enable_bg(ppu) || is_enable_sprite(ppu)) {
           if((1 <= ppu->cycle && ppu->cycle <= 256) || (321 <= ppu->cycle && ppu->cycle <= 336)) {
             update_background(ppu);
             if(ppu->cycle % 8 == 0)
@@ -485,17 +487,14 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
         }
 
         if(is_enable_sprite(ppu)) {
-          if(2 <= ppu->cycle && ppu->cycle <= 257) {
+          if(2 <= ppu->cycle && ppu->cycle <= 257)
             sprite_shift(ppu);
-          }
-
           if(ppu->cycle == 1)
             clear_snd_oam(ppu);
           if(ppu->cycle == 65)
             evaluate_sprite(ppu);
-          if(ppu->cycle == 257) {
+          if(ppu->cycle == 257)
             fetch_sprite(ppu);
-          }
         }
         break;
     }
