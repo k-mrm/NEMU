@@ -1,5 +1,5 @@
 # NEMU
-A simple implementation of NES(Nintendo Entertainment System) emulator( ˘ω˘)
+A NES(Nintendo Entertainment System) emulator( ˘ω˘)
 
 ## sample
 
