@@ -29,6 +29,10 @@ int nemu_boot(NEMU *nes, Cassette *cas) {
     /* draw 1frame */
     while(pcycle < 262 * 341) {
       int cycle = cpu_step(&nes->cpu);
+      if(nes->ppu.dma_write_flag) {
+        cycle += 513;
+        nes->ppu.dma_write_flag = 0;
+      }
       c = ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
       pcycle += cycle * 3;
       if(nmi) {
