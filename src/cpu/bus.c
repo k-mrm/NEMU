@@ -26,7 +26,7 @@ uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
     return joypad_read(bus->pad, 2);
   }
   else if(addr < 0x4018) {
-    return apu_read(apu, addr - 0x4000, data);
+    return apu_read(bus->apu, addr - 0x4000);
   }
   else if(addr < 0x4020) {
     return 0;   /* Normally disabled */
@@ -65,7 +65,7 @@ void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
     joypad_write(bus->pad, 1, data);
   }
   else if(addr < 0x4018) {
-    apu_write(apu, addr - 0x4000, data);
+    apu_write(bus->apu, addr - 0x4000, data);
   }
   else if(addr < 0x4020) {
     ;   /* Normally disabled */

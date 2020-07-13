@@ -1,6 +1,7 @@
 #include "apu/apu.h"
 
 uint8_t apu_read(APU *apu, uint16_t idx) {
+  ;
 }
 
 void apu_write(APU *apu, uint16_t idx, uint8_t data) {
