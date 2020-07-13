@@ -36,7 +36,7 @@ uint8_t ppu_read(PPU *ppu, uint16_t idx) {
     }
     case 7: {
       uint8_t data = ppubus_read(ppu->bus, ppu->vramaddr);
-      if(ppu->vramaddr < 0x3eff) {
+      if(ppu->vramaddr < 0x3f00) {
         res = ppu->data_buf;
         ppu->data_buf = data;
       }
