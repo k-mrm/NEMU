@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS = -Wall -Wextra -I ./include/ -O3 -DNDEBUG
-LDFLAGS := -lallegro -lallegro_main -lallegro_primitives
+LDFLAGS := -lallegro -lallegro_main -lallegro_primitives -lopenal -lalut
 SRCROOT = ./src
 SRCDIRS := $(shell find $(SRCROOT) -type d)
 SRCS=$(foreach dir, $(SRCDIRS), $(wildcard $(dir)/*.c))

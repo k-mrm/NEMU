@@ -22,7 +22,7 @@ struct APU {
     uint8_t noise_time;     /* $400f */
     uint8_t dmc_ctrl1;      /* $4010 */
     uint8_t dmc_ctrl2;      /* $4011 */
-    uint8_t dcm_ctrl3;      /* $4012 */
+    uint8_t dmc_ctrl3;      /* $4012 */
     uint8_t dmc_ctrl4;      /* $4013 */
     uint8_t status;         /* $4015 */
     uint8_t frame_cnt;      /* $4017 */
