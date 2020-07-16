@@ -1,5 +1,7 @@
 #include "apu/apu.h"
 
+#define pulse1_timer(apu) (((uint16_t)apu->freq2 & 0x7) << 8 | apu->freq1)
+
 uint8_t apu_read(APU *apu, uint16_t idx) {
   switch(idx) {
     case 0x15:  return apu->io.status;
@@ -33,6 +35,10 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
   }
 }
 
-void apu_step() {
+void apu_init(APU *apu) {
+  memset(apu, 0, sizeof(APU));
+}
+
+void apu_step(APU *apu) {
   ;
 }

@@ -3,7 +3,8 @@
 
 #include <AL/alut.h>
 
-struct audio {
+typedef struct Audio Audio;
+struct Audio {
   ;
 };
 

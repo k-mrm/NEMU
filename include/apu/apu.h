@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+enum pulseduty {
+  DUTY_12_5,
+  DUTY_25_0,
+  DUTY_50_0,
+  DUTY_75_0,
+};
+
 typedef struct APU APU;
 struct APU {
   struct {
