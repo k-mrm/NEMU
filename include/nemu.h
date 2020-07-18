@@ -14,6 +14,7 @@
 #include "ppu/ppu.h"
 #include "gui/gui.h"
 #include "joypad/joypad.h"
+#include "audio/audio.h"
 
 typedef struct NEMU NEMU;
 struct NEMU {
@@ -25,10 +26,11 @@ struct NEMU {
   APU apu;
   Joypad pad;
   Disp screen;
-  GUI gui;
   Cassette *cassette;
+  GUI gui;
+  Audio audio;
 };
 
-int nemu_boot(NEMU *, Cassette *);
+int nemu_boot(int, char **, NEMU *, Cassette *);
 
 #endif

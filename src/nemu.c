@@ -1,7 +1,7 @@
 #include "nemu.h"
 #include "cpu/register.h"
 
-static void nemu_init(NEMU *nes) {
+static void nemu_init(int argc, char **argv, NEMU *nes) {
   cpu_define_inst();
   cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette, &nes->pad);
   cpu_init(&nes->cpu, &nes->cpubus);
@@ -9,12 +9,13 @@ static void nemu_init(NEMU *nes) {
   ppu_init(&nes->ppu, &nes->ppubus);
   gui_init(&nes->gui);
   joypad_init(&nes->pad);
+  audio_init(argc, argv, &nes->audio);
 }
 
-int nemu_boot(NEMU *nes, Cassette *cas) {
+int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   nes->cassette = cas;
   int nmi = 0;
-  nemu_init(nes);
+  nemu_init(argc, argv, nes);
   cpu_interrupt(&nes->cpu, RESET);
 
 #ifdef CPU_DEBUG

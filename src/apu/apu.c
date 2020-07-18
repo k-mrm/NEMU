@@ -1,6 +1,15 @@
+#include <string.h>
 #include "apu/apu.h"
+#include "audio/audio.h"
 
 #define pulse1_timer(apu) (((uint16_t)apu->freq2 & 0x7) << 8 | apu->freq1)
+
+uint8_t pulse_seq[4][8] = {
+  {0, 1, 0, 0, 0, 0, 0, 0},
+  {0, 1, 1, 0, 0, 0, 0, 0},
+  {0, 1, 1, 1, 1, 0, 0, 0},
+  {1, 0, 0, 1, 1, 1, 1, 1},
+};
 
 uint8_t apu_read(APU *apu, uint16_t idx) {
   switch(idx) {
@@ -39,6 +48,6 @@ void apu_init(APU *apu) {
   memset(apu, 0, sizeof(APU));
 }
 
-void apu_step(APU *apu) {
+void apu_step(APU *apu, Audio *audio, int cycle) {
   ;
 }

@@ -18,5 +18,5 @@ int main(int argc, char **argv) {
   if(read_cassette(&cassette, cname)) return 1;
 
   NEMU nes;
-  return nemu_boot(&nes, &cassette);
+  return nemu_boot(argc, argv, &nes, &cassette);
 }
