@@ -23,7 +23,6 @@ struct NEMU {
   RAM ram;
   PPU ppu;
   PPUBus ppubus;
-  APU apu;
   Joypad pad;
   Disp screen;
   Cassette *cassette;

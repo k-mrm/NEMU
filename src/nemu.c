@@ -3,13 +3,14 @@
 
 static void nemu_init(int argc, char **argv, NEMU *nes) {
   cpu_define_inst();
-  cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->apu, nes->cassette, &nes->pad);
+  cpubus_init(&nes->cpubus, &nes->ram, &nes->ppu, &nes->cpu.apu, nes->cassette, &nes->pad);
   cpu_init(&nes->cpu, &nes->cpubus);
   ppubus_init(&nes->ppubus, nes->cassette);
   ppu_init(&nes->ppu, &nes->ppubus);
   gui_init(&nes->gui);
   joypad_init(&nes->pad);
   audio_init(argc, argv, &nes->audio);
+  apu_init(&nes->cpu.apu);
 }
 
 int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
@@ -33,6 +34,7 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
         nes->ppu.dma_write_flag = 0;
       }
       ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
+      apu_step(&nes->cpu.apu, nes->audio, cycle);
       pcycle += cycle * 3;
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);

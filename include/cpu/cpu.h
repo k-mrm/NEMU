@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "cpu/bus.h"
+#include "apu/apu.h"
 
 enum REGP_STATUS {
   P_STATUS_CARRY      = 1 << 0,
@@ -16,6 +17,7 @@ enum REGP_STATUS {
 };
 
 typedef struct CPU CPU;
+/* RP2A03 */
 struct CPU {
   struct {
     uint8_t a;
@@ -26,6 +28,7 @@ struct CPU {
     uint8_t p;
   } reg;
   CPUBus *bus;
+  APU apu;
 };
 
 void cpu_init(CPU *, CPUBus *);

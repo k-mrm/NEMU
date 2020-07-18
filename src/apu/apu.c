@@ -1,8 +1,23 @@
+#include <stdio.h>
 #include <string.h>
 #include "apu/apu.h"
 #include "audio/audio.h"
 
-#define pulse1_timer(apu) (((uint16_t)apu->freq2 & 0x7) << 8 | apu->freq1)
+#define pulse1_timer(apu) (((uint16_t)apu->io.pulse1_freq2 & 0x7) << 8 | apu->io.pulse1_freq1)
+
+/* $4000/$4004 DDLC VVVV */
+#define pulse1_duty(apu) (((apu)->io.pulse1_ctrl1 & 0xc0) >> 6)
+#define pulse2_duty(apu) (((apu)->io.pulse2_ctrl1 & 0xc0) >> 6)
+
+/* $4015 ---d nt21 */
+#define is_enable_pulse1(apu) ((apu)->io.status & 0x1)
+#define is_enable_pulse2(apu) ((apu)->io.status & 0x2)
+#define is_enable_triangle(apu) ((apu)->io.status & 0x4)
+#define is_enable_noise(apu) ((apu)->io.status & 0x8)
+#define is_enable_dmc(apu) ((apu)->io.status & 0x10)
+
+/* $4017 MI-- ---- */
+#define seq_mode(apu)   (((apu)->io.frame_cnt >> 7) & 0x1)
 
 uint8_t pulse_seq[4][8] = {
   {0, 1, 0, 0, 0, 0, 0, 0},
@@ -48,6 +63,24 @@ void apu_init(APU *apu) {
   memset(apu, 0, sizeof(APU));
 }
 
-void apu_step(APU *apu, Audio *audio, int cycle) {
+void frame_seq_4step(APU *apu) {
   ;
+}
+
+void frame_seq_5step(APU *apu) {
+  ;
+}
+
+void apu_step(APU *apu, Audio *audio, int cycle) {
+  static int a = 0;
+  apu->cycle += cycle;
+  if(apu->cycle < 7457) return;
+
+  apu->cycle -= 7457;
+  if(seq_mode(apu)) {
+    frame_seq_5step(apu);
+  }
+  else {
+    frame_seq_4step(apu);
+  }
 }

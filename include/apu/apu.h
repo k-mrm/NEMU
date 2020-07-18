@@ -34,9 +34,12 @@ struct APU {
     uint8_t status;         /* $4015 */
     uint8_t frame_cnt;      /* $4017 */
   } io;
+  uint16_t timer: 11;
+  uint16_t cycle;
 };
 
 uint8_t apu_read(APU *, uint16_t);
 void apu_write(APU *, uint16_t, uint8_t);
+void apu_init(APU *);
 
 #endif
