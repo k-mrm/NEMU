@@ -26,7 +26,21 @@ void cpu_interrupt(CPU *cpu, int inter) {
       cpu->reg.pc = ((uint16_t)high << 8) | low;
       break;
     }
-    case IRQ: panic("IRQ: unimplemented"); break;
+    case IRQ: {
+      if(cpu_get_pflag(cpu, P_STATUS_IRQ))
+        break;
+      cpu_write_pflag(cpu, P_STATUS_BRK, 0);
+      cpu_stack_push(cpu, cpu->reg.pc >> 8);
+      cpu_stack_push(cpu, cpu->reg.pc & 0xff);
+      cpu_stack_push(cpu, cpu->reg.p);
+      cpu_write_pflag(cpu, P_STATUS_IRQ, 1);
+
+      uint8_t low = cpubus_read(cpu->bus, 0xfffe);
+      uint8_t high = cpubus_read(cpu->bus, 0xffff);
+
+      cpu->reg.pc = ((uint16_t)high << 8) | low;
+      break;
+    }
     case BRK: {
       if(cpu_get_pflag(cpu, P_STATUS_IRQ) || cpu_get_pflag(cpu, P_STATUS_BRK))
         break;
