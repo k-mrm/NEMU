@@ -26,11 +26,18 @@ uint8_t pulse_seq[4][8] = {
   {1, 0, 0, 1, 1, 1, 1, 1},
 };
 
+/* see https://wiki.nesdev.com/w/index.php/APU_Length_Counter */
+uint8_t length_counter[32] = {
+  10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
+  12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30,
+};
+
+/* see https://wiki.nesdev.com/w/index.php/APU#Status_.28.244015.29 */
 uint8_t apu_read(APU *apu, uint16_t idx) {
-  switch(idx) {
-    case 0x15:  return apu->io.status;
-    default:    return 0;
-  }
+  /*
+  if(idx == 0x15) return apu->io.status;
+  */
+  return 0;
 }
 
 void apu_write(APU *apu, uint16_t idx, uint8_t data) {
@@ -71,7 +78,7 @@ void frame_seq_5step(APU *apu) {
   ;
 }
 
-void apu_step(APU *apu, Audio *audio, int cycle) {
+int apu_step(APU *apu, Audio *audio, int cycle) {
   static int a = 0;
   apu->cycle += cycle;
   if(apu->cycle < 7457) return;
@@ -83,4 +90,5 @@ void apu_step(APU *apu, Audio *audio, int cycle) {
   else {
     frame_seq_4step(apu);
   }
+  return 0;
 }

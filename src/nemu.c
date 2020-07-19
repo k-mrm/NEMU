@@ -33,13 +33,14 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
         cycle += 513;
         nes->ppu.dma_write_flag = 0;
       }
-      ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
-      apu_step(&nes->cpu.apu, nes->audio, cycle);
       pcycle += cycle * 3;
+      ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);
         nmi = 0;
       }
+      int irq = apu_step(&nes->cpu.apu, nes->audio, cycle);
+      if(irq) cpu_interrupt(&nes->cpu, IRQ);
     }
     gui_render(nes->screen);
 
