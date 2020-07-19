@@ -81,7 +81,7 @@ void frame_seq_5step(APU *apu) {
 int apu_step(APU *apu, Audio *audio, int cycle) {
   static int a = 0;
   apu->cycle += cycle;
-  if(apu->cycle < 7457) return;
+  if(apu->cycle < 7457) return 0;
 
   apu->cycle -= 7457;
   if(seq_mode(apu)) {
