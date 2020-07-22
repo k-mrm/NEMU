@@ -3,7 +3,6 @@
 #include "apu/apu.h"
 #include "audio/audio.h"
 
-/* $4000/$4004 DDLC VVVV */
 
 /* $4015 ---d nt21 */
 
@@ -44,15 +43,32 @@ uint8_t apu_read(APU *apu, uint16_t idx) {
 void apu_write(APU *apu, uint16_t idx, uint8_t data) {
   switch(idx) {
     case 0x0: {
+      /* $4000 DDLC VVVV */
       apu->pulse1.duty = (data & 0xc0) >> 6;
       apu->pulse1.eg.volume = data & 0xf;
       apu->pulse1.halt = data & 0x20;
       break;
     }
-    case 0x1:
-    case 0x2:
-    case 0x3:
-    case 0x4:
+    case 0x1: {
+    }
+    case 0x2: {
+      /* $4002 LLLL LLLL */
+      apu->pulse1.timer = (apu->pulse1.timer & 0x700) | data;
+      break;
+    }
+    case 0x3: {
+      /* $4003 llll lHHH */
+      apu->pulse1.timer = (apu->pulse1.timer & 0xff) | ((data & 0x7) << 8);
+      apu->pulse1.len_cnt = data >> 3;
+      break;
+    }
+    case 0x4: {
+      /* $4004 DDLC VVVV */
+      apu->pulse2.duty = (data & 0xc0) >> 6;
+      apu->pulse2.eg.volume = data & 0xf;
+      apu->pulse2.halt = data & 0x20;
+      break;
+    }
     case 0x5:
     case 0x6:
     case 0x7:

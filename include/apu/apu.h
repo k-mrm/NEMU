@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "audio/audio.h"
+#include <stdbool.h>
 
 enum pulseduty {
   DUTY_12_5,
@@ -18,11 +19,17 @@ struct envelope {
   uint8_t start;
 };
 
+struct sweepunit {
+  ;
+};
+
 struct pulse {
   struct envelope eg;
+  struct sweepunit sweep;
   uint8_t len_cnt;
-  uint8_t duty;
+  enum pulseduty duty;
   uint8_t halt;
+  uint8_t timer;
 };
 
 typedef struct APU APU;
@@ -31,8 +38,8 @@ struct APU {
   struct pulse pulse2;
   uint16_t timer: 11;
   uint16_t cycle;
-  uint8_t seq_mode;
-  uint8_t is_enable_irq;
+  bool seq_mode: 1;
+  bool is_enable_irq: 1;
 };
 
 uint8_t apu_read(APU *, uint16_t);
