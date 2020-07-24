@@ -74,6 +74,8 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
       break;
     }
     case 0x1: {
+      /* $4001 EPPP NSSS */
+      break;
     }
     case 0x2: {
       /* $4002 LLLL LLLL */
@@ -110,7 +112,7 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x17: {
       /* $4017 MI-- ---- */
       apu->seq_mode = (data >> 7) & 0x1;
-      apu->is_enable_irq = (data >> 6) & 0x1;
+      apu->inhibit_irq = (data >> 6) & 0x1;
       break;
     }
     default: break;
@@ -122,16 +124,33 @@ void apu_init(APU *apu) {
 }
 
 int frame_seq_4step(APU *apu) {
+  apu->step++;
   envelope_clock(&apu->pulse1.eg);
   if(apu->step % 2 == 0) {
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
   }
 
-  apu->step++;
+  if(apu->step == 4) {
+    apu->step = 0;
+
+    if(!apu->inhibit_irq) {
+      return 1;
+    }
+  }
+
   return 0;
 }
 
 int frame_seq_5step(APU *apu) {
+  apu->step++;
+  if(apu->step != 4) {
+    envelope_clock(&apu->pulse1.eg);
+  }
+
+  if(apu->step == 2 || apu->step == 5) {
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+  } 
+
   return 0;
 }
 

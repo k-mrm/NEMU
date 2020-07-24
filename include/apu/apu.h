@@ -29,9 +29,14 @@ struct triangle {
   ;
 };
 
+struct sequencer {
+
+};
+
 struct pulse {
   struct envelope eg;
   struct sweepunit sweep;
+  struct sequencer seq;
   uint8_t len_cnt;
   enum pulseduty duty;
   bool halt: 1;
@@ -47,7 +52,7 @@ struct APU {
   uint16_t cycle;
   uint8_t step;
   bool seq_mode: 1;
-  bool is_enable_irq: 1;
+  bool inhibit_irq: 1;
 };
 
 uint8_t apu_read(APU *, uint16_t);
