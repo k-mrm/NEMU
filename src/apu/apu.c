@@ -21,14 +21,37 @@ static uint8_t length_counter[32] = {
   12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30,
 };
 
-void envelope_clock(struct envelope *e) {
+static void envelope_clock(struct envelope *e) {
   if(e->start) {
     e->start = 0;
     e->decay = 15;
     e->divider = e->volume;
   }
+  else if(e->divider == 0) {
+    e->divider = e->volume;
+    e->decay--;
+
+    if(e->decay == 0) {
+      if(e->loop)
+        e->decay = 15;
+    }
+    else {
+      e->decay--;
+    }
+  }
   else {
-    ;
+    e->divider--;
+  }
+}
+
+static void length_counter_clock(uint8_t *c, bool enable, bool halt) {
+  if(enable) {
+    if(*c && !halt) {
+      (*c)--;
+    }
+  }
+  else {
+    *c = 0;
   }
 }
 
@@ -46,7 +69,8 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
       /* $4000 DDLC VVVV */
       apu->pulse1.duty = (data & 0xc0) >> 6;
       apu->pulse1.eg.volume = data & 0xf;
-      apu->pulse1.halt = data & 0x20;
+      apu->pulse1.eg.constant = data & 0x10;
+      apu->pulse1.eg.loop = apu->pulse1.halt = data & 0x20;
       break;
     }
     case 0x1: {
@@ -59,7 +83,7 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x3: {
       /* $4003 llll lHHH */
       apu->pulse1.timer = (apu->pulse1.timer & 0xff) | ((data & 0x7) << 8);
-      apu->pulse1.len_cnt = data >> 3;
+      apu->pulse1.len_cnt = length_counter[data >> 3];
       break;
     }
     case 0x4: {
@@ -98,6 +122,12 @@ void apu_init(APU *apu) {
 }
 
 int frame_seq_4step(APU *apu) {
+  envelope_clock(&apu->pulse1.eg);
+  if(apu->step % 2 == 0) {
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+  }
+
+  apu->step++;
   return 0;
 }
 

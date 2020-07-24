@@ -17,9 +17,15 @@ struct envelope {
   uint8_t decay;
   uint8_t divider;
   uint8_t start;
+  bool loop: 1;
+  bool constant: 1;
 };
 
 struct sweepunit {
+  ;
+};
+
+struct triangle {
   ;
 };
 
@@ -28,7 +34,8 @@ struct pulse {
   struct sweepunit sweep;
   uint8_t len_cnt;
   enum pulseduty duty;
-  uint8_t halt;
+  bool halt: 1;
+  bool is_enable: 1;
   uint8_t timer;
 };
 
@@ -38,6 +45,7 @@ struct APU {
   struct pulse pulse2;
   uint16_t timer: 11;
   uint16_t cycle;
+  uint8_t step;
   bool seq_mode: 1;
   bool is_enable_irq: 1;
 };
