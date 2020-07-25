@@ -5,58 +5,7 @@
 
 /* $4015 ---d nt21 */
 
-/* cpu clock: 1789772.5 */
-
-static uint8_t pulse_seq[4][8] = {
-  {0, 1, 0, 0, 0, 0, 0, 0},
-  {0, 1, 1, 0, 0, 0, 0, 0},
-  {0, 1, 1, 1, 1, 0, 0, 0},
-  {1, 0, 0, 1, 1, 1, 1, 1},
-};
-
-/* see https://wiki.nesdev.com/w/index.php/APU_Length_Counter */
-static uint8_t length_counter[32] = {
-  10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
-  12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30,
-};
-
-static void envelope_clock(struct envelope *e) {
-  if(e->start) {
-    e->start = 0;
-    e->decay = 15;
-    e->divider = e->volume;
-  }
-  else if(e->divider == 0) {
-    e->divider = e->volume;
-    e->decay--;
-
-    if(e->decay == 0) {
-      if(e->loop)
-        e->decay = 15;
-    }
-    else {
-      e->decay--;
-    }
-  }
-  else {
-    e->divider--;
-  }
-}
-
-static void length_counter_clock(uint8_t *c, bool enable, bool halt) {
-  if(enable) {
-    if(*c && !halt) {
-      (*c)--;
-    }
-  }
-  else {
-    *c = 0;
-  }
-}
-
-static void pulse_update(struct pulse *pulse) {
-  ;
-}
+/* cpu clock: 1789772.5 Hz */
 
 /* see https://wiki.nesdev.com/w/index.php/APU#Status_.28.244015.29 */
 uint8_t apu_read(APU *apu, uint16_t idx) {
@@ -82,13 +31,14 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     }
     case 0x2: {
       /* $4002 LLLL LLLL */
-      apu->pulse1.timer = (apu->pulse1.timer & 0x700) | data;
+      apu->pulse1.seq.timer = (apu->pulse1.seq.timer & 0x700) | data;
       break;
     }
     case 0x3: {
       /* $4003 llll lHHH */
-      apu->pulse1.timer = (apu->pulse1.timer & 0xff) | ((data & 0x7) << 8);
+      apu->pulse1.seq.timer = (apu->pulse1.seq.timer & 0xff) | ((data & 0x7) << 8);
       apu->pulse1.len_cnt = length_counter[data >> 3];
+      apu->pulse1.freq = 1789772.0 / (16 * (apu->pulse1.seq.timer + 1));
       break;
     }
     case 0x4: {
@@ -111,7 +61,7 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x11:
     case 0x12:
     case 0x13:
-    case 0x15: break;
+    case 0x15: /* TODO */ break;
     case 0x17: {
       /* $4017 MI-- ---- */
       apu->seq_mode = (data >> 7) & 0x1;
@@ -172,9 +122,7 @@ int apu_clock(APU *apu, Audio *audio) {
       envelope_clock(&apu->pulse1.eg);
       length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
 
-      if(!apu->inhibit_irq) {
-        return 1;
-      }
+      if(!apu->inhibit_irq) return 1;
     }
 
     return 0;

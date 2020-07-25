@@ -4,45 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "audio/audio.h"
-
-enum pulseduty {
-  DUTY_12_5,
-  DUTY_25_0,
-  DUTY_50_0,
-  DUTY_75_0,
-};
-
-struct envelope {
-  uint8_t volume;
-  uint8_t decay;
-  uint8_t divider;
-  uint8_t start;
-  bool loop: 1;
-  bool constant: 1;
-};
-
-struct sweepunit {
-  ;
-};
-
-struct triangle {
-  ;
-};
-
-struct sequencer {
-
-};
-
-struct pulse {
-  struct envelope eg;
-  struct sweepunit sweep;
-  struct sequencer seq;
-  uint8_t len_cnt;
-  enum pulseduty duty;
-  bool halt: 1;
-  bool is_enable: 1;
-  uint8_t timer;
-};
+#include "apu/pulse.h"
 
 typedef struct APU APU;
 struct APU {
