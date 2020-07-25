@@ -17,40 +17,12 @@ uint8_t apu_read(APU *apu, uint16_t idx) {
 
 void apu_write(APU *apu, uint16_t idx, uint8_t data) {
   switch(idx) {
-    case 0x0: {
-      /* $4000 DDLC VVVV */
-      apu->pulse1.duty = (data & 0xc0) >> 6;
-      apu->pulse1.eg.volume = data & 0xf;
-      apu->pulse1.eg.constant = data & 0x10;
-      apu->pulse1.eg.loop = apu->pulse1.halt = data & 0x20;
-      break;
-    }
-    case 0x1: {
-      /* $4001 EPPP NSSS */
-      break;
-    }
-    case 0x2: {
-      /* $4002 LLLL LLLL */
-      apu->pulse1.seq.timer = (apu->pulse1.seq.timer & 0x700) | data;
-      break;
-    }
-    case 0x3: {
-      /* $4003 llll lHHH */
-      apu->pulse1.seq.timer = (apu->pulse1.seq.timer & 0xff) | ((data & 0x7) << 8);
-      apu->pulse1.len_cnt = length_counter[data >> 3];
-      apu->pulse1.freq = 1789772.0 / (16 * (apu->pulse1.seq.timer + 1));
-      break;
-    }
-    case 0x4: {
-      /* $4004 DDLC VVVV */
-      apu->pulse2.duty = (data & 0xc0) >> 6;
-      apu->pulse2.eg.volume = data & 0xf;
-      apu->pulse2.halt = data & 0x20;
-      break;
-    }
-    case 0x5:
-    case 0x6:
-    case 0x7:
+    case 0x0: case 0x1:
+    case 0x2: case 0x3:
+      pulse_write(&apu->pulse1, idx, data); break;
+    case 0x4: case 0x5:
+    case 0x6: case 0x7:
+      pulse_write(&apu->pulse2, idx - 0x4, data); break;
     case 0x8:
     case 0xa:
     case 0xb:

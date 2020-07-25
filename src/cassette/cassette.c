@@ -4,22 +4,22 @@
 #include "cassette/cassette.h"
 #include "log/log.h"
 
+/*
 static void cassette_dump(Cassette *cassette) {
-  // printf("prgrom: %#lx\n", cassette->nprgrom_byte);
-  // printf("chrrom: %#lx\n", cassette->nchrrom_byte);
+  printf("prgrom: %#lx\n", cassette->nprgrom_byte);
+  printf("chrrom: %#lx\n", cassette->nchrrom_byte);
 
-  /*
-     puts("prgrom:");
-     for(int i = 0; i < cassette->nprgrom_byte; ++i) {
-     printf("%02x ", cassette->prgrom[i]);
-     }
-     puts("chrrom:");
-     for(int i = 0; i < cassette->nchrrom_byte; ++i) {
-     printf("%x ", cassette->chrrom[i]);
-     }
-     puts("");
-     */
+  puts("prgrom:");
+  for(int i = 0; i < cassette->nprgrom_byte; ++i) {
+    printf("%02x ", cassette->prgrom[i]);
+  }
+  puts("chrrom:");
+  for(int i = 0; i < cassette->nchrrom_byte; ++i) {
+    printf("%x ", cassette->chrrom[i]);
+  }
+  puts("");
 }
+*/
 
 static int parse_ines_format(Cassette *cas, unsigned char *ines) {
   if(memcmp(ines, "NES\x1A", 4)) {
@@ -41,7 +41,7 @@ static int parse_ines_format(Cassette *cas, unsigned char *ines) {
   memcpy(cas->prgrom, ines + prgrom_base, nprgrom_byte);
   memcpy(cas->chrrom, ines + chrrom_base, nchrrom_byte);
 
-  cassette_dump(cas);
+  // cassette_dump(cas);
 
   return 0;
 }

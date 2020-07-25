@@ -27,5 +27,6 @@ struct pulse {
 };
 
 void pulse_update(struct pulse *);
+void pulse_write(struct pulse *, uint16_t, uint8_t);
 
 #endif
