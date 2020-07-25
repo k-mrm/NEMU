@@ -2,8 +2,8 @@
 #define NEMU_APU_H
 
 #include <stdint.h>
-#include "audio/audio.h"
 #include <stdbool.h>
+#include "audio/audio.h"
 
 enum pulseduty {
   DUTY_12_5,

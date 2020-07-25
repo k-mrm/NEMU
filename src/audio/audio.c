@@ -8,3 +8,7 @@ void audio_init(int argc, char **argv, Audio *audio) {
   alGenBuffers(4, audio->buffer);
   alGenSources(1, &audio->src);
 }
+
+void audio_update(Audio *audio) {
+  ;
+}
