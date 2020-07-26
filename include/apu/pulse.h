@@ -8,25 +8,19 @@
 #include "apu/lengthcounter.h"
 #include "apu/sweep.h"
 
-enum pulseduty {
-  DUTY_12_5,
-  DUTY_25_0,
-  DUTY_50_0,
-  DUTY_75_0,
-};
-
 struct pulse {
   struct envelope eg;
   struct sweepunit sweep;
   struct sequencer seq;
   float freq;
   uint8_t len_cnt;
-  enum pulseduty duty;
+  int duty;
   bool halt: 1;
   bool is_enable: 1;
 };
 
 void pulse_update(struct pulse *);
 void pulse_write(struct pulse *, uint16_t, uint8_t);
+void pulse_output(struct pulse *);
 
 #endif

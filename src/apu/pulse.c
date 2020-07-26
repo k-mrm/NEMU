@@ -4,6 +4,7 @@
 #include "apu/pulse.h"
 #include "apu/lengthcounter.h"
 
+/* see https://wiki.nesdev.com/w/index.php/APU_Pulse */
 uint8_t pulse_seq[4][8] = {
   {0, 1, 0, 0, 0, 0, 0, 0},
   {0, 1, 1, 0, 0, 0, 0, 0},
@@ -25,19 +26,23 @@ void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
       break;
     case 0x2:
       /* $4002/$4006 LLLL LLLL */
-      pulse->seq.timer = (pulse->seq.timer & 0x700) | data;
+      pulse->seq.reload = pulse->seq.timer = (pulse->seq.timer & 0x700) | data;
       break;
     case 0x3:
       /* $4003/$4007 llll lHHH */
-      pulse->seq.timer = (pulse->seq.timer & 0xff) | ((data & 0x7) << 8);
+      pulse->seq.reload = pulse->seq.timer = (pulse->seq.timer & 0xff) | ((data & 0x7) << 8);
       pulse->len_cnt = length_counter[data >> 3];
-      pulse->freq = 1789772.0 / (16 * (pulse->seq.timer + 1));
+      pulse->eg.start = true;
       break;
     default: break;
   }
 }
 
-void pulse_update(struct pulse *pulse) {
-  ;
-}
+int pulse_output(struct pulse *pulse) {
+  int p = pulse_seq[pulse->duty][pulse->seq_idx];
+  if(pulse->len_cnt == 0 || !p) {
+    return 0;
+  }
 
+  return pulse->eg.constant? pulse->eg.volume : pulse->eg.decay;
+}

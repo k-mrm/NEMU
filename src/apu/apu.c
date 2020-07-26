@@ -3,10 +3,6 @@
 #include "apu/apu.h"
 #include "audio/audio.h"
 
-/* $4015 ---d nt21 */
-
-/* cpu clock: 1789772.5 Hz */
-
 /* see https://wiki.nesdev.com/w/index.php/APU#Status_.28.244015.29 */
 uint8_t apu_read(APU *apu, uint16_t idx) {
   /*
@@ -32,8 +28,10 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x10:
     case 0x11:
     case 0x12:
-    case 0x13:
-    case 0x15: /* TODO */ break;
+    case 0x13: /* TODO */ break;
+    case 0x15:
+      /* $4015 ---d nt21 */
+      break;
     case 0x17: {
       /* $4017 MI-- ---- */
       apu->seq_mode = (data >> 7) & 0x1;
@@ -48,56 +46,66 @@ void apu_init(APU *apu) {
   memset(apu, 0, sizeof(APU));
 }
 
+void frame_seq_5step(APU *apu) {
+  if(apu->cycle == 3728) {
+    envelope_clock(&apu->pulse1.eg);
+  }
+  if(apu->cycle == 7456) {
+    envelope_clock(&apu->pulse1.eg);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+  }
+  if(apu->cycle == 11185) {
+    envelope_clock(&apu->pulse1.eg);
+  }
+  if(apu->cycle == 14914) {
+    /* NOP */
+  }
+  if(apu->cycle == 18640) {
+    apu->cycle = 0;
+    envelope_clock(&apu->pulse1.eg);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+  }
+
+  return 0;
+}
+
+void frame_seq_4step(APU *apu) {
+  if(apu->cycle == 3728) {
+    envelope_clock(&apu->pulse1.eg);
+  }
+  if(apu->cycle == 7456) {
+    envelope_clock(&apu->pulse1.eg);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+  }
+  if(apu->cycle == 11185) {
+    envelope_clock(&apu->pulse1.eg);
+  }
+  if(apu->cycle == 14914) {
+    apu->cycle = 0;
+    envelope_clock(&apu->pulse1.eg);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+
+    if(!apu->inhibit_irq) return 1;
+  }
+
+  return 0;
+}
+
 int apu_clock(APU *apu, Audio *audio) {
   apu->cycle++;
-  pulse_update(&apu->pulse1);
-  pulse_update(&apu->pulse2);
+
+  sequencer_8step_clock(&apu->pulse1.seq);
+  sequencer_8step_clock(&apu->pulse2.seq);
+
+  int p1 = pulse_output(&apu->pulse1.seq);
+  int p2 = pulse_output(&apu->pulse2.seq);
 
   /* see https://wiki.nesdev.com/w/index.php/APU_Frame_Counter */
   if(apu->seq_mode) {
-    /* 5 step */
-    if(apu->cycle == 3728) {
-      envelope_clock(&apu->pulse1.eg);
-    }
-    if(apu->cycle == 7456) {
-      envelope_clock(&apu->pulse1.eg);
-      length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
-    }
-    if(apu->cycle == 11185) {
-      envelope_clock(&apu->pulse1.eg);
-    }
-    if(apu->cycle == 14914) {
-      /* NOP */
-    }
-    if(apu->cycle == 18640) {
-      apu->cycle = 0;
-      envelope_clock(&apu->pulse1.eg);
-      length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
-    }
-
-    return 0;
+    return frame_seq_5step(apu);
   }
   else {
-    /* 4 step */
-    if(apu->cycle == 3728) {
-      envelope_clock(&apu->pulse1.eg);
-    }
-    if(apu->cycle == 7456) {
-      envelope_clock(&apu->pulse1.eg);
-      length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
-    }
-    if(apu->cycle == 11185) {
-      envelope_clock(&apu->pulse1.eg);
-    }
-    if(apu->cycle == 14914) {
-      apu->cycle = 0;
-      envelope_clock(&apu->pulse1.eg);
-      length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
-
-      if(!apu->inhibit_irq) return 1;
-    }
-
-    return 0;
+    return frame_seq_4step(apu);
   }
 }
 
