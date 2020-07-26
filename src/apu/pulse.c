@@ -39,7 +39,7 @@ void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
 }
 
 int pulse_output(struct pulse *pulse) {
-  int p = pulse_seq[pulse->duty][pulse->seq_idx];
+  int p = pulse_seq[pulse->duty][pulse->seq.seq_idx];
   if(pulse->len_cnt == 0 || !p) {
     return 0;
   }

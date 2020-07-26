@@ -57,7 +57,7 @@ void apu_init(APU *apu) {
   }
 }
 
-void frame_seq_5step(APU *apu) {
+int frame_seq_5step(APU *apu) {
   if(apu->cycle == 3728) {
     envelope_clock(&apu->pulse1.eg);
   }
@@ -80,7 +80,7 @@ void frame_seq_5step(APU *apu) {
   return 0;
 }
 
-void frame_seq_4step(APU *apu) {
+int frame_seq_4step(APU *apu) {
   if(apu->cycle == 3728) {
     envelope_clock(&apu->pulse1.eg);
   }
@@ -110,8 +110,10 @@ int apu_clock(APU *apu, Audio *audio) {
 
   int p1 = pulse_output(&apu->pulse1.seq);
   int p2 = pulse_output(&apu->pulse2.seq);
+  /* TODO: tnd */
+  int out = pulse_table[p1 + p2];
 
-  /* see https://wiki.nesdev.com/w/index.php/APU_Frame_Counter */
+  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
   if(apu->seq_mode) {
     return frame_seq_5step(apu);
   }
