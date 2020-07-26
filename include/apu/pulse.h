@@ -16,7 +16,7 @@ struct pulse {
   uint8_t len_cnt;
   int duty;
   bool halt: 1;
-  bool is_enable: 1;
+  bool enabled: 1;
 };
 
 void pulse_update(struct pulse *);

@@ -34,6 +34,8 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x13: /* TODO */ break;
     case 0x15:
       /* $4015 ---d nt21 */
+      apu->pulse1.enabled = data & 0x1;
+      apu->pulse2.enabled = data & 0x2;
       break;
     case 0x17: {
       /* $4017 MI-- ---- */
@@ -63,7 +65,7 @@ int frame_seq_5step(APU *apu) {
   }
   if(apu->cycle == 7456) {
     envelope_clock(&apu->pulse1.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
   if(apu->cycle == 11185) {
     envelope_clock(&apu->pulse1.eg);
@@ -74,7 +76,7 @@ int frame_seq_5step(APU *apu) {
   if(apu->cycle == 18640) {
     apu->cycle = 0;
     envelope_clock(&apu->pulse1.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
 
   return 0;
@@ -86,7 +88,7 @@ int frame_seq_4step(APU *apu) {
   }
   if(apu->cycle == 7456) {
     envelope_clock(&apu->pulse1.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
   if(apu->cycle == 11185) {
     envelope_clock(&apu->pulse1.eg);
@@ -94,7 +96,7 @@ int frame_seq_4step(APU *apu) {
   if(apu->cycle == 14914) {
     apu->cycle = 0;
     envelope_clock(&apu->pulse1.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.is_enable, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
 
     if(!apu->inhibit_irq) return 1;
   }

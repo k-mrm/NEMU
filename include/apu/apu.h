@@ -10,9 +10,7 @@ typedef struct APU APU;
 struct APU {
   struct pulse pulse1;
   struct pulse pulse2;
-  uint16_t timer: 11;
   uint16_t cycle;
-  uint8_t step;
   bool seq_mode: 1;
   bool inhibit_irq: 1;
 };
