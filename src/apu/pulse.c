@@ -5,7 +5,7 @@
 #include "apu/lengthcounter.h"
 
 /* see https://wiki.nesdev.com/w/index.php/APU_Pulse */
-uint8_t pulse_seq[4][8] = {
+const uint8_t pulse_seq[4][8] = {
   {0, 1, 0, 0, 0, 0, 0, 0},
   {0, 1, 1, 0, 0, 0, 0, 0},
   {0, 1, 1, 1, 1, 0, 0, 0},

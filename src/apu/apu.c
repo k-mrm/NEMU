@@ -3,6 +3,9 @@
 #include "apu/apu.h"
 #include "audio/audio.h"
 
+float pulse_table[32];
+float tnd_table[204];
+
 /* see https://wiki.nesdev.com/w/index.php/APU#Status_.28.244015.29 */
 uint8_t apu_read(APU *apu, uint16_t idx) {
   /*
@@ -44,6 +47,14 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
 
 void apu_init(APU *apu) {
   memset(apu, 0, sizeof(APU));
+
+  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer */
+  for(int n = 0; n < 32; ++n) {
+    pulse_table[n] = 95.52 / (8128.0 / n + 100);
+  }
+  for(int n = 0; n < 204; ++n) {
+    tnd_table[n] = 163.67 / (24329.0 / n + 100);
+  }
 }
 
 void frame_seq_5step(APU *apu) {
