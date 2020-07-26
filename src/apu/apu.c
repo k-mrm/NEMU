@@ -48,7 +48,7 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
 void apu_init(APU *apu) {
   memset(apu, 0, sizeof(APU));
 
-  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer */
+  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
   for(int n = 0; n < 32; ++n) {
     pulse_table[n] = 95.52 / (8128.0 / n + 100);
   }
@@ -108,18 +108,17 @@ int apu_clock(APU *apu, Audio *audio) {
   sequencer_8step_clock(&apu->pulse1.seq);
   sequencer_8step_clock(&apu->pulse2.seq);
 
-  int p1 = pulse_output(&apu->pulse1.seq);
-  int p2 = pulse_output(&apu->pulse2.seq);
+  int p1 = pulse_output(&apu->pulse1);
+  int p2 = pulse_output(&apu->pulse2);
   /* TODO: tnd */
-  int out = pulse_table[p1 + p2];
+  float out = pulse_table[p1 + p2];
+  // printf("out: %f\n", out);
 
-  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
-  if(apu->seq_mode) {
+  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer */
+  if(apu->seq_mode)
     return frame_seq_5step(apu);
-  }
-  else {
+  else
     return frame_seq_4step(apu);
-  }
 }
 
 int apu_step(APU *apu, Audio *audio, int cycle) {
