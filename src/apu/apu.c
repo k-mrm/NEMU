@@ -60,20 +60,20 @@ void apu_init(APU *apu) {
 }
 
 int frame_seq_5step(APU *apu) {
-  if(apu->cycle == 3728) {
+  if(apu->cycle == 7457) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 7456) {
+  if(apu->cycle == 14913) {
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
-  if(apu->cycle == 11185) {
+  if(apu->cycle == 22371) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 14914) {
+  if(apu->cycle == 29828) {
     /* NOP */
   }
-  if(apu->cycle == 18640) {
+  if(apu->cycle == 37281) {
     apu->cycle = 0;
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
@@ -83,17 +83,17 @@ int frame_seq_5step(APU *apu) {
 }
 
 int frame_seq_4step(APU *apu) {
-  if(apu->cycle == 3728) {
+  if(apu->cycle == 7457) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 7456) {
+  if(apu->cycle == 14913) {
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
-  if(apu->cycle == 11185) {
+  if(apu->cycle == 22371) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 14914) {
+  if(apu->cycle == 29828) {
     apu->cycle = 0;
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
@@ -107,8 +107,10 @@ int frame_seq_4step(APU *apu) {
 int apu_clock(APU *apu, Audio *audio) {
   apu->cycle++;
 
-  sequencer_8step_clock(&apu->pulse1.seq);
-  sequencer_8step_clock(&apu->pulse2.seq);
+  if(apu->cycle % 2 == 0) {
+    sequencer_8step_clock(&apu->pulse1.seq);
+    sequencer_8step_clock(&apu->pulse2.seq);
+  }
 
   int p1 = pulse_output(&apu->pulse1);
   int p2 = pulse_output(&apu->pulse2);
@@ -123,8 +125,8 @@ int apu_clock(APU *apu, Audio *audio) {
     return frame_seq_4step(apu);
 }
 
-int apu_step(APU *apu, Audio *audio, int cycle) {
-  while(cycle--) {
+int apu_step(APU *apu, Audio *audio, int cpucycle) {
+  while(cpucycle--) {
     apu_clock(apu, audio);
   }
 }

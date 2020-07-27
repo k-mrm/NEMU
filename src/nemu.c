@@ -28,19 +28,18 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
     int pcycle = 0;
     /* draw 1frame */
     while(pcycle < 262 * 341) {
-      int cycle = cpu_step(&nes->cpu);
+      int ccycle = cpu_step(&nes->cpu);
       if(nes->ppu.dma_write_flag) {
-        cycle += 513;
+        ccycle += 513;
         nes->ppu.dma_write_flag = 0;
       }
-      pcycle += cycle * 3;
-      ppu_step(&nes->ppu, nes->screen, &nmi, cycle * 3);
+      pcycle += ccycle * 3;
+      ppu_step(&nes->ppu, nes->screen, &nmi, ccycle * 3);
       if(nmi) {
         cpu_interrupt(&nes->cpu, NMI);
         nmi = 0;
       }
-      /* 2 CPU cycles = 1 APU cycle */
-      int irq = apu_step(&nes->cpu.apu, &nes->audio, cycle / 2);
+      int irq = apu_step(&nes->cpu.apu, &nes->audio, ccycle);
       if(irq) cpu_interrupt(&nes->cpu, IRQ);
     }
     gui_render(nes->screen);

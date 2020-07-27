@@ -186,6 +186,7 @@ void cpu_define_inst() {
   DEF_INST(0x28, OP_PLP, ADDR_IMPLIED, 1, 4);
   DEF_INST(0xEA, OP_NOP, ADDR_IMPLIED, 1, 2);
 
+  /* TODO: unofficial opcode */
   INVALID_INST(0x3);
   INVALID_INST(0x4);
   INVALID_INST(0x7);
