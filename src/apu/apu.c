@@ -104,19 +104,28 @@ int frame_seq_4step(APU *apu) {
   return 0;
 }
 
-int apu_clock(APU *apu, Audio *audio) {
-  apu->cycle++;
-
-  if(apu->cycle % 2 == 0) {
-    sequencer_8step_clock(&apu->pulse1.seq);
-    sequencer_8step_clock(&apu->pulse2.seq);
-  }
-
+void apu_sample(APU *apu, Audio *audio) {
   int p1 = pulse_output(&apu->pulse1);
   int p2 = pulse_output(&apu->pulse2);
   /* TODO: tnd */
   float out = pulse_table[p1 + p2];
-  // printf("out: %f\n", out);
+  printf("out: %f\n", out);
+}
+
+int apu_clock(APU *apu, Audio *audio) {
+  static const int sampling_period = 1789773 / 44100;
+
+  apu->cycle++;
+
+  if(apu->cycle % sampling_period == 0) {
+    /* sound */
+    apu_sample(apu, audio);
+  }
+
+  if(apu->cycle % 2 == 0) { /* APU clock */
+    pulse_timer_clock(&apu->pulse1);
+    pulse_timer_clock(&apu->pulse2);
+  }
 
   /* see https://wiki.nesdev.com/w/index.php/APU_Mixer */
   if(apu->seq_mode)

@@ -11,9 +11,11 @@
 struct pulse {
   struct envelope eg;
   struct sweepunit sweep;
-  struct sequencer seq;
   float freq;
   uint8_t len_cnt;
+  uint16_t timer: 11;
+  uint16_t reload: 11;
+  uint8_t sequence;
   int duty;
   bool halt: 1;
   bool enabled: 1;
@@ -22,5 +24,6 @@ struct pulse {
 void pulse_update(struct pulse *);
 void pulse_write(struct pulse *, uint16_t, uint8_t);
 int pulse_output(struct pulse *);
+void pulse_timer_clock(struct pulse *);
 
 #endif
