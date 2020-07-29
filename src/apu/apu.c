@@ -105,6 +105,7 @@ void apu_sample(APU *apu, Audio *audio) {
   /* TODO: tnd */
   float out = pulse_table[p1 + p2];
   printf("out: %f\n", out);
+  audio->buf[audio->nbuf++] = out;
 }
 
 int apu_clock(APU *apu, Audio *audio) {

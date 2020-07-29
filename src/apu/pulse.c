@@ -23,6 +23,10 @@ void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
       break;
     case 0x1:
       /* $4001/$4005 EPPP NSSS */
+      pulse->sweep.shift = data & 0x7;
+      pulse->sweep.neg = (data >> 3) & 0x1;
+      pulse->sweep.period = (data >> 4) & 0x7;
+      pulse->sweep.enabled = (data >> 7) & 0x1;
       break;
     case 0x2:
       /* $4002/$4006 LLLL LLLL */

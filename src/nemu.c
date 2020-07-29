@@ -43,6 +43,7 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
       if(irq) cpu_interrupt(&nes->cpu, IRQ);
     }
     gui_render(nes->screen);
+    audio_update(&nes->audio);
 
     memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
   }

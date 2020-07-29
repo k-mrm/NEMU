@@ -5,6 +5,8 @@
 
 typedef struct Audio Audio;
 struct Audio {
+  float *buf;
+  size_t nbuf;
 };
 
 void audio_init(int, char **, Audio *);
