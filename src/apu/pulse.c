@@ -12,6 +12,10 @@ const uint8_t pulse_seq[4][8] = {
   {1, 0, 0, 1, 1, 1, 1, 1},
 };
 
+void sweepunit_clock(struct sweepunit *s) {
+  ;
+}
+
 void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
   switch(idx) {
     case 0x0:
@@ -27,6 +31,7 @@ void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
       pulse->sweep.neg = (data >> 3) & 0x1;
       pulse->sweep.period = (data >> 4) & 0x7;
       pulse->sweep.enabled = (data >> 7) & 0x1;
+      pulse->sweep.reload = true;
       break;
     case 0x2:
       /* $4002/$4006 LLLL LLLL */
@@ -38,7 +43,6 @@ void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
       pulse->len_cnt = length_counter[data >> 3];
       pulse->eg.start = true;
       break;
-    default: break;
   }
 }
 

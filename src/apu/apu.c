@@ -57,21 +57,21 @@ void apu_init(APU *apu) {
 }
 
 int frame_seq_5step(APU *apu) {
-  if(apu->cycle == 7457) {
+  if(apu->fs_cycle == 7457) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 14913) {
+  if(apu->fs_cycle == 14913) {
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
-  if(apu->cycle == 22371) {
+  if(apu->fs_cycle == 22371) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 29828) {
+  if(apu->fs_cycle == 29828) {
     /* NOP */
   }
-  if(apu->cycle == 37281) {
-    apu->cycle = 0;
+  if(apu->fs_cycle == 37281) {
+    apu->fs_cycle = 0;
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
@@ -79,18 +79,18 @@ int frame_seq_5step(APU *apu) {
 }
 
 int frame_seq_4step(APU *apu) {
-  if(apu->cycle == 7457) {
+  if(apu->fs_cycle == 7457) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 14913) {
+  if(apu->fs_cycle == 14913) {
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
-  if(apu->cycle == 22371) {
+  if(apu->fs_cycle == 22371) {
     envelope_clock(&apu->pulse1.eg);
   }
-  if(apu->cycle == 29828) {
-    apu->cycle = 0;
+  if(apu->fs_cycle == 29828) {
+    apu->fs_cycle = 0;
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
 
@@ -112,9 +112,11 @@ int apu_clock(APU *apu, Audio *audio) {
   static const int sampling_period = 1789773 / 44100;
 
   apu->cycle++;
+  apu->fs_cycle++;
 
   if(apu->cycle % sampling_period == 0) {
     /* sound */
+    apu->cycle = 0;
     apu_sample(apu, audio);
   }
 
@@ -131,7 +133,6 @@ int apu_clock(APU *apu, Audio *audio) {
 }
 
 int apu_step(APU *apu, Audio *audio, int cpucycle) {
-  while(cpucycle--) {
+  while(cpucycle--)
     apu_clock(apu, audio);
-  }
 }

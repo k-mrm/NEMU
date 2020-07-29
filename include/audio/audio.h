@@ -10,5 +10,6 @@ struct Audio {
 };
 
 void audio_init(int, char **, Audio *);
+void audio_update(Audio *);
 
 #endif

@@ -5,7 +5,14 @@
 #include <stdbool.h>
 #include "apu/envelope.h"
 #include "apu/lengthcounter.h"
-#include "apu/sweep.h"
+
+struct sweepunit {
+  uint8_t shift;
+  uint8_t period;
+  bool neg: 1;
+  bool enabled: 1;
+  bool reload: 1;
+};
 
 struct pulse {
   struct envelope eg;
@@ -24,5 +31,7 @@ void pulse_update(struct pulse *);
 void pulse_write(struct pulse *, uint16_t, uint8_t);
 int pulse_output(struct pulse *);
 void pulse_timer_clock(struct pulse *);
+
+void sweepunit_clock(struct sweepunit *);
 
 #endif

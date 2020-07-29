@@ -11,6 +11,7 @@ struct APU {
   struct pulse pulse1;
   struct pulse pulse2;
   uint16_t cycle;
+  uint16_t fs_cycle;
   bool seq_mode: 1;
   bool inhibit_irq: 1;
 };
