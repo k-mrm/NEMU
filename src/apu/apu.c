@@ -37,12 +37,11 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
       apu->pulse1.enabled = data & 0x1;
       apu->pulse2.enabled = data & 0x2;
       break;
-    case 0x17: {
+    case 0x17:
       /* $4017 MI-- ---- */
       apu->seq_mode = (data >> 7) & 0x1;
       apu->inhibit_irq = (data >> 6) & 0x1;
       break;
-    }
     default: break;
   }
 }
@@ -51,12 +50,10 @@ void apu_init(APU *apu) {
   memset(apu, 0, sizeof(APU));
 
   /* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
-  for(int n = 0; n < 32; ++n) {
+  for(int n = 0; n < 32; ++n)
     pulse_table[n] = 95.52 / (8128.0 / n + 100);
-  }
-  for(int n = 0; n < 204; ++n) {
+  for(int n = 0; n < 204; ++n)
     tnd_table[n] = 163.67 / (24329.0 / n + 100);
-  }
 }
 
 int frame_seq_5step(APU *apu) {
@@ -78,7 +75,6 @@ int frame_seq_5step(APU *apu) {
     envelope_clock(&apu->pulse1.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   }
-
   return 0;
 }
 
@@ -100,7 +96,6 @@ int frame_seq_4step(APU *apu) {
 
     if(!apu->inhibit_irq) return 1;
   }
-
   return 0;
 }
 

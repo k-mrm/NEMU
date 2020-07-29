@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "apu/envelope.h"
-#include "apu/sequencer.h"
 #include "apu/lengthcounter.h"
 #include "apu/sweep.h"
 
