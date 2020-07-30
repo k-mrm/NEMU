@@ -133,7 +133,7 @@ int apu_clock(APU *apu, Audio *audio) {
     pulse_timer_clock(&apu->pulse2);
   }
 
-  /* see https://wiki.nesdev.com/w/index.php/APU_Mixer */
+  /* see https://wiki.nesdev.com/w/index.php/APU_Frame_Counter */
   if(apu->seq_mode)
     return frame_seq_5step(apu);
   else
