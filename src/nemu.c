@@ -47,6 +47,5 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
 
     memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
   }
-
   return 0;
 }

@@ -52,55 +52,53 @@ void apu_init(APU *apu) {
     tnd_table[n] = 163.67 / (24329.0 / n + 100);
 }
 
+static void frame_seq_quarter_frame(APU *apu) {
+  envelope_clock(&apu->pulse1.eg);
+  envelope_clock(&apu->pulse2.eg);
+}
+
+static void frame_seq_half_frame(APU *apu) {
+  length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
+  length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+}
+
 int frame_seq_5step(APU *apu) {
   if(apu->fs_cycle == 7457) {
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
+    frame_seq_quarter_frame(apu);
   }
   if(apu->fs_cycle == 14913) {
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
-    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+    frame_seq_quarter_frame(apu);
+    frame_seq_half_frame(apu);
   }
   if(apu->fs_cycle == 22371) {
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
+    frame_seq_quarter_frame(apu);
   }
   if(apu->fs_cycle == 29828) {
     /* NOP */
   }
   if(apu->fs_cycle == 37281) {
     apu->fs_cycle = 0;
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
-    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+    frame_seq_quarter_frame(apu);
+    frame_seq_half_frame(apu);
   }
   return 0;
 }
 
 int frame_seq_4step(APU *apu) {
   if(apu->fs_cycle == 7457) {
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
+    frame_seq_quarter_frame(apu);
   }
   if(apu->fs_cycle == 14913) {
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
-    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+    frame_seq_quarter_frame(apu);
+    frame_seq_half_frame(apu);
   }
   if(apu->fs_cycle == 22371) {
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
+    frame_seq_quarter_frame(apu);
   }
-  if(apu->fs_cycle == 29828) {
+  if(apu->fs_cycle == 29829) {
     apu->fs_cycle = 0;
-    envelope_clock(&apu->pulse1.eg);
-    envelope_clock(&apu->pulse2.eg);
-    length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
-    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+    frame_seq_quarter_frame(apu);
+    frame_seq_half_frame(apu);
 
     if(!apu->inhibit_irq) return 1;
   }
