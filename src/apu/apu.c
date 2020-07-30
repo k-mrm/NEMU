@@ -3,14 +3,12 @@
 #include "apu/apu.h"
 #include "audio/audio.h"
 
-float pulse_table[32];
-float tnd_table[204];
+static float pulse_table[32];
+static float tnd_table[204];
 
 /* see https://wiki.nesdev.com/w/index.php/APU#Status_.28.244015.29 */
 uint8_t apu_read(APU *apu, uint16_t idx) {
-  /*
-  if(idx == 0x15) return apu->io.status;
-  */
+  // if(idx == 0x15) return apu->io.status;
   return 0;
 }
 
@@ -42,13 +40,11 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
       apu->seq_mode = (data >> 7) & 0x1;
       apu->inhibit_irq = (data >> 6) & 0x1;
       break;
-    default: break;
   }
 }
 
 void apu_init(APU *apu) {
-  memset(apu, 0, sizeof(APU));
-
+  *apu = (APU){0};
   /* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
   for(int n = 0; n < 32; ++n)
     pulse_table[n] = 95.52 / (8128.0 / n + 100);
@@ -59,13 +55,17 @@ void apu_init(APU *apu) {
 int frame_seq_5step(APU *apu) {
   if(apu->fs_cycle == 7457) {
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
   }
   if(apu->fs_cycle == 14913) {
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
   }
   if(apu->fs_cycle == 22371) {
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
   }
   if(apu->fs_cycle == 29828) {
     /* NOP */
@@ -73,7 +73,9 @@ int frame_seq_5step(APU *apu) {
   if(apu->fs_cycle == 37281) {
     apu->fs_cycle = 0;
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
   }
   return 0;
 }
@@ -81,18 +83,24 @@ int frame_seq_5step(APU *apu) {
 int frame_seq_4step(APU *apu) {
   if(apu->fs_cycle == 7457) {
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
   }
   if(apu->fs_cycle == 14913) {
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
   }
   if(apu->fs_cycle == 22371) {
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
   }
   if(apu->fs_cycle == 29828) {
     apu->fs_cycle = 0;
     envelope_clock(&apu->pulse1.eg);
+    envelope_clock(&apu->pulse2.eg);
     length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
+    length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
 
     if(!apu->inhibit_irq) return 1;
   }
@@ -104,7 +112,7 @@ void apu_sample(APU *apu, Audio *audio) {
   int p2 = pulse_output(&apu->pulse2);
   /* TODO: tnd */
   float out = pulse_table[p1 + p2];
-  printf("out: %f\n", out);
+  // printf("out: %f\n", out);
   audio->buf[audio->nbuf++] = out;
 }
 

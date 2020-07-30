@@ -12,7 +12,7 @@ const uint8_t pulse_seq[4][8] = {
   {1, 0, 0, 1, 1, 1, 1, 1},
 };
 
-void sweepunit_clock(struct sweepunit *s) {
+void sweepunit_clock(struct pulse *pulse) {
   ;
 }
 
