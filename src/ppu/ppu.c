@@ -277,8 +277,6 @@ static void draw_pixel(PPU *ppu, Disp screen) {
   uint8_t hpid = (ppu->attrhigh_reg & mux_mask) != 0;
   uint8_t bgpid = lpid | (hpid << 1);
 
-  // printf("pid %d pixel %d %#x color %d\n", pid, pixel, 0x3f00 + pid * 4 + pixel, color);
-  
   uint8_t sprpixel = 0;
   uint8_t sprpid = 0;
   uint8_t priority = 0;
@@ -346,12 +344,12 @@ static void evaluate_sprite(PPU *ppu) {
   }
 }
 
-#define rev_bit(x) \
-  do {  \
-    x = (((x) & 0x55) << 1) | (((x) >> 1) & 0x55);  \
-    x = (((x) & 0x33) << 2) | (((x) >> 2) & 0x33);  \
-    x = (((x) & 0x0f) << 4) | (((x) >> 4) & 0x0f);  \
-  } while(0)
+static uint8_t rev_bit(uint8_t x) {
+  x = ((x & 0x55) << 1) | ((x >> 1) & 0x55);
+  x = ((x & 0x33) << 2) | ((x >> 2) & 0x33);
+  x = ((x & 0x0f) << 4) | ((x >> 4) & 0x0f);
+  return x;
+}
 
 static void fetch_sprite(PPU *ppu) {
   for(int i = 0; i < 8; i++) {
@@ -373,12 +371,8 @@ static void fetch_sprite(PPU *ppu) {
       uint8_t sprhigh =
         ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + 8 + (vflip? 7 - yoffset : yoffset));
 
-      if(hflip) {
-        rev_bit(sprlow);
-        rev_bit(sprhigh);
-      }
-      ppu->snd_sprite_sprlow[i] = sprlow;
-      ppu->snd_sprite_sprhigh[i] = sprhigh;
+      ppu->snd_sprite_sprlow[i] = hflip? rev_bit(sprlow) : sprlow;
+      ppu->snd_sprite_sprhigh[i] = hflip? rev_bit(sprhigh) : sprhigh;
     }
 
     ppu->snd_sprite_atlatch[i] = attr;

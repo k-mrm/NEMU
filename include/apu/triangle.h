@@ -1,8 +1,9 @@
 #ifndef NEMU_APU_TRIANGLE_H
 #define NEMU_APU_TRIANGLE_H
 
+#include <stdint.h>
+
 struct triangle {
-  /* TODO */
 };
 
 #endif
