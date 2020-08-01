@@ -114,6 +114,7 @@ int frame_seq_4step(APU *apu) {
   return 0;
 }
 
+/* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
 void apu_sample(APU *apu, Audio *audio) {
   int p1 = pulse_output(&apu->pulse1);
   int p2 = pulse_output(&apu->pulse2);
