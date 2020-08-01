@@ -24,9 +24,8 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x4: case 0x5:
     case 0x6: case 0x7:
       pulse_write(&apu->pulse2, idx - 0x4, data); break;
-    case 0x8:
-    case 0xa:
-    case 0xb:
+    case 0x8: case 0xa: case 0xb:
+      triangle_write(&apu->tri, idx - 0x8, data); break;
     case 0xc:
     case 0xe:
     case 0xf:
@@ -62,6 +61,7 @@ void apu_init(APU *apu) {
 static void frame_seq_quarter_frame(APU *apu) {
   envelope_clock(&apu->pulse1.eg);
   envelope_clock(&apu->pulse2.eg);
+  linear_counter_clock(&apu->tri);
 }
 
 static void frame_seq_half_frame(APU *apu) {
@@ -148,6 +148,10 @@ int apu_clock(APU *apu, Audio *audio) {
 }
 
 int apu_step(APU *apu, Audio *audio, int cpucycle) {
-  while(cpucycle--)
-    apu_clock(apu, audio);
+  int irq = 0;
+  while(cpucycle--) {
+    if(apu_clock(apu, audio))
+      irq = 1;
+  }
+  return irq;
 }

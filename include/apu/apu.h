@@ -5,11 +5,13 @@
 #include <stdbool.h>
 #include "audio/audio.h"
 #include "apu/pulse.h"
+#include "apu/triangle.h"
 
 typedef struct APU APU;
 struct APU {
   struct pulse pulse1;
   struct pulse pulse2;
+  struct triangle tri;
   uint16_t cycle;
   uint16_t fs_cycle;
   bool seq_mode: 1;
