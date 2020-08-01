@@ -12,8 +12,32 @@ const uint8_t pulse_seq[4][8] = {
   {1, 0, 0, 1, 1, 1, 1, 1},
 };
 
-void sweepunit_clock(struct pulse *pulse) {
-  ;
+bool muted(struct pulse *p) {
+  return p->reload < 8 || 0x7ff < p->reload;
+}
+
+void sweepunit_clock(struct pulse *p, int chan) {
+  if(p->sweep.divider == 0) {
+    if(p->sweep.enabled && p->sweep.shift && p->len_cnt && !muted(p)) {
+      if(p->sweep.neg) {
+        if(chan == 1)
+          p->reload += ~(p->reload >> p->sweep.shift);
+        else if(chan == 2)
+          p->reload += -(p->reload >> p->sweep.shift);
+      }
+      else {
+        p->reload += (p->reload >> p->sweep.shift);
+      }
+    }
+
+    if(p->sweep.reload) {
+      p->sweep.divider = p->sweep.period;
+      p->sweep.reload = false;
+    }
+  }
+  else {
+    p->sweep.divider--;
+  }
 }
 
 void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
@@ -62,7 +86,7 @@ void pulse_timer_clock(struct pulse *pulse) {
 
 int pulse_output(struct pulse *pulse) {
   int p = pulse_seq[pulse->duty][pulse->sequence];
-  if(pulse->len_cnt == 0 || !p)
+  if(pulse->len_cnt == 0 || !p || muted(pulse))
     return 0;
 
   return pulse->eg.constant? pulse->eg.volume : pulse->eg.decay;

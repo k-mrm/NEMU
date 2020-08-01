@@ -8,7 +8,11 @@ static float tnd_table[204];
 
 /* see https://wiki.nesdev.com/w/index.php/APU#Status_.28.244015.29 */
 uint8_t apu_read(APU *apu, uint16_t idx) {
-  // if(idx == 0x15) return apu->io.status;
+  if(idx == 0x15) {
+    /* $4015 if-d nt21 */
+    return (apu->pulse1.len_cnt > 0) | 
+      ((apu->pulse2.len_cnt > 0) << 1); /* TODO: if-d nt */
+  }
   return 0;
 }
 
@@ -34,6 +38,9 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
       /* $4015 ---d nt21 */
       apu->pulse1.enabled = data & 0x1;
       apu->pulse2.enabled = data & 0x2;
+
+      if(!apu->pulse1.enabled) apu->pulse1.len_cnt = 0;
+      if(!apu->pulse2.enabled) apu->pulse2.len_cnt = 0;
       break;
     case 0x17:
       /* $4017 MI-- ---- */
@@ -60,6 +67,8 @@ static void frame_seq_quarter_frame(APU *apu) {
 static void frame_seq_half_frame(APU *apu) {
   length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+  sweepunit_clock(&apu->pulse1, 1);
+  sweepunit_clock(&apu->pulse2, 2);
 }
 
 int frame_seq_5step(APU *apu) {
@@ -121,7 +130,6 @@ int apu_clock(APU *apu, Audio *audio) {
   apu->fs_cycle++;
 
   if(apu->cycle % sampling_period == 0) {
-    /* sound */
     apu->cycle = 0;
     apu_sample(apu, audio);
   }

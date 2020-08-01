@@ -114,8 +114,6 @@ void ppu_write(PPU *ppu, uint16_t idx, uint8_t data) {
       ppubus_write(ppu->bus, ppu->vramaddr, data);
       ppu->vramaddr += vramaddr_inc(ppu);
       break;
-    default:
-      break;
   }
 }
 
@@ -313,12 +311,10 @@ static void draw_pixel(PPU *ppu, Disp screen) {
     color = ppubus_read(ppu->bus, 0x3f00 + (bgpid << 2) + bgpixel);
   }
   else if(bgpixel && sprpixel) {
-    if(!priority) {
+    if(!priority)
       color = ppubus_read(ppu->bus, 0x3f10 + (sprpid << 2) + sprpixel);
-    }
-    else {
+    else
       color = ppubus_read(ppu->bus, 0x3f00 + (bgpid << 2) + bgpixel);
-    }
   }
 
   RGB rgb = colors[color];
@@ -372,11 +368,9 @@ static void fetch_sprite(PPU *ppu) {
       uint8_t vhflip = (attr >> 6) & 0x3;
       uint8_t vflip = vhflip & 0x2;
       uint8_t hflip = vhflip & 0x1;
-      uint8_t sprlow, sprhigh;
-
-      sprlow =
+      uint8_t sprlow =
         ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + (vflip? 7 - yoffset : yoffset));
-      sprhigh =
+      uint8_t sprhigh =
         ppubus_read(ppu->bus, sprite_paltable_addr(ppu) + id * 16 + 8 + (vflip? 7 - yoffset : yoffset));
 
       if(hflip) {

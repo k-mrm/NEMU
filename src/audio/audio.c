@@ -14,7 +14,7 @@ void audio_update(Audio *audio) {
       audio->nbuf,
       44100,
       ALLEGRO_AUDIO_DEPTH_INT16,
-      ALLEGRO_CHANNEL_CONF_2,
+      ALLEGRO_CHANNEL_CONF_1,
       false);
   al_play_sample(s, 1.0, 0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
   memset(audio->buf, 0, sizeof(float) * 4096);
