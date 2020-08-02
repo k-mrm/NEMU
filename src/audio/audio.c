@@ -13,7 +13,7 @@ void audio_update(Audio *audio) {
   ALLEGRO_SAMPLE *s = al_create_sample(audio->buf,
       audio->nbuf,
       44100,
-      ALLEGRO_AUDIO_DEPTH_INT16,
+      ALLEGRO_AUDIO_DEPTH_FLOAT32,
       ALLEGRO_CHANNEL_CONF_1,
       false);
   al_play_sample(s, 1.0, 0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
