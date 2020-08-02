@@ -18,5 +18,7 @@ struct triangle {
 
 void triangle_write(struct triangle *, uint16_t, uint8_t);
 void linear_counter_clock(struct triangle *);
+void triangle_timer_clock(struct triangle *);
+int triangle_output(struct triangle *);
 
 #endif

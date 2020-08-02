@@ -10,8 +10,9 @@ static float tnd_table[204];
 uint8_t apu_read(APU *apu, uint16_t idx) {
   if(idx == 0x15) {
     /* $4015 if-d nt21 */
-    return (apu->pulse1.len_cnt > 0) | 
-      ((apu->pulse2.len_cnt > 0) << 1); /* TODO: if-d nt */
+    return (apu->pulse1.len_cnt > 0) |
+      ((apu->pulse2.len_cnt > 0) << 1) |
+      ((apu->tri.len_cnt > 0) << 2); /* TODO: if-d n */
   }
   return 0;
 }
@@ -117,10 +118,12 @@ int frame_seq_4step(APU *apu) {
 void apu_sample(APU *apu, Audio *audio) {
   int p1 = pulse_output(&apu->pulse1);
   int p2 = pulse_output(&apu->pulse2);
+  int t = triangle_output(&apu->tri);
   /* TODO: tnd */
-  float out = pulse_table[p1 + p2];
+  float pout = pulse_table[p1 + p2];
+  float tndout = tnd_table[t * 3];
   // printf("out: %f\n", out);
-  audio->buf[audio->nbuf++] = out;
+  audio->buf[audio->nbuf++] = pout + tndout;
 }
 
 int apu_clock(APU *apu, Audio *audio) {
