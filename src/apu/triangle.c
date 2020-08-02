@@ -54,7 +54,7 @@ void triangle_timer_clock(struct triangle *tri) {
 }
 
 int triangle_output(struct triangle *tri) {
-  if(!tri->len_cnt && !tri->linear_cnt && !tri->ctrl)
+  if(!tri->len_cnt || !tri->linear_cnt)
     return 0;
 
   return triangle_seq[tri->sequence];
