@@ -3,12 +3,7 @@
 
 #include "cpu/cpu.h"
 
-enum Interrupt {
-  NMI,
-  RESET,
-  IRQ,
-  BRK,
-};
+enum interrupt { NMI, RESET, IRQ, BRK };
 
 void cpu_interrupt(CPU *, int);
 

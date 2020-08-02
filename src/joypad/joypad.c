@@ -34,14 +34,15 @@ static uint8_t read_btnstate(enum button btn) {
     case BUTTON_DOWN:   return al_key_down(&state, ALLEGRO_KEY_S);
     case BUTTON_LEFT:   return al_key_down(&state, ALLEGRO_KEY_A);
     case BUTTON_RIGHT:  return al_key_down(&state, ALLEGRO_KEY_D);
+    default:  panic("unknown button: %d", btn); return 0;
   }
-  panic("unknown button %d", btn);
 }
 
 uint8_t joypad_read(Joypad *pad, int padn) {
   switch(padn) {
     case 1: return read_btnstate(pad->btnstate.pad1++);
     case 2: return read_btnstate(pad->btnstate.pad2++);
+    default: panic("unknown pad: %d", padn); return 0;
   }
 }
 

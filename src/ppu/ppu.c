@@ -140,11 +140,6 @@ static enum linestate linestate_from(uint16_t line) {
   return 0;
 }
 
-static uint16_t nametable_addr(PPU *ppu) {
-  uint16_t f = ppu->io.ctrl & 0x03;
-  return 0x2000 + f * 0x400;
-}
-
 static uint16_t bg_paltable_addr(PPU *ppu) {
   uint16_t f = (ppu->io.ctrl >> 4) & 0x01;
   return f * 0x1000;

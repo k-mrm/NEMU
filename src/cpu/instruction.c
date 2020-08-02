@@ -398,11 +398,11 @@ void cpu_run(CPU *cpu, int cycle) {
 
 int cpu_step(CPU *cpu) {
   static uint64_t cpu_cycle = 0;
-  uint16_t op_pc = cpu->reg.pc;
   uint8_t code = cpu_fetch(cpu);
   CPUInst inst = code_decoder[code];
 
   /*
+  uint16_t op_pc = cpu->reg.pc;
   log_dbg("%04x %02x ", op_pc, code);
   printf("%s ", inst_dump(inst.op));
   printf("A:%02x X:%02x Y:%02x P:%02x SP:%02x CYCLE:%ld\n",
