@@ -59,11 +59,11 @@ void pulse_write(struct pulse *pulse, uint16_t idx, uint8_t data) {
       break;
     case 0x2:
       /* $4002/$4006 LLLL LLLL */
-      pulse->reload = pulse->timer = (pulse->timer & 0x700) | data;
+      pulse->reload = (pulse->reload & 0x700) | data;
       break;
     case 0x3:
       /* $4003/$4007 llll lHHH */
-      pulse->reload = pulse->timer = (pulse->timer & 0xff) | ((data & 0x7) << 8);
+      pulse->reload = (pulse->reload & 0xff) | ((data & 0x7) << 8);
       pulse->len_cnt = length_counter[data >> 3];
       pulse->eg.start = true;
       break;

@@ -36,10 +36,12 @@ void apu_write(APU *apu, uint16_t idx, uint8_t data) {
     case 0x15:
       /* $4015 ---d nt21 */
       apu->pulse1.enabled = data & 0x1;
-      apu->pulse2.enabled = data & 0x2;
+      apu->pulse2.enabled = (data >> 1) & 0x1;
+      apu->tri.enabled = (data >> 2) & 0x1; 
 
       if(!apu->pulse1.enabled) apu->pulse1.len_cnt = 0;
       if(!apu->pulse2.enabled) apu->pulse2.len_cnt = 0;
+      if(!apu->tri.enabled) apu->tri.len_cnt = 0;
       break;
     case 0x17:
       /* $4017 MI-- ---- */
@@ -67,21 +69,20 @@ static void frame_seq_quarter_frame(APU *apu) {
 static void frame_seq_half_frame(APU *apu) {
   length_counter_clock(&apu->pulse1.len_cnt, apu->pulse1.enabled, apu->pulse1.halt);
   length_counter_clock(&apu->pulse2.len_cnt, apu->pulse2.enabled, apu->pulse2.halt);
+  length_counter_clock(&apu->tri.len_cnt, apu->tri.enabled, apu->tri.ctrl);
   sweepunit_clock(&apu->pulse1, 1);
   sweepunit_clock(&apu->pulse2, 2);
 }
 
 int frame_seq_5step(APU *apu) {
-  if(apu->fs_cycle == 7457) {
+  if(apu->fs_cycle == 7457)
     frame_seq_quarter_frame(apu);
-  }
   if(apu->fs_cycle == 14913) {
     frame_seq_quarter_frame(apu);
     frame_seq_half_frame(apu);
   }
-  if(apu->fs_cycle == 22371) {
+  if(apu->fs_cycle == 22371)
     frame_seq_quarter_frame(apu);
-  }
   if(apu->fs_cycle == 29828) {
     /* NOP */
   }
@@ -94,16 +95,14 @@ int frame_seq_5step(APU *apu) {
 }
 
 int frame_seq_4step(APU *apu) {
-  if(apu->fs_cycle == 7457) {
+  if(apu->fs_cycle == 7457)
     frame_seq_quarter_frame(apu);
-  }
   if(apu->fs_cycle == 14913) {
     frame_seq_quarter_frame(apu);
     frame_seq_half_frame(apu);
   }
-  if(apu->fs_cycle == 22371) {
+  if(apu->fs_cycle == 22371)
     frame_seq_quarter_frame(apu);
-  }
   if(apu->fs_cycle == 29829) {
     apu->fs_cycle = 0;
     frame_seq_quarter_frame(apu);
@@ -139,6 +138,7 @@ int apu_clock(APU *apu, Audio *audio) {
     pulse_timer_clock(&apu->pulse1);
     pulse_timer_clock(&apu->pulse2);
   }
+  triangle_timer_clock(&apu->tri);
 
   /* see https://wiki.nesdev.com/w/index.php/APU_Frame_Counter */
   if(apu->seq_mode)
