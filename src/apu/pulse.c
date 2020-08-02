@@ -29,11 +29,11 @@ void sweepunit_clock(struct pulse *p, int chan) {
         p->reload += (p->reload >> p->sweep.shift);
       }
     }
+  }
 
-    if(p->sweep.reload) {
-      p->sweep.divider = p->sweep.period;
-      p->sweep.reload = false;
-    }
+  if(p->sweep.divider == 0 || p->sweep.reload) {
+    p->sweep.divider = p->sweep.period;
+    p->sweep.reload = false;
   }
   else {
     p->sweep.divider--;
