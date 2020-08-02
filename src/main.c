@@ -5,17 +5,11 @@
 
 int main(int argc, char **argv) {
   Cassette cassette;
-  char *cname;
-#ifdef CPU_DEBUG
-  cname = "roms/nestest.nes";
-#else
   if(argc != 2) {
     panic("invalid arguments");
   }
-  cname = argv[1];
-#endif
 
-  if(read_cassette(&cassette, cname)) return 1;
+  if(read_cassette(&cassette, argv[1])) return 1;
 
   NEMU nes;
   return nemu_boot(argc, argv, &nes, &cassette);

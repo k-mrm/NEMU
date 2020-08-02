@@ -19,10 +19,6 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   nemu_init(argc, argv, nes);
   cpu_interrupt(&nes->cpu, RESET);
 
-#ifdef CPU_DEBUG
-  nes->cpu.reg.pc = 0xc000;
-#endif
-
   for(;;) {
     request_frame(&nes->gui); /* 60 FPS */
     int pcycle = 0;
