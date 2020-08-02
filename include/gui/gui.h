@@ -13,7 +13,8 @@ struct GUI {
 };
 
 void gui_init(GUI *);
+void gui_close(GUI *);
 void gui_render(Disp);
-void request_frame(GUI *);
+int request_frame(GUI *);
 
 #endif

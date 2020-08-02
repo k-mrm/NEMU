@@ -11,15 +11,24 @@ void gui_init(GUI *gui) {
   gui->event_queue = al_create_event_queue();
   gui->timer = al_create_timer(1.0 / FPS);
   al_register_event_source(gui->event_queue, al_get_timer_event_source(gui->timer));
+  al_register_event_source(gui->event_queue, al_get_display_event_source(gui->display));
   al_start_timer(gui->timer);
 }
 
-void request_frame(GUI *gui) {
+void gui_close(GUI *gui) {
+  al_destroy_display(gui->display);
+  al_destroy_event_queue(gui->event_queue);
+  al_destroy_timer(gui->timer);
+}
+
+int request_frame(GUI *gui) {
   for(;;) {
     ALLEGRO_EVENT e;
     al_wait_for_event(gui->event_queue, &e);
     if(e.type == ALLEGRO_EVENT_TIMER)
-      break;
+      return 1;
+    else if(e.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+      return 0;
   } 
 }
 

@@ -17,3 +17,7 @@ void audio_update(Audio *audio) {
   memset(audio->buf, 0, sizeof(float) * 4096);
   audio->nbuf = 0;
 }
+
+void audio_close(Audio *audio) {
+  free(audio->buf);
+}

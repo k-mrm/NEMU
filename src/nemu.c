@@ -13,6 +13,11 @@ static void nemu_init(int argc, char **argv, NEMU *nes) {
   apu_init(&nes->cpu.apu);
 }
 
+static void nemu_close(NEMU *nes) {
+  gui_close(&nes->gui);
+  audio_close(&nes->audio);
+}
+
 int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   nes->cassette = cas;
   int nmi = 0;
@@ -20,7 +25,8 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   cpu_interrupt(&nes->cpu, RESET);
 
   for(;;) {
-    request_frame(&nes->gui); /* 60 FPS */
+    if(!request_frame(&nes->gui)) // 60 FPS
+      break;
     int pcycle = 0;
     /* draw 1frame */
     while(pcycle < 262 * 341) {
@@ -43,5 +49,8 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
 
     memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
   }
+
+  nemu_close(nes);
+
   return 0;
 }
