@@ -397,8 +397,8 @@ static void ppu_tick(PPU *ppu) {
   }
 }
 
-int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
-  int ret = 0;
+int ppu_step(PPU *ppu, Disp screen, int ncycle) {
+  int nmi = 0;
   while(ncycle--) {
     ppu_tick(ppu);
 
@@ -441,7 +441,7 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
       case VERTICAL_BLANKING:
         if(ppu->line == 241 && ppu->cycle == 1) {
           enable_VBlank(ppu);
-          *nmi = is_enable_nmi(ppu)? 1 : 0;
+          nmi = is_enable_nmi(ppu)? 1 : 0;
         }
         break;
       case PRERENDER:
@@ -482,5 +482,5 @@ int ppu_step(PPU *ppu, Disp screen, int *nmi, int ncycle) {
         break;
     }
   }
-  return ret;
+  return nmi;
 }

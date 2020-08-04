@@ -20,7 +20,6 @@ static void nemu_close(NEMU *nes) {
 
 int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   nes->cassette = cas;
-  int nmi = 0;
   nemu_init(argc, argv, nes);
   cpu_interrupt(&nes->cpu, RESET);
 
@@ -36,11 +35,9 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
         nes->ppu.dma_write_flag = 0;
       }
       pcycle += ccycle * 3;
-      ppu_step(&nes->ppu, nes->screen, &nmi, ccycle * 3);
-      if(nmi) {
-        cpu_interrupt(&nes->cpu, NMI);
-        nmi = 0;
-      }
+      int nmi = ppu_step(&nes->ppu, nes->screen, ccycle * 3);
+      if(nmi) cpu_interrupt(&nes->cpu, NMI);
+
       int irq = apu_step(&nes->cpu.apu, &nes->audio, ccycle);
       if(irq) cpu_interrupt(&nes->cpu, IRQ);
     }

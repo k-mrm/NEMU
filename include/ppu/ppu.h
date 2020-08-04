@@ -66,7 +66,7 @@ struct PPU {
 };
 
 void ppu_oam_write(PPU *, uint8_t);
-int ppu_step(PPU *, Disp, int *, int);
+int ppu_step(PPU *, Disp, int);
 void ppu_init(PPU *, PPUBus *);
 uint8_t ppu_read(PPU *, uint16_t);
 void ppu_write(PPU *, uint16_t, uint8_t);

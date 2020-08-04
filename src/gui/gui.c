@@ -1,15 +1,13 @@
 #include "gui/gui.h"
 #include "ppu/palette.h"
 
-#define FPS 60
-
 void gui_init(GUI *gui) {
   al_init();
   al_init_primitives_addon();
   al_install_keyboard();
   gui->display = al_create_display(256, 240);
   gui->event_queue = al_create_event_queue();
-  gui->timer = al_create_timer(1.0 / FPS);
+  gui->timer = al_create_timer(1.0 / 60); // 60 FPS
   al_register_event_source(gui->event_queue, al_get_timer_event_source(gui->timer));
   al_register_event_source(gui->event_queue, al_get_display_event_source(gui->display));
   al_start_timer(gui->timer);
