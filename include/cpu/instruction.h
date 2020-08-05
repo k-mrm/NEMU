@@ -17,7 +17,7 @@ enum AddressingMode {
   ADDR_INDIRECTY,
 };
 
-enum OpCode {
+enum opcode {
   OP_ADC,
   OP_SBC,
   OP_AND,
@@ -74,12 +74,35 @@ enum OpCode {
   OP_PHP,
   OP_PLP,
   OP_NOP,
+  /* unofficial opcode */
+  OP_AAC,
+  OP_AAX,
+  OP_ARR,
+  OP_ASR,
+  OP_ATX,
+  OP_AXA,
+  OP_AXS,
+  OP_DCP,
+  OP_DOP,
+  OP_ISC,
+  OP_KIL,
+  OP_LAR,
+  OP_LAX,
+  OP_RLA,
+  OP_RRA,
+  OP_SLO,
+  OP_SRE,
+  OP_SXA,
+  OP_SYA,
+  OP_TOP,
+  OP_XAA,
+  OP_XAS,
 };
 
 typedef struct CPUInst CPUInst;
 
 struct CPUInst {
-  enum OpCode op;
+  enum opcode op;
   enum AddressingMode a;
   int len;
   int cycle;
@@ -91,7 +114,7 @@ extern CPUInst code_decoder[256];
   code_decoder[(hex)] = (CPUInst){(op), (a), (len), (cycle)}
 
 #define INVALID_INST(hex) \
-  code_decoder[(hex)] = (CPUInst){(255), (255), (0), (0)}
+  code_decoder[(hex)] = (CPUInst){255, 255, 0, 0}
 
 void cpu_define_inst(void);
 int cpu_step(CPU *);
