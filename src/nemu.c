@@ -21,7 +21,7 @@ static void nemu_close(NEMU *nes) {
 int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   nes->cassette = cas;
   nemu_init(argc, argv, nes);
-  cpu_interrupt(&nes->cpu, RESET);
+  cpu_reset(&nes->cpu);
 
   for(;;) {
     if(!request_frame(&nes->gui)) // 60 FPS

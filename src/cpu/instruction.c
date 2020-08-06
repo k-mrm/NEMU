@@ -390,7 +390,7 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
 }
 
 void cpu_run(CPU *cpu, int cycle) {
-  while(cycle > 0) {
+  while(cycle > 0 && !cpu->halt) {
     int c = cpu_step(cpu);
     cycle -= c;
   }

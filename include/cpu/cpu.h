@@ -34,7 +34,6 @@ struct CPU {
 
 void cpu_init(CPU *, CPUBus *);
 void cpu_reset(CPU *);
-
 void cpu_stack_push(CPU *, uint8_t);
 uint8_t cpu_stack_pop(CPU *);
 

@@ -1,5 +1,6 @@
 #include "cpu/cpu.h"
 #include "cpu/register.h"
+#include "cpu/interrupt.h"
 
 void cpu_init(CPU *cpu, CPUBus *cpubus) {
   cpu->reg.a = 0;
@@ -14,6 +15,12 @@ void cpu_init(CPU *cpu, CPUBus *cpubus) {
    */
   cpu->reg.p = 0x24; // 0x34?
   cpu->bus = cpubus;
+  cpu->halt = false;
+}
+
+void cpu_reset(CPU *cpu) {
+  cpu->halt = false;
+  cpu_interrupt(cpu, RESET);
 }
 
 void cpu_stack_push(CPU *cpu, uint8_t data) {
