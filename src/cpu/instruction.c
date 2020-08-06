@@ -871,8 +871,13 @@ int cpu_step(CPU *cpu) {
 
       cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == 0);
       cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.x >> 7) & 1);
-
       break;
+    case OP_AAX: {
+      uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+      uint8_t res = cpu->reg.x & cpu->reg.a;
+      cpubus_write(cpu->bus, addr, res);
+      break;
+    }
     default:
       panic("Unhandled opcode: %s", inst_dump(inst.op));
       break;
