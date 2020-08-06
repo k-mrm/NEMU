@@ -255,6 +255,46 @@ void cpu_define_inst() {
   DEF_INST(0x7a, OP_NOP, ADDR_IMPLIED, 1, 2);
   DEF_INST(0xda, OP_NOP, ADDR_IMPLIED, 1, 2);
   DEF_INST(0xfa, OP_NOP, ADDR_IMPLIED, 1, 2);
+  DEF_INST(0x27, OP_RLA, ADDR_ZEROPAGE, 2, 5);
+  DEF_INST(0x37, OP_RLA, ADDR_ZEROPAGEX, 2, 6);
+  DEF_INST(0x2f, OP_RLA, ADDR_ABSOLUTE, 3, 6);
+  DEF_INST(0x3f, OP_RLA, ADDR_ABSOLUTEX, 3, 7);
+  DEF_INST(0x3b, OP_RLA, ADDR_ABSOLUTEY, 3, 7);
+  DEF_INST(0x23, OP_RLA, ADDR_INDIRECTX, 2, 8);
+  DEF_INST(0x33, OP_RLA, ADDR_INDIRECTY, 2, 8);
+  DEF_INST(0x67, OP_RRA, ADDR_ZEROPAGE, 2, 5);
+  DEF_INST(0x77, OP_RRA, ADDR_ZEROPAGEX, 2, 6);
+  DEF_INST(0x6f, OP_RRA, ADDR_ABSOLUTE, 3, 6);
+  DEF_INST(0x7f, OP_RRA, ADDR_ABSOLUTEX, 3, 7);
+  DEF_INST(0x7b, OP_RRA, ADDR_ABSOLUTEY, 3, 7);
+  DEF_INST(0x63, OP_RRA, ADDR_INDIRECTX, 2, 8);
+  DEF_INST(0x73, OP_RRA, ADDR_INDIRECTY, 2, 8);
+  DEF_INST(0xeb, OP_SBC, ADDR_IMMEDIATE, 2, 2);
+  DEF_INST(0x07, OP_SLO, ADDR_ZEROPAGE, 2, 5);
+  DEF_INST(0x17, OP_SLO, ADDR_ZEROPAGEX, 2, 6);
+  DEF_INST(0x0f, OP_SLO, ADDR_ABSOLUTE, 3, 6);
+  DEF_INST(0x1f, OP_SLO, ADDR_ABSOLUTEX, 3, 7);
+  DEF_INST(0x1b, OP_SLO, ADDR_ABSOLUTEY, 3, 7);
+  DEF_INST(0x03, OP_SLO, ADDR_INDIRECTX, 2, 8);
+  DEF_INST(0x13, OP_SLO, ADDR_INDIRECTY, 2, 8);
+  DEF_INST(0x47, OP_SRE, ADDR_ZEROPAGE, 2, 5);
+  DEF_INST(0x57, OP_SRE, ADDR_ZEROPAGEX, 2, 6);
+  DEF_INST(0x4f, OP_SRE, ADDR_ABSOLUTE, 3, 6);
+  DEF_INST(0x5f, OP_SRE, ADDR_ABSOLUTEX, 3, 7);
+  DEF_INST(0x5b, OP_SRE, ADDR_ABSOLUTEY, 3, 7);
+  DEF_INST(0x43, OP_SRE, ADDR_INDIRECTX, 2, 8);
+  DEF_INST(0x53, OP_SRE, ADDR_INDIRECTY, 2, 8);
+  DEF_INST(0x9e, OP_SXA, ADDR_ABSOLUTEY, 3, 5);
+  DEF_INST(0x9c, OP_SYA, ADDR_ABSOLUTEX, 3, 5);
+  DEF_INST(0x0c, OP_TOP, ADDR_ABSOLUTE, 3, 4);
+  DEF_INST(0x1c, OP_TOP, ADDR_ABSOLUTEX, 3, 4);
+  DEF_INST(0x3c, OP_TOP, ADDR_ABSOLUTEX, 3, 4);
+  DEF_INST(0x5c, OP_TOP, ADDR_ABSOLUTEX, 3, 4);
+  DEF_INST(0x7c, OP_TOP, ADDR_ABSOLUTEX, 3, 4);
+  DEF_INST(0xdc, OP_TOP, ADDR_ABSOLUTEX, 3, 4);
+  DEF_INST(0xfc, OP_TOP, ADDR_ABSOLUTEX, 3, 4);
+  DEF_INST(0x8b, OP_XAA, ADDR_IMMEDIATE, 2, 2);
+  DEF_INST(0x9b, OP_XAS, ADDR_ABSOLUTEY, 3, 5);
 }
 
 uint8_t cpu_fetch(CPU *cpu) {
@@ -284,9 +324,8 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
       return (cpu_fetch(cpu) + cpu->reg.x) & 0xff;
     case ADDR_ZEROPAGEY:
       return (cpu_fetch(cpu) + cpu->reg.y) & 0xff;
-    case ADDR_ABSOLUTE: {
+    case ADDR_ABSOLUTE:
       return cpu_fetch16(cpu);
-    }
     case ADDR_ABSOLUTEX: {
       uint16_t addr = cpu_fetch16(cpu);
       return addr + cpu->reg.x;
@@ -328,12 +367,9 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
 
 uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
   switch(addrmode) {
-    case ADDR_ACCUMULATOR:
-      return cpu->reg.a;
-    case ADDR_IMPLIED:
-      return 0;
-    case ADDR_IMMEDIATE:
-      return cpu_fetch_operand(cpu, addrmode);
+    case ADDR_ACCUMULATOR:  return cpu->reg.a;
+    case ADDR_IMPLIED:      return 0;
+    case ADDR_IMMEDIATE:    return cpu_fetch_operand(cpu, addrmode);
     case ADDR_ZEROPAGE:
     case ADDR_RELATIVE:
     case ADDR_ZEROPAGEX:
