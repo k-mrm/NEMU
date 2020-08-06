@@ -390,7 +390,7 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
 }
 
 void cpu_run(CPU *cpu, int cycle) {
-  while(cycle > 0 && !cpu->halt) {
+  while(cycle > 0) {
     int c = cpu_step(cpu);
     cycle -= c;
   }
@@ -398,6 +398,8 @@ void cpu_run(CPU *cpu, int cycle) {
 
 int cpu_step(CPU *cpu) {
   static uint64_t cpu_cycle = 0;
+
+  if(cpu->halt) return 0;
   uint8_t code = cpu_fetch(cpu);
   CPUInst inst = code_decoder[code];
 
@@ -862,6 +864,14 @@ int cpu_step(CPU *cpu) {
       break;
     case OP_KIL:
       cpu->halt = true;
+      break;
+    case OP_LAX:
+      cpu->reg.a = cpu_fetch_data(cpu, inst.a);
+      cpu->reg.x = cpu->reg.a;
+
+      cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.x == 0);
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (cpu->reg.x >> 7) & 1);
+
       break;
     default:
       panic("Unhandled opcode: %s", inst_dump(inst.op));
