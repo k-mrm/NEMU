@@ -29,6 +29,7 @@ struct CPU {
   } reg;
   CPUBus *bus;
   APU apu;
+  bool halt: 1;
 };
 
 void cpu_init(CPU *, CPUBus *);
