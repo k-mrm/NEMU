@@ -941,6 +941,26 @@ int cpu_step(CPU *cpu) {
       cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
       break;
     }
+    case OP_RRA: {
+      uint8_t carry = cpu_get_pflag(cpu, P_STATUS_CARRY);
+      uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+      uint8_t m = cpubus_read(cpu->bus, addr);
+      uint8_t res = (m >> 1) | (carry << 7);
+
+      cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 0) & 1);
+      cpubus_write(cpu->bus, addr, res);
+
+      uint16_t adcres = (uint16_t)cpu->reg.a + res + cpu_get_pflag(cpu, P_STATUS_CARRY);
+
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (adcres >> 7) & 1);
+      cpu_write_pflag(cpu, P_STATUS_CARRY, adcres > 0xff);
+      cpu_write_pflag(cpu, P_STATUS_OVERFLOW,
+          (cpu->reg.a ^ adcres) & (res ^ adcres) & (1 << 7));
+
+      cpu->reg.a = adcres & 0xff;
+      cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+      break;
+    }
     default:
       panic("Unhandled opcode: %s", inst_dump(inst.op));
       break;
