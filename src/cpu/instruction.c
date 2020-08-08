@@ -909,9 +909,34 @@ int cpu_step(CPU *cpu) {
       uint8_t m = cpubus_read(cpu->bus, addr);
       uint8_t res = m << 1;
       cpubus_write(cpu->bus, addr, res);
-      cpu->reg.a = cpu->reg.a | res;
+      cpu->reg.a |= res;
 
       cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 7) & 1);
+      cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
+      break;
+    }
+    case OP_RLA: {
+      uint8_t carry = cpu_get_pflag(cpu, P_STATUS_CARRY);
+      uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+      uint8_t m = cpubus_read(cpu->bus, addr);
+      uint8_t res = (m << 1) | carry;
+      cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 7) & 1);
+      cpubus_write(cpu->bus, addr, res);
+
+      cpu->reg.a &= res;
+      cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
+      break;
+    }
+    case OP_SRE: {
+      uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+      uint8_t m = cpubus_read(cpu->bus, addr);
+      uint8_t res = m >> 1;
+      cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 0) & 1);
+      cpubus_write(cpu->bus, addr, res);
+
+      cpu->reg.a ^= res;
       cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
       cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
       break;
