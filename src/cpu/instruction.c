@@ -714,7 +714,6 @@ int cpu_step(CPU *cpu) {
       cpu_write_pflag(cpu, P_STATUS_CARRY, cpu->reg.a >= m);
       cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == m);
       cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
-
       break;
     }
     case OP_CPX: {
@@ -876,6 +875,21 @@ int cpu_step(CPU *cpu) {
       uint16_t addr = cpu_fetch_operand(cpu, inst.a);
       uint8_t res = cpu->reg.x & cpu->reg.a;
       cpubus_write(cpu->bus, addr, res);
+      break;
+    }
+    case OP_DCP: {
+      uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+      uint8_t m = cpubus_read(cpu->bus, addr);
+      m--;
+      cpubus_write(cpu->bus, addr, m);
+      uint8_t res = cpu->reg.a - m;
+
+      cpu_write_pflag(cpu, P_STATUS_CARRY, cpu->reg.a >= m);
+      cpu_write_pflag(cpu, P_STATUS_ZERO, res == 0);
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, (res >> 7) & 1);
+      break;
+    }
+    case OP_ISC: {
       break;
     }
     default:
