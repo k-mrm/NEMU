@@ -904,6 +904,18 @@ int cpu_step(CPU *cpu) {
       cpu->reg.a = res & 0xff;
       break;
     }
+    case OP_SLO: {
+      uint16_t addr = cpu_fetch_operand(cpu, inst.a);
+      uint8_t m = cpubus_read(cpu->bus, addr);
+      uint8_t res = m << 1;
+      cpubus_write(cpu->bus, addr, res);
+      cpu->reg.a = cpu->reg.a | res;
+
+      cpu_write_pflag(cpu, P_STATUS_CARRY, (m >> 7) & 1);
+      cpu_write_pflag(cpu, P_STATUS_ZERO, cpu->reg.a == 0);
+      cpu_write_pflag(cpu, P_STATUS_NEGATIVE, cpu->reg.a & (1 << 7));
+      break;
+    }
     default:
       panic("Unhandled opcode: %s", inst_dump(inst.op));
       break;
