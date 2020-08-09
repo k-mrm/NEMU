@@ -21,6 +21,15 @@ static void cassette_dump(Cassette *cassette) {
 }
 */
 
+static void mapper_check(int map) {
+  switch(map) {
+    case 0:
+      break;
+    default:
+      panic("unsupported mapper: %d", map);
+  }
+}
+
 static int parse_ines_format(Cassette *cas, unsigned char *ines) {
   if(memcmp(ines, "NES\x1A", 4)) {
     panic("This file is not NES format");
@@ -29,6 +38,12 @@ static int parse_ines_format(Cassette *cas, unsigned char *ines) {
   size_t nprgrom_byte = ines[4] * 16384;
   size_t nchrrom_byte = ines[5] * 8192;
   unsigned char flag6 = ines[6];
+  unsigned char flag7 = ines[7];
+
+  uint8_t mapper_low = flag6 >> 4 & 0xf;
+  uint8_t mapper_high = flag7 & 0xf0;
+  cas->mapper = mapper_low | mapper_high;
+  mapper_check(cas->mapper);
 
   cas->mirror = flag6 & 0x01;
   int has_trainer = flag6 & 0x04;
@@ -40,8 +55,6 @@ static int parse_ines_format(Cassette *cas, unsigned char *ines) {
   cas->nchrrom_byte = nchrrom_byte;
   memcpy(cas->prgrom, ines + prgrom_base, nprgrom_byte);
   memcpy(cas->chrrom, ines + chrrom_base, nchrrom_byte);
-
-  // cassette_dump(cas);
 
   return 0;
 }
