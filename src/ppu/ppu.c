@@ -15,7 +15,6 @@
 
 #define is_enable_nmi(ppu)  ((ppu)->io.ctrl & (1 << 7))
 #define is_addr_inc32(ppu)  ((ppu)->io.ctrl & (1 << 2))
-
 #define vramaddr_inc(ppu)   (is_addr_inc32((ppu))? 32 : 1)
 
 #define is_enable_bg(ppu)     ((ppu)->io.mask & (1 << 3))
@@ -137,7 +136,6 @@ static enum linestate linestate_from(uint16_t line) {
   else if(line == 261) return PRERENDER;
 
   panic("invalid line");
-  return 0;
 }
 
 static uint16_t bg_paltable_addr(PPU *ppu) {

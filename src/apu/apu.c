@@ -14,7 +14,9 @@ uint8_t apu_read(APU *apu, uint16_t idx) {
       ((apu->pulse2.len_cnt > 0) << 1) |
       ((apu->tri.len_cnt > 0) << 2); /* TODO: if-d n */
   }
-  return 0;
+  else {
+    return 0;
+  }
 }
 
 void apu_write(APU *apu, uint16_t idx, uint8_t data) {

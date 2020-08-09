@@ -9,6 +9,6 @@
 # define log_dbg(...)
 #endif
 
-void panic(char *, ...);
+void panic(char *, ...) __attribute__((noreturn));
 
 #endif

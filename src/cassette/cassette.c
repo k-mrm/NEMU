@@ -29,10 +29,9 @@ static void mapper_check(int map) {
 }
 
 static int parse_ines_format(Cassette *cas, unsigned char *ines) {
-  if(memcmp(ines, "NES\x1A", 4)) {
+  if(memcmp(ines, "NES\x1A", 4))
     panic("This file is not NES format");
-    return 1;
-  }
+
   size_t nprgrom_byte = ines[4] * 16384;
   size_t nchrrom_byte = ines[5] * 8192;
   unsigned char flag6 = ines[6];
@@ -62,7 +61,6 @@ int read_cassette(Cassette *cassette, const char *fname) {
   FILE *cas = fopen(fname, "r");
   if(!cas) {
     panic("cannot open file: %s", fname);
-    return 1;
   }
 
   fseek(cas, 0, SEEK_END);
@@ -72,7 +70,6 @@ int read_cassette(Cassette *cassette, const char *fname) {
   if(fread(ines, 1, fsize, cas) < fsize) {
     free(ines);
     panic("Error reading file");
-    goto end;
   }
 
   if(parse_ines_format(cassette, ines)) {

@@ -361,7 +361,6 @@ uint16_t cpu_fetch_operand(CPU *cpu, int addrmode) {
     }
     default:
       panic("Unknown addressing mode");
-      return 0;   /* unreachable */
   }
 }
 
@@ -385,7 +384,6 @@ uint8_t cpu_fetch_data(CPU *cpu, int addrmode) {
     }
     default:
       panic("Unknown addressing mode");
-      return 0;   /* unreachable */
   }
 }
 
@@ -963,7 +961,6 @@ int cpu_step(CPU *cpu) {
     }
     default:
       panic("Unhandled opcode: %s", inst_dump(inst.op));
-      break;
   }
   cpu_cycle += cycle;
 
