@@ -75,15 +75,17 @@ static void frame_seq_half_frame(APU *apu) {
   sweepunit_clock(&apu->pulse2, 2);
 }
 
-int frame_seq_5step(APU *apu) {
-  if(apu->fs_cycle == 7457)
+static void frame_seq_5step(APU *apu) {
+  if(apu->fs_cycle == 7457) {
     frame_seq_quarter_frame(apu);
+  }
   if(apu->fs_cycle == 14913) {
     frame_seq_quarter_frame(apu);
     frame_seq_half_frame(apu);
   }
-  if(apu->fs_cycle == 22371)
+  if(apu->fs_cycle == 22371) {
     frame_seq_quarter_frame(apu);
+  }
   if(apu->fs_cycle == 29828) {
     /* NOP */
   }
@@ -92,30 +94,30 @@ int frame_seq_5step(APU *apu) {
     frame_seq_quarter_frame(apu);
     frame_seq_half_frame(apu);
   }
-  return 0;
 }
 
-int frame_seq_4step(APU *apu) {
-  if(apu->fs_cycle == 7457)
+static void frame_seq_4step(APU *apu) {
+  if(apu->fs_cycle == 7457) {
     frame_seq_quarter_frame(apu);
+  }
   if(apu->fs_cycle == 14913) {
     frame_seq_quarter_frame(apu);
     frame_seq_half_frame(apu);
   }
-  if(apu->fs_cycle == 22371)
+  if(apu->fs_cycle == 22371) {
     frame_seq_quarter_frame(apu);
+  }
   if(apu->fs_cycle == 29829) {
     apu->fs_cycle = 0;
     frame_seq_quarter_frame(apu);
     frame_seq_half_frame(apu);
 
-    if(!apu->inhibit_irq) return 1;
+    if(!apu->inhibit_irq) apu->irq = true;
   }
-  return 0;
 }
 
 /* see https://wiki.nesdev.com/w/index.php/APU_Mixer#Lookup_Table */
-void apu_sample(APU *apu, Audio *audio) {
+static void apu_sample(APU *apu, Audio *audio) {
   int p1 = pulse_output(&apu->pulse1);
   int p2 = pulse_output(&apu->pulse2);
   int t = triangle_output(&apu->tri);
@@ -126,7 +128,7 @@ void apu_sample(APU *apu, Audio *audio) {
   audio->buf[audio->nbuf++] = pout + tndout;
 }
 
-int apu_clock(APU *apu, Audio *audio) {
+static void apu_clock(APU *apu, Audio *audio) {
   static const int sampling_period = 1789773 / 44100;
 
   apu->cycle++;
@@ -145,16 +147,12 @@ int apu_clock(APU *apu, Audio *audio) {
 
   /* see https://wiki.nesdev.com/w/index.php/APU_Frame_Counter */
   if(apu->seq_mode)
-    return frame_seq_5step(apu);
+    frame_seq_5step(apu);
   else
-    return frame_seq_4step(apu);
+    frame_seq_4step(apu);
 }
 
-int apu_step(APU *apu, Audio *audio, int cpucycle) {
-  int irq = 0;
-  while(cpucycle--) {
-    if(apu_clock(apu, audio))
-      irq = 1;
-  }
-  return irq;
+void apu_step(APU *apu, Audio *audio, int cpucycle) {
+  while(cpucycle--)
+    apu_clock(apu, audio);
 }

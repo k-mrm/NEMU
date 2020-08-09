@@ -38,8 +38,8 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
       int nmi = ppu_step(&nes->ppu, nes->screen, ccycle * 3);
       if(nmi) cpu_interrupt(&nes->cpu, NMI);
 
-      int irq = apu_step(&nes->cpu.apu, &nes->audio, ccycle);
-      if(irq) cpu_interrupt(&nes->cpu, IRQ);
+      apu_step(&nes->cpu.apu, &nes->audio, ccycle);
+      if(nes->cpu.apu.irq) cpu_interrupt(&nes->cpu, IRQ);
     }
     gui_render(nes->screen);
     audio_update(&nes->audio);

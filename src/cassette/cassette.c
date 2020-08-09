@@ -23,10 +23,8 @@ static void cassette_dump(Cassette *cassette) {
 
 static void mapper_check(int map) {
   switch(map) {
-    case 0:
-      break;
-    default:
-      panic("unsupported mapper: %d", map);
+    case 0:   break;
+    default:  panic("unsupported mapper: %d", map);
   }
 }
 

@@ -16,11 +16,12 @@ struct APU {
   uint16_t fs_cycle;
   bool seq_mode: 1;
   bool inhibit_irq: 1;
+  bool irq: 1;
 };
 
 uint8_t apu_read(APU *, uint16_t);
 void apu_write(APU *, uint16_t, uint8_t);
 void apu_init(APU *);
-int apu_step(APU *, Audio *, int);
+void apu_step(APU *, Audio *, int);
 
 #endif
