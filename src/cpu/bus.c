@@ -41,7 +41,7 @@ uint8_t cpubus_read(CPUBus *bus, uint16_t addr) {
     return cassette_read_rom(bus->cas, addr - 0x8000);
   }
   else if(bus->cas->nprgrom_byte <= 0x4000) {
-    /* mirror $8000-$bfff == $c0000-$ffff */
+    /* mirror $8000-$bfff == $c000-$ffff */
     return cassette_read_rom(bus->cas, addr - 0xc000);
   }
   else {
@@ -58,7 +58,6 @@ void cpubus_write(CPUBus *bus, uint16_t addr, uint8_t data) {
     ppu_write(bus->ppu, (addr - 0x2000) & 0x7, data);
   }
   else if(addr == 0x4014) {
-    bus->ppu->dma_write_flag = 1;
     ppu_dma_write(bus->ppu, bus, data);
   }
   else if(addr == 0x4016) {
