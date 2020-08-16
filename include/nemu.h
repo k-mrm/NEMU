@@ -30,6 +30,7 @@ struct NEMU {
   Audio audio;
 };
 
-int nemu_boot(int, char **, NEMU *, Cassette *);
+void nemu_boot(int, char **, NEMU *, Cassette *);
+void nemu_close(NEMU *);
 
 #endif

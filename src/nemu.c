@@ -13,12 +13,12 @@ static void nemu_init(int argc, char **argv, NEMU *nes) {
   apu_init(&nes->cpu.apu);
 }
 
-static void nemu_close(NEMU *nes) {
+void nemu_close(NEMU *nes) {
   gui_close(&nes->gui);
   audio_close(&nes->audio);
 }
 
-int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
+void nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
   nes->cassette = cas;
   nemu_init(argc, argv, nes);
   cpu_reset(&nes->cpu);
@@ -43,11 +43,5 @@ int nemu_boot(int argc, char **argv, NEMU *nes, Cassette *cas) {
     }
     gui_render(nes->screen);
     audio_update(&nes->audio);
-
-    memset(nes->screen, 0, sizeof(ALLEGRO_VERTEX) * 240 * 256);
   }
-
-  nemu_close(nes);
-
-  return 0;
 }

@@ -12,5 +12,8 @@ int main(int argc, char **argv) {
     return 1;
 
   NEMU nes;
-  return nemu_boot(argc, argv, &nes, &cassette);
+  nemu_boot(argc, argv, &nes, &cassette);
+  nemu_close(&nes);
+
+  return 0;
 }
