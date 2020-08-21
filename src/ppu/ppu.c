@@ -5,9 +5,6 @@
 #include "log/log.h"
 #include "gui/gui.h"
 
-#define put_pixel(disp, py, px, rgb) disp[py][px] = (ALLEGRO_VERTEX){ \
-  .x = (px), .y = (py), .color = al_map_rgb(rgb.r, rgb.g, rgb.b)  \
-}
 #define enable_VBlank(ppu)  (ppu)->io.status |= (1 << 7)
 #define disable_VBlank(ppu) (ppu)->io.status &= ~(1 << 7)
 
@@ -190,16 +187,14 @@ static void copy_horizontal_t2v(PPU *ppu) {
   /*
    *  v: ....F.. ...EDCBA = t: ....F.. ...EDCBA
    */
-  ppu->vramaddr =
-    (ppu->vramaddr & ~0x41f) | (ppu->tmp_vramaddr & 0x41f);
+  ppu->vramaddr = (ppu->vramaddr & ~0x41f) | (ppu->tmp_vramaddr & 0x41f);
 }
 
 static void copy_vertical_t2v(PPU *ppu) {
   /*
    *  v: IHGF.ED CBA..... = t: IHGF.ED CBA.....
    */
-  ppu->vramaddr =
-    (ppu->vramaddr & ~0x7be0) | (ppu->tmp_vramaddr & 0x7be0);
+  ppu->vramaddr = (ppu->vramaddr & ~0x7be0) | (ppu->tmp_vramaddr & 0x7be0);
 }
 
 #define tile_addr(v)  (0x2000 | ((v) & 0xfff))

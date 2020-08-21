@@ -3,13 +3,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <allegro5/allegro5.h>
-#include <allegro5/allegro_primitives.h>
+#include "gui/gui.h"
 #include "ppu/bus.h"
 #include "ppu/palette.h"
 #include "ppu/sprite.h"
-
-typedef ALLEGRO_VERTEX Disp[240][256];
 
 typedef struct PPU PPU;
 struct PPU {
